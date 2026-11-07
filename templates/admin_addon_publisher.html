@@ -678,9 +678,9 @@
       if (!banner) return;
       banner.textContent = msg;
       banner.style.display = 'block';
-      banner.style.background = isError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(22, 163, 74, 0.15)';
-      banner.style.border = isError ? '1px solid #ef4444' : '1px solid #16a34a';
-      banner.style.color = isError ? '#dc2626' : '#15803d';
+      banner.style.background = isError ? 'rgba(239, 68, 68, 0.15)' : 'var(--banner-success-bg, rgba(22, 163, 74, 0.15))';
+      banner.style.border = isError ? '1px solid #ef4444' : '1px solid var(--banner-success-border, #16a34a)';
+      banner.style.color = isError ? '#dc2626' : 'var(--banner-success-text, #15803d)';
       setTimeout(() => { banner.style.display = 'none'; }, 5000);
     }
 

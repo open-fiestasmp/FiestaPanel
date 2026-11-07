@@ -1257,7 +1257,7 @@
       --switch-active-border: #000040;
       --switch-inactive-bg: #d4d0c8;
       --switch-inactive-border: #808080;
-      --banner-success-bg: #dff0d8;
+      --banner-success-bg: #dce8f8;
       --banner-success-border: #000080;
       --banner-success-text: #000080;
     }
@@ -1847,16 +1847,13 @@
       --help-bg: #18222d !important;
       --help-border: #2b3e52 !important;
       --help-header-text: #ffffff !important;
-      --help-sub-text: #74b21d !important;
+      --help-sub-text: var(--primary-accent, #74b21d) !important;
       --help-body-text: #d1d5db !important;
       --footer-bg: #11171f !important;
       --footer-border: #233446 !important;
       --footer-text: #9ea8b3 !important;
-      --banner-success-bg: rgba(116, 178, 29, 0.18) !important;
-      --banner-success-border: #74b21d !important;
-      --banner-success-text: #a3e635 !important;
-      --card-active-bg: rgba(116, 178, 29, 0.22) !important;
-      --card-hover-border: #74b21d !important;
+      --card-active-bg: var(--card-active-bg, rgba(255, 255, 255, 0.08)) !important;
+      --card-hover-border: var(--card-hover-border, #4b5563) !important;
       --danger-text: #f87171 !important;
     }
 
@@ -1901,16 +1898,13 @@
       --help-bg: #18222d !important;
       --help-border: #2b3e52 !important;
       --help-header-text: #ffffff !important;
-      --help-sub-text: #74b21d !important;
+      --help-sub-text: var(--primary-accent, #74b21d) !important;
       --help-body-text: #d1d5db !important;
       --footer-bg: #11171f !important;
       --footer-border: #233446 !important;
       --footer-text: #9ea8b3 !important;
-      --banner-success-bg: rgba(116, 178, 29, 0.18) !important;
-      --banner-success-border: #74b21d !important;
-      --banner-success-text: #a3e635 !important;
-      --card-active-bg: rgba(116, 178, 29, 0.22) !important;
-      --card-hover-border: #74b21d !important;
+      --card-active-bg: var(--card-active-bg, rgba(255, 255, 255, 0.08)) !important;
+      --card-hover-border: var(--card-hover-border, #4b5563) !important;
       --danger-text: #f87171 !important;
     }
 
@@ -4369,28 +4363,211 @@
 
     /* Alert Message Banner */
     .status-alert {
-      padding: 6px 10px;
+      padding: 8px 12px;
       margin-bottom: 12px;
       font-size: 11px;
       display: none;
-      border-radius: 2px;
+      border-radius: 3px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
     }
 
     .status-alert.success {
-      background: var(--banner-success-bg, #ebfaeb);
+      background: var(--banner-success-bg, #eef8ea);
       border: 1px solid var(--banner-success-border, #74b21d);
       color: var(--banner-success-text, #006622);
     }
 
     /* Themed Success Banner Generic Utility */
     .banner-themed-success {
-      background: var(--banner-success-bg, #ebfaeb) !important;
+      background: var(--banner-success-bg, #eef8ea) !important;
       border: 1px solid var(--banner-success-border, #74b21d) !important;
       color: var(--banner-success-text, #006622) !important;
     }
     .banner-themed-success .banner-icon,
-    .banner-themed-success .banner-title {
+    .banner-themed-success .banner-title,
+    .banner-themed-success strong {
       color: var(--banner-success-text, #006622) !important;
+    }
+
+    /* Theme-specific explicit banner styling for maximum fidelity across panel */
+    [data-theme="classic"] .status-alert.success,
+    [data-theme="classic"] .banner-themed-success {
+      background: #eef8ea !important;
+      border-color: #74b21d !important;
+      color: #006622 !important;
+    }
+    [data-theme="classic"] .banner-themed-success .banner-icon,
+    [data-theme="classic"] .banner-themed-success .banner-title,
+    [data-theme="classic"] .banner-themed-success strong {
+      color: #006622 !important;
+    }
+
+    [data-theme="dark"] .status-alert.success,
+    [data-theme="dark"] .banner-themed-success {
+      background: #142217 !important;
+      border-color: #4f8014 !important;
+      color: #82c92c !important;
+    }
+    [data-theme="dark"] .banner-themed-success .banner-icon,
+    [data-theme="dark"] .banner-themed-success .banner-title,
+    [data-theme="dark"] .banner-themed-success strong {
+      color: #82c92c !important;
+    }
+
+    [data-theme="archer"] .status-alert.success,
+    [data-theme="archer"] .banner-themed-success {
+      background: #ebf5fd !important;
+      border-color: #0078d7 !important;
+      color: #005a9e !important;
+    }
+    [data-theme="archer"] .banner-themed-success .banner-icon,
+    [data-theme="archer"] .banner-themed-success .banner-title,
+    [data-theme="archer"] .banner-themed-success strong {
+      color: #005a9e !important;
+    }
+
+    [data-theme="archer-dark"] .status-alert.success,
+    [data-theme="archer-dark"] .banner-themed-success {
+      background: #112538 !important;
+      border-color: #0078d7 !important;
+      color: #58d3f7 !important;
+      box-shadow: 0 0 8px rgba(0, 120, 215, 0.25) !important;
+    }
+    [data-theme="archer-dark"] .banner-themed-success .banner-icon,
+    [data-theme="archer-dark"] .banner-themed-success .banner-title,
+    [data-theme="archer-dark"] .banner-themed-success strong {
+      color: #58d3f7 !important;
+    }
+
+    [data-theme="amber"] .status-alert.success,
+    [data-theme="amber"] .banner-themed-success {
+      background: #fdf3eb !important;
+      border-color: #d35400 !important;
+      color: #963b00 !important;
+    }
+    [data-theme="amber"] .banner-themed-success .banner-icon,
+    [data-theme="amber"] .banner-themed-success .banner-title,
+    [data-theme="amber"] .banner-themed-success strong {
+      color: #963b00 !important;
+    }
+
+    [data-theme="amber-dark"] .status-alert.success,
+    [data-theme="amber-dark"] .banner-themed-success {
+      background: #2a1608 !important;
+      border-color: #d97706 !important;
+      color: #fbbf24 !important;
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.2) !important;
+    }
+    [data-theme="amber-dark"] .banner-themed-success .banner-icon,
+    [data-theme="amber-dark"] .banner-themed-success .banner-title,
+    [data-theme="amber-dark"] .banner-themed-success strong {
+      color: #fbbf24 !important;
+    }
+
+    [data-theme="matrix"] .status-alert.success,
+    [data-theme="matrix"] .banner-themed-success {
+      background: #07190b !important;
+      border-color: #00ff66 !important;
+      color: #00ff66 !important;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.3) !important;
+    }
+    [data-theme="matrix"] .banner-themed-success .banner-icon,
+    [data-theme="matrix"] .banner-themed-success .banner-title,
+    [data-theme="matrix"] .banner-themed-success strong {
+      color: #00ff66 !important;
+    }
+
+    [data-theme="synthwave"] .status-alert.success,
+    [data-theme="synthwave"] .banner-themed-success {
+      background: rgba(43, 15, 56, 0.9) !important;
+      border-color: #ff2a85 !important;
+      color: #05d9e8 !important;
+      box-shadow: 0 0 12px rgba(255, 42, 133, 0.35) !important;
+    }
+    [data-theme="synthwave"] .banner-themed-success .banner-icon,
+    [data-theme="synthwave"] .banner-themed-success .banner-title,
+    [data-theme="synthwave"] .banner-themed-success strong {
+      color: #05d9e8 !important;
+    }
+
+    [data-theme="nighthawk"] .status-alert.success,
+    [data-theme="nighthawk"] .banner-themed-success {
+      background: #2c1215 !important;
+      border-color: #dc2626 !important;
+      color: #fca5a5 !important;
+      box-shadow: 0 0 10px rgba(220, 38, 38, 0.3) !important;
+    }
+    [data-theme="nighthawk"] .banner-themed-success .banner-icon,
+    [data-theme="nighthawk"] .banner-themed-success .banner-title,
+    [data-theme="nighthawk"] .banner-themed-success strong {
+      color: #fca5a5 !important;
+    }
+
+    [data-theme="nordic"] .status-alert.success,
+    [data-theme="nordic"] .banner-themed-success {
+      background: #e1f5fe !important;
+      border-color: #0288d1 !important;
+      color: #01579b !important;
+    }
+    [data-theme="nordic"] .banner-themed-success .banner-icon,
+    [data-theme="nordic"] .banner-themed-success .banner-title,
+    [data-theme="nordic"] .banner-themed-success strong {
+      color: #01579b !important;
+    }
+
+    [data-theme="catppuccin"] .status-alert.success,
+    [data-theme="catppuccin"] .banner-themed-success {
+      background: #232236 !important;
+      border-color: #cba6f7 !important;
+      color: #cba6f7 !important;
+      box-shadow: 0 0 8px rgba(203, 166, 247, 0.25) !important;
+    }
+    [data-theme="catppuccin"] .banner-themed-success .banner-icon,
+    [data-theme="catppuccin"] .banner-themed-success .banner-title,
+    [data-theme="catppuccin"] .banner-themed-success strong {
+      color: #cba6f7 !important;
+    }
+
+    [data-theme="win98"] .status-alert.success,
+    [data-theme="win98"] .banner-themed-success {
+      background: #dce8f8 !important;
+      border: 2px solid !important;
+      border-color: #ffffff #808080 #808080 #ffffff !important;
+      color: #000080 !important;
+      border-radius: 0 !important;
+    }
+    [data-theme="win98"] .banner-themed-success .banner-icon,
+    [data-theme="win98"] .banner-themed-success .banner-title,
+    [data-theme="win98"] .banner-themed-success strong {
+      color: #000080 !important;
+    }
+
+    [data-theme="win7"] .status-alert.success,
+    [data-theme="win7"] .banner-themed-success {
+      background: linear-gradient(to bottom, #eff6fd 0%, #d8ebfa 100%) !important;
+      border: 1px solid #7ebbf0 !important;
+      color: #003e7e !important;
+      box-shadow: 0 1px 4px rgba(0, 60, 140, 0.18), inset 0 1px 0 #ffffff !important;
+      border-radius: 3px !important;
+    }
+    [data-theme="win7"] .banner-themed-success .banner-icon,
+    [data-theme="win7"] .banner-themed-success .banner-title,
+    [data-theme="win7"] .banner-themed-success strong {
+      color: #003e7e !important;
+    }
+
+    [data-theme="custom"] .status-alert.success,
+    [data-theme="custom"] .banner-themed-success {
+      background: var(--banner-success-bg, rgba(0,0,0,0.05)) !important;
+      border-color: var(--banner-success-border, var(--primary-accent)) !important;
+      color: var(--banner-success-text, var(--primary-accent)) !important;
+    }
+    [data-theme="custom"] .banner-themed-success .banner-icon,
+    [data-theme="custom"] .banner-themed-success .banner-title,
+    [data-theme="custom"] .banner-themed-success strong {
+      color: var(--banner-success-text, var(--primary-accent)) !important;
     }
 
     .status-alert.error {
@@ -5449,12 +5626,12 @@
         </div>
 
         <!-- ── UPCOMING EVENT NOTIFICATION BANNER ───────────────── -->
-        <div id="tp-event-reminder-banner" class="status-alert" style="display: none; background: var(--banner-success-bg, #eff6ff); border: 1px solid var(--banner-success-border, #93c5fd); color: var(--banner-success-text, #1e40af); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px;">
+        <div id="tp-event-reminder-banner" class="status-alert banner-themed-success" style="display: none; background: var(--banner-success-bg, #eff6ff); border: 1px solid var(--banner-success-border, #93c5fd); color: var(--banner-success-text, #1e40af); padding: 10px 14px; margin-bottom: 12px; border-radius: 2px;">
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 9px;">
-              <i class="fa-solid fa-calendar-star" style="font-size: 16px; color: var(--banner-success-text, #2563eb);"></i>
+              <i class="fa-solid fa-calendar-star banner-icon" style="font-size: 16px;"></i>
               <div>
-                <strong style="color: var(--banner-success-text, #1e3a8a);">Server Event Reminder:</strong>
+                <strong class="banner-title">Server Event Reminder:</strong>
                 <span id="event-reminder-banner-msg" style="margin-left: 4px; font-size: 11.5px; color: var(--text-main);">No upcoming events.</span>
               </div>
             </div>
@@ -7349,7 +7526,7 @@
             </div>
           </div>
 
-          <div id="fm-upload-status" style="display: none; padding: 4px 8px; margin-bottom: 6px; font-size: 10px; font-weight: bold; color: var(--banner-success-text, #006622); background: var(--banner-success-bg, #eefbee); border: 1px solid var(--banner-success-border, #94d494);"></div>
+          <div id="fm-upload-status" class="status-alert banner-themed-success" style="display: none; padding: 5px 10px; margin-bottom: 6px; font-size: 10.5px; font-weight: bold;"></div>
 
           <!-- File Manager Data Grid -->
           <table class="data-grid-table" id="fm-table">
@@ -9567,10 +9744,23 @@ def on_action(ctx, action_name, payload):
 
     function showBannerAlert(msg, isError) {
       const el = document.getElementById('tp-alert-banner');
-      el.textContent = msg;
+      if (!el) return;
       el.className = 'status-alert ' + (isError ? 'error' : 'success');
-      el.style.display = 'block';
-      setTimeout(() => { el.style.display = 'none'; }, 4000);
+      el.innerHTML = '';
+      const icon = document.createElement('i');
+      icon.className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-check';
+      icon.style.marginRight = '8px';
+      icon.style.fontSize = '13px';
+      icon.style.flexShrink = '0';
+      const textSpan = document.createElement('span');
+      textSpan.textContent = msg;
+      textSpan.style.flex = '1';
+      el.appendChild(icon);
+      el.appendChild(textSpan);
+      el.style.display = 'flex';
+      el.style.alignItems = 'center';
+      if (window._bannerAlertTimer) clearTimeout(window._bannerAlertTimer);
+      window._bannerAlertTimer = setTimeout(() => { el.style.display = 'none'; }, 4500);
     }
 
     function toggleNavGroup(groupId, el) {
@@ -17214,6 +17404,13 @@ def on_action(ctx, action_name, payload):
         pBanner.style.background = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)';
         pBanner.style.borderColor = accent;
         pBanner.style.color = accent;
+      }
+
+      if (getActiveTheme() === 'custom') {
+        document.documentElement.style.setProperty('--banner-success-bg', isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.04)');
+        document.documentElement.style.setProperty('--banner-success-border', accent);
+        document.documentElement.style.setProperty('--banner-success-text', accent);
+        document.documentElement.style.setProperty('--primary-accent', accent);
       }
     }
 
