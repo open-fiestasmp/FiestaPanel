@@ -301,5 +301,14 @@ class TestAddonExistsAndSoftwareGrid(unittest.TestCase):
         self.assertIn('[data-theme="archer-dark"] .addon-modal-tab-btn.active-tab', content)
         self.assertIn('[data-theme="nighthawk"] .addon-modal-tab-btn.active-tab', content)
 
+        # 6. Server software Java switcher box and runtime cards have Dark Reader & dark theme compatibility
+        self.assertIn('id="jre-switcher-box" class="jre-switcher-box"', content)
+        self.assertNotIn('border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-main, #ffffff); padding: 12px;', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .jre-switcher-box', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .jre-item-card', content)
+        self.assertIn('[data-theme="dark"] .jre-switcher-box', content)
+        self.assertIn('[data-theme="dark"] .jre-item-card', content)
+        self.assertIn('class="jre-item-card', content)
+
 if __name__ == "__main__":
     unittest.main()

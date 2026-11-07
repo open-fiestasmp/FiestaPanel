@@ -1809,11 +1809,23 @@
     html[data-darkreader-scheme="dark"],
     html[data-darkreader-mode] {
       color-scheme: dark !important;
+      --workspace-bg: #141c24 !important;
+      --bg-main: #141c24 !important;
+      --card-bg: #18222d !important;
+      --card-border: #2b3e52 !important;
+      --input-bg: #121922 !important;
+      --input-border: #253546 !important;
     }
 
     html[data-darkreader-scheme="dark"] [data-theme],
     html[data-darkreader-mode] [data-theme] {
       color-scheme: dark !important;
+      --workspace-bg: #141c24 !important;
+      --bg-main: #141c24 !important;
+      --card-bg: #18222d !important;
+      --card-border: #2b3e52 !important;
+      --input-bg: #121922 !important;
+      --input-border: #253546 !important;
     }
 
     html[data-darkreader-scheme="dark"] [data-theme="win7"] .console-frame,
@@ -1909,6 +1921,50 @@
     html[data-darkreader-scheme="dark"] .data-grid-table th,
     html[data-darkreader-mode] .data-grid-table th {
       color: #ffffff !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .jre-switcher-box,
+    html[data-darkreader-mode] .jre-switcher-box,
+    html[data-darkreader-scheme="dark"] [data-theme] .jre-switcher-box,
+    html[data-darkreader-mode] [data-theme] .jre-switcher-box {
+      background: #18222d !important;
+      border-color: #2b3e52 !important;
+      color: #f0f6fc !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .jre-item-card,
+    html[data-darkreader-mode] .jre-item-card,
+    html[data-darkreader-scheme="dark"] [data-theme] .jre-item-card,
+    html[data-darkreader-mode] [data-theme] .jre-item-card {
+      background: #121922 !important;
+      border-color: #253546 !important;
+      color: #f0f6fc !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .jre-item-card:hover,
+    html[data-darkreader-mode] .jre-item-card:hover,
+    html[data-darkreader-scheme="dark"] [data-theme] .jre-item-card:hover,
+    html[data-darkreader-mode] [data-theme] .jre-item-card:hover {
+      background: #1d2c3c !important;
+      border-color: #3b536e !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .jre-item-card.selected,
+    html[data-darkreader-mode] .jre-item-card.selected,
+    html[data-darkreader-scheme="dark"] [data-theme] .jre-item-card.selected,
+    html[data-darkreader-mode] [data-theme] .jre-item-card.selected {
+      background: rgba(116, 178, 29, 0.22) !important;
+      border-color: #74b21d !important;
+      color: #f0f6fc !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .theme-card-panel,
+    html[data-darkreader-mode] .theme-card-panel,
+    html[data-darkreader-scheme="dark"] [data-theme] .theme-card-panel,
+    html[data-darkreader-mode] [data-theme] .theme-card-panel {
+      background: #18222d !important;
+      border-color: #2b3e52 !important;
+      color: #f0f6fc !important;
     }
 
     /* ── Universal Contrast Safety Fallbacks for Dark Themes ── */
@@ -3081,6 +3137,90 @@
     [data-theme="nighthawk"] .software-card [style*="color: #059669"],
     [data-theme="catppuccin"] .software-card [style*="color: #059669"],
     [data-theme="custom"] .software-card [style*="color: #059669"] { color: #34d399 !important; }
+
+    /* Java Switcher Box & Runtime Items */
+    .jre-switcher-box {
+      border: 1px solid var(--card-border, #cbd5e1);
+      background: var(--card-bg, #ffffff);
+      color: var(--text-main);
+      padding: 12px;
+      margin-bottom: 16px;
+      border-radius: 2px;
+    }
+
+    .jre-item-card {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      border-radius: 3px;
+      border: 1px solid var(--input-border, #e2e8f0);
+      background: var(--input-bg, #ffffff);
+      color: var(--text-main);
+      transition: background 0.15s ease, border-color 0.15s ease;
+    }
+
+    .jre-item-card:hover {
+      background: var(--table-hover-row, #f4faed);
+      border-color: var(--card-hover-border, #74b21d);
+    }
+
+    .jre-item-card.selected {
+      border: 1px solid var(--sec-bar-bg, #74b21d);
+      background: var(--card-active-bg, #eef6e8);
+    }
+
+    [data-theme="dark"] .jre-switcher-box,
+    [data-theme="archer-dark"] .jre-switcher-box,
+    [data-theme="amber-dark"] .jre-switcher-box,
+    [data-theme="matrix"] .jre-switcher-box,
+    [data-theme="synthwave"] .jre-switcher-box,
+    [data-theme="nighthawk"] .jre-switcher-box,
+    [data-theme="catppuccin"] .jre-switcher-box,
+    [data-theme="custom"][data-custom-mode="dark"] .jre-switcher-box {
+      background: var(--card-bg, #18222d) !important;
+      border-color: var(--card-border, #2b3e52) !important;
+      color: var(--text-main, #f0f6fc) !important;
+    }
+
+    [data-theme="dark"] .jre-item-card,
+    [data-theme="archer-dark"] .jre-item-card,
+    [data-theme="amber-dark"] .jre-item-card,
+    [data-theme="matrix"] .jre-item-card,
+    [data-theme="synthwave"] .jre-item-card,
+    [data-theme="nighthawk"] .jre-item-card,
+    [data-theme="catppuccin"] .jre-item-card,
+    [data-theme="custom"][data-custom-mode="dark"] .jre-item-card {
+      background: var(--input-bg, #121922) !important;
+      border-color: var(--input-border, #253546) !important;
+      color: var(--text-main, #f0f6fc) !important;
+    }
+
+    [data-theme="dark"] .jre-item-card:hover,
+    [data-theme="archer-dark"] .jre-item-card:hover,
+    [data-theme="amber-dark"] .jre-item-card:hover,
+    [data-theme="matrix"] .jre-item-card:hover,
+    [data-theme="synthwave"] .jre-item-card:hover,
+    [data-theme="nighthawk"] .jre-item-card:hover,
+    [data-theme="catppuccin"] .jre-item-card:hover,
+    [data-theme="custom"][data-custom-mode="dark"] .jre-item-card:hover {
+      background: var(--table-hover-row, #1d2c3c) !important;
+      border-color: var(--card-hover-border, #74b21d) !important;
+    }
+
+    [data-theme="dark"] .jre-item-card.selected,
+    [data-theme="archer-dark"] .jre-item-card.selected,
+    [data-theme="amber-dark"] .jre-item-card.selected,
+    [data-theme="matrix"] .jre-item-card.selected,
+    [data-theme="synthwave"] .jre-item-card.selected,
+    [data-theme="nighthawk"] .jre-item-card.selected,
+    [data-theme="catppuccin"] .jre-item-card.selected,
+    [data-theme="custom"][data-custom-mode="dark"] .jre-item-card.selected {
+      background: var(--card-active-bg, rgba(116, 178, 29, 0.22)) !important;
+      border-color: var(--card-hover-border, #74b21d) !important;
+      color: var(--text-bold, #ffffff) !important;
+    }
 
     /* Permission Pills / Badges */
     .perm-badge {
@@ -5924,7 +6064,7 @@
             Choose which Java runtime executes your Minecraft server. Switch between installed versions (e.g. Java 8, 11, 17, 21, 25) or specify a custom JVM executable path.
           </div>
 
-          <div style="border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-main, #ffffff); padding: 12px; margin-bottom: 16px; border-radius: 2px;">
+          <div id="jre-switcher-box" class="jre-switcher-box">
             <table class="form-layout-table" style="margin-bottom: 8px;">
               <tr>
                 <td class="label-col" style="width: 140px;">Active JVM Runtime:</td>
@@ -5942,14 +6082,14 @@
               </tr>
             </table>
 
-            <div style="font-size: 11px; font-weight: bold; margin: 10px 0 6px 0; color: var(--text-main, #1e293b);">Detected Java Installations on Host:</div>
+            <div style="font-size: 11px; font-weight: bold; margin: 10px 0 6px 0; color: var(--text-bold, var(--text-main, #1e293b));">Detected Java Installations on Host:</div>
             <div id="jre-list-container" style="display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;">
               <div style="font-size: 11px; color: var(--text-sub); font-style: italic;">Scanning host for installed JREs...</div>
             </div>
 
             <!-- Custom Java Path Input -->
             <div style="border-top: 1px dashed var(--input-border, #ccc); padding-top: 10px; margin-top: 10px;">
-              <div style="font-weight: bold; font-size: 11px; margin-bottom: 4px;">Custom Java Executable Binary Path:</div>
+              <div style="font-weight: bold; font-size: 11px; margin-bottom: 4px; color: var(--text-bold, var(--text-main));">Custom Java Executable Binary Path:</div>
               <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
                 <input type="text" id="jre-custom-path-input" class="tp-input-text" style="flex: 1; min-width: 280px; font-family: monospace; font-size: 11.5px; height: 26px;" placeholder="/usr/lib/jvm/java-21-openjdk-arm64/bin/java or custom path">
                 <button type="button" class="btn-classic" style="height: 26px; padding: 0 10px; font-size: 11px;" onclick="testCustomJavaPath()">[ Test Binary ]</button>
@@ -14653,10 +14793,9 @@ def on_action(ctx, action_name, payload):
         avail.forEach((rt) => {
           const isSelected = rt.active;
           const checked = isSelected ? 'checked' : '';
-          const borderStyle = isSelected ? 'border: 1px solid #74b21d; background: var(--table-alt, #f0fdf4);' : 'border: 1px solid var(--input-border, #e2e8f0); background: var(--bg-main, #ffffff);';
           const activeBadge = isSelected ? '<span class="badge-status online" style="font-size: 9px; padding: 1px 6px; margin-left: 8px;">Active</span>' : '';
           html += `
-            <label style="display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; border-radius: 3px; ${borderStyle}">
+            <label class="jre-item-card ${isSelected ? 'selected' : ''}">
               <input type="radio" name="jre-choice" value="${escapeHtml(rt.path)}" ${checked} onchange="onJreRadioChange(this.value)">
               <div style="flex: 1; font-size: 11.5px;">
                 <strong>${escapeHtml(rt.vendor || 'Java')} ${rt.major_version ? escapeHtml(String(rt.major_version)) : ''}</strong>
@@ -14678,6 +14817,14 @@ def on_action(ctx, action_name, payload):
       if (customInp) customInp.value = val;
       const feedback = document.getElementById('jre-test-feedback');
       if (feedback) feedback.textContent = '';
+      document.querySelectorAll('#jre-list-container .jre-item-card').forEach(card => {
+        const rad = card.querySelector('input[type="radio"]');
+        if (rad && rad.checked) {
+          card.classList.add('selected');
+        } else {
+          card.classList.remove('selected');
+        }
+      });
     }
 
     async function testCustomJavaPath() {
