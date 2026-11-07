@@ -310,5 +310,64 @@ class TestAddonExistsAndSoftwareGrid(unittest.TestCase):
         self.assertIn('[data-theme="dark"] .jre-item-card', content)
         self.assertIn('class="jre-item-card', content)
 
+        # 7. DynIP Fallback Port modal cards have dedicated classes and Dark Reader overrides
+        self.assertIn('id="dynip-info-box" class="dynip-info-box"', content)
+        self.assertIn('id="dynip-java-card" class="dynip-card"', content)
+        self.assertIn('id="dynip-bedrock-card" class="dynip-card"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .dynip-card', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .dynip-info-box', content)
+        self.assertIn('[data-theme="dark"] .dynip-card', content)
+        self.assertIn('[data-theme="catppuccin"] .dynip-card', content)
+
+        # 8. Dimension reset cards and world/datapack upload boxes have Dark Reader overrides
+        self.assertIn('class="dim-reset-card"', content)
+        self.assertIn('class="world-upload-box"', content)
+        self.assertIn('class="datapack-upload-box"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .dim-reset-card', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .world-upload-box', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .datapack-upload-box', content)
+
+        # 9. Console power toolbar, quick world toolbar, and archived log notice
+        self.assertIn('class="console-power-toolbar"', content)
+        self.assertIn('class="console-env-toolbar"', content)
+        self.assertIn('class="archived-log-notice"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .console-power-toolbar', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .console-env-toolbar', content)
+
+        # 10. Filter toolbars across plugins, mods, and repo search
+        self.assertIn('class="filter-toolbar-box"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .filter-toolbar-box', content)
+
+        # 11. Automated routine task cards and cloud sync status box
+        self.assertIn('class="auto-task-card"', content)
+        self.assertIn('class="auto-task-card cloud-sync-box"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .auto-task-card', content)
+
+        # 12. Player inventory modal sub-panels have dedicated classes and Dark Reader overrides
+        self.assertIn('class="inv-player-summary"', content)
+        self.assertIn('class="inv-armor-panel"', content)
+        self.assertIn('class="inv-storage-panel"', content)
+        self.assertIn('class="inv-ender-panel"', content)
+        self.assertIn('class="inv-toolbar-panel"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .inv-player-summary', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .inv-storage-panel', content)
+
+        # 13. Notifications dropdown list and notification items
+        self.assertIn('class="notif-dropdown-list"', content)
+        self.assertIn('class="panel-box notif-card-item"', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .notif-dropdown-list', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .notif-card-item', content)
+
+        # 14. Software cards hover & active states in Dark Reader
+        self.assertIn('html[data-darkreader-scheme="dark"] .software-card:hover', content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .software-card.active', content)
+
+        # 15. Admin addon publisher template Dark Reader compatibility
+        pub_path = os.path.join(portal_app.BASE_DIR, "templates", "admin_addon_publisher.html")
+        with open(pub_path, "r", encoding="utf-8") as f_pub:
+            pub_content = f_pub.read()
+        self.assertIn('html[data-darkreader-scheme="dark"] .studio-container', pub_content)
+        self.assertIn('html[data-darkreader-scheme="dark"] .panel-box', pub_content)
+
 if __name__ == "__main__":
     unittest.main()

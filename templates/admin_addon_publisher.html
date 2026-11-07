@@ -60,6 +60,59 @@
       --btn-satin-green-hover: #047857;
     }
 
+    /* ── Dark Reader & Forced Dark Extension Compatibility ── */
+    html[data-darkreader-scheme="dark"],
+    html[data-darkreader-mode] {
+      color-scheme: dark !important;
+      --bg-page: #0f172a !important;
+      --bg-frame: #1e293b !important;
+      --border-frame: #334155 !important;
+      --header-grad-1: #1e3a8a !important;
+      --header-grad-2: #0f172a !important;
+      --header-grad-3: #1e293b !important;
+      --header-bot-border: #0284c7 !important;
+      --sec-bar-bg: #0284c7 !important;
+      --sec-bar-border: #0369a1 !important;
+      --text-main: #e2e8f0 !important;
+      --text-sub: #94a3b8 !important;
+      --text-bold: #f8fafc !important;
+      --input-bg: #0f172a !important;
+      --input-border: #475569 !important;
+      --input-text: #f8fafc !important;
+      --table-border: #334155 !important;
+      --table-alt: #1e293b !important;
+      --btn-classic-bg: #334155 !important;
+      --btn-classic-border: #475569 !important;
+      --btn-satin-green: #059669 !important;
+      --btn-satin-green-hover: #047857 !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .studio-container,
+    html[data-darkreader-mode] .studio-container {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+    }
+
+    html[data-darkreader-scheme="dark"] .panel-box,
+    html[data-darkreader-mode] .panel-box,
+    html[data-darkreader-scheme="dark"] .panel-body,
+    html[data-darkreader-mode] .panel-body {
+      background: #1e293b !important;
+      border-color: #334155 !important;
+      color: #e2e8f0 !important;
+    }
+
+    html[data-darkreader-scheme="dark"] input,
+    html[data-darkreader-scheme="dark"] select,
+    html[data-darkreader-scheme="dark"] textarea,
+    html[data-darkreader-mode] input,
+    html[data-darkreader-mode] select,
+    html[data-darkreader-mode] textarea {
+      background: #0f172a !important;
+      border-color: #475569 !important;
+      color: #f8fafc !important;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
