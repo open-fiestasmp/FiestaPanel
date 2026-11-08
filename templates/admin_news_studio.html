@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>FiestaSMP News Studio (2009 Aero Edition)</title>
+  <title>FiestaSMP News Studio</title>
   <link rel="icon" href="/server-icon.webp" type="image/webp">
   <link rel="stylesheet" href="/static/microsoft-2009.css?v=20261108b">
   <script src="/static/marked.min.js"></script>
@@ -641,7 +641,7 @@
   <div class="studio-window-titlebar">
     <div class="studio-title-brand">
       <img src="/server-icon.webp" alt="Fiesta Logo">
-      <span>FiestaSMP Official Website &bull; News Studio &amp; Article CMS (2009 Aero Edition)</span>
+      <span>FiestaSMP Official Website &bull; News Studio &amp; Article CMS</span>
     </div>
     <div class="studio-window-actions">
       <span style="font-size: 11px; opacity: 0.85;">Hugo Engine: v0.154.5</span>
@@ -939,9 +939,15 @@
             <div>
               <strong>Feed Standards:</strong> RSS 2.0 + Atom self-link + DC Creator + CDATA content:encoded
             </div>
-            <div style="margin-top:6px;">
-              <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" class="ms-btn-aero-rss">Open Live Feed</a>
-              <button class="ms-btn-aero-secondary" onclick="navigator.clipboard.writeText('https://open-fiestasmp.github.io/news/index.xml'); showToast('RSS Feed URL copied to clipboard!');">Copy RSS URL</button>
+            <div style="margin-top:6px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" class="ms-btn-aero-rss">
+                <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+                <span>Open Live Feed</span>
+              </a>
+              <button class="ms-btn-aero-copy" onclick="navigator.clipboard.writeText('https://open-fiestasmp.github.io/news/index.xml'); showToast('RSS Feed URL copied to clipboard!');" title="Copy RSS Feed URL to clipboard">
+                <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                <span>Copy RSS URL</span>
+              </button>
             </div>
           </div>
         </div>

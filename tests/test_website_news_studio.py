@@ -123,7 +123,7 @@ class TestWebsiteNewsStudio(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         html = res.data.decode("utf-8")
         self.assertIn("FiestaSMP News Studio", html)
-        self.assertIn("2009 Aero Edition", html)
+        self.assertIn("FiestaSMP Official Website", html)
         self.assertIn("Articles Archive", html)
 
         # Authenticated access to articles API

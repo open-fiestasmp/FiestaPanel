@@ -1279,8 +1279,41 @@ img {
   fill: #ffffff;
 }
 .ms-footer-copy {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
   color: #e4f2fb;
   font-size: 11px;
+}
+.ms-footer-sep {
+  margin: 0 8px;
+  color: #a8d5f2;
+  opacity: 0.75;
+}
+.ms-footer-rss-link {
+  color: #e4f2fb !important;
+  font-weight: 600;
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+.ms-footer-rss-link:hover {
+  color: #ffffff !important;
+  text-decoration: underline !important;
+}
+.ms-footer-rss-icon {
+  width: 12px;
+  height: 12px;
+  fill: #ffa755;
+  flex-shrink: 0;
+  vertical-align: -1px;
+  transition: fill 0.15s ease;
+}
+.ms-footer-rss-link:hover .ms-footer-rss-icon {
+  fill: #ffc285;
 }
 
 /* --------------------------------------------------------------------------
@@ -1941,26 +1974,84 @@ img {
 .ms-btn-aero-rss {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
-  background: linear-gradient(180deg, #ff9245 0%, #f26522 50%, #d85213 100%);
+  height: 30px;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #ff964d 0%, #f26522 50%, #d85213 100%);
   border: 1px solid #aa3b07;
   color: #ffffff !important;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
   font-size: 12px;
   font-weight: 700;
-  padding: 6px 14px;
-  border-radius: 4px;
+  padding: 0 14px;
+  border-radius: 3px;
   text-decoration: none !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 2px rgba(0, 0, 0, 0.15);
   cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: background 0.15s ease, box-shadow 0.15s ease;
 }
 .ms-btn-aero-rss:hover {
-  background: linear-gradient(180deg, #ffa35f 0%, #f77233 50%, #e35a1a 100%);
+  background: linear-gradient(180deg, #ffa666 0%, #f77233 50%, #e35a1a 100%);
   color: #ffffff !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6), 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.ms-btn-aero-rss:active {
+  background: linear-gradient(180deg, #d85213 0%, #bf4207 100%);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.35);
 }
 .ms-btn-aero-rss svg {
   width: 14px;
   height: 14px;
   fill: currentColor;
+  flex-shrink: 0;
+}
+
+.ms-btn-aero-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 30px;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f7fc 45%, #e1edf7 50%, #d3e5f4 100%);
+  border: 1px solid #8baecb;
+  border-radius: 3px;
+  color: #174b7c !important;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0 13px;
+  text-decoration: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 1px 2px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  white-space: nowrap;
+  user-select: none;
+  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+.ms-btn-aero-copy:hover {
+  background: linear-gradient(180deg, #ffffff 0%, #f6fbff 45%, #e9f3fd 50%, #dcedfb 100%);
+  border-color: #558ebf;
+  color: #0b345b !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 1px 4px rgba(33, 102, 160, 0.28);
+}
+.ms-btn-aero-copy:active {
+  background: linear-gradient(180deg, #cde3f5 0%, #b8d7ee 50%, #cce1f3 100%);
+  border-color: #4a7fae;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.ms-btn-aero-copy.copied {
+  border-color: #2e8b57 !important;
+  color: #1a6e3b !important;
+  background: linear-gradient(180deg, #ffffff 0%, #edf9f0 50%, #d8f2df 100%) !important;
+}
+.ms-btn-aero-copy svg {
+  width: 13px;
+  height: 13px;
+  fill: currentColor;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
