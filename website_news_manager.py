@@ -170,15 +170,27 @@ class WebsiteNewsManager:
 
     def get_article(self, slug: str) -> Optional[Dict[str, Any]]:
         """Retrieves a single article by slug or filename."""
-        slug = slug.strip()
-        fpath = os.path.join(self.posts_dir, f"{slug}.md")
+        slug = str(slug or "").strip()
+        if not slug:
+            return None
+        clean_slug = os.path.splitext(slug)[0]
+        fpath = os.path.join(self.posts_dir, f"{clean_slug}.md")
         if not os.path.isfile(fpath):
             # Check by iterating files in case filename != slug
             for p in glob.glob(os.path.join(self.posts_dir, "*.md")):
                 try:
                     with open(p, "r", encoding="utf-8") as f:
                         meta, body = self.parse_frontmatter(f.read())
-                    if meta.get("slug") == slug or os.path.splitext(os.path.basename(p))[0] == slug:
+                    f_stem = os.path.splitext(os.path.basename(p))[0]
+                    file_slug = str(meta.get("slug") or f_stem).strip()
+                    if (
+                        file_slug == slug
+                        or file_slug == clean_slug
+                        or f_stem == slug
+                        or f_stem == clean_slug
+                        or file_slug.lower() == clean_slug.lower()
+                        or f_stem.lower() == clean_slug.lower()
+                    ):
                         fpath = p
                         break
                 except Exception:
@@ -273,36 +285,63 @@ class WebsiteNewsManager:
 
     def delete_article(self, slug: str) -> Dict[str, Any]:
         """Deletes an article file and its compiled directory, then rebuilds site."""
-        slug = slug.strip()
-        fpath = os.path.join(self.posts_dir, f"{slug}.md")
+        slug = str(slug or "").strip()
+        if not slug:
+            return {"success": False, "error": "No article slug provided."}
 
-        deleted = False
-        if os.path.isfile(fpath):
-            os.remove(fpath)
-            deleted = True
+        clean_slug = os.path.splitext(slug)[0]
+        target_file = None
+        actual_slug = clean_slug
+
+        # 1. Check direct file by slug name
+        direct_path = os.path.join(self.posts_dir, f"{clean_slug}.md")
+        if os.path.isfile(direct_path):
+            target_file = direct_path
         else:
-            # Search by slug inside file
+            # 2. Search through all markdown files in posts_dir
             for p in glob.glob(os.path.join(self.posts_dir, "*.md")):
                 try:
                     with open(p, "r", encoding="utf-8") as f:
                         meta, _ = self.parse_frontmatter(f.read())
-                    if meta.get("slug") == slug:
-                        os.remove(p)
-                        deleted = True
+                    f_stem = os.path.splitext(os.path.basename(p))[0]
+                    file_slug = str(meta.get("slug") or f_stem).strip()
+                    if (
+                        file_slug == slug
+                        or file_slug == clean_slug
+                        or f_stem == slug
+                        or f_stem == clean_slug
+                        or file_slug.lower() == clean_slug.lower()
+                        or f_stem.lower() == clean_slug.lower()
+                    ):
+                        target_file = p
+                        actual_slug = file_slug
                         break
-                except Exception:
+                except Exception as e:
+                    logger.warning(f"Error reading {p} during slug search: {e}")
                     continue
 
-        if not deleted:
+        if not target_file or not os.path.isfile(target_file):
             return {"success": False, "error": f"Article with slug '{slug}' not found."}
 
+        # Attempt deletion with explicit error handling
+        try:
+            os.remove(target_file)
+        except Exception as e:
+            logger.error(f"Failed to remove article file {target_file}: {e}")
+            return {"success": False, "error": f"Failed to delete article file '{os.path.basename(target_file)}': {e}"}
+
         # Remove compiled output directory if present
-        compiled_dir = os.path.join(self.news_dir, slug)
-        if os.path.isdir(compiled_dir):
-            shutil.rmtree(compiled_dir, ignore_errors=True)
+        for s in set([slug, clean_slug, actual_slug, os.path.splitext(os.path.basename(target_file))[0]]):
+            compiled_dir = os.path.join(self.news_dir, s)
+            if os.path.isdir(compiled_dir):
+                shutil.rmtree(compiled_dir, ignore_errors=True)
 
         build_res = self.rebuild()
-        return {"success": True, "message": f"Article '{slug}' deleted successfully.", "build": build_res}
+        return {
+            "success": True,
+            "message": f"Article '{slug}' deleted successfully.",
+            "build": build_res
+        }
 
     # ── Site Build & RSS Synchronization ─────────────────────────────────────
     def rebuild(self) -> Dict[str, Any]:
