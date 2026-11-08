@@ -1350,7 +1350,9 @@ def enforce_security():
         is_admin = (role in ("owner", "administrator") or "all" in perms)
         path = request.path
         if not is_admin:
-            if path.startswith("/api/files/") and "filemanager" not in perms:
+            if path.startswith("/api/panel/update") or path.startswith("/api/system/update"):
+                return jsonify(error="Administrator permission required"), 403
+            elif path.startswith("/api/files/") and "filemanager" not in perms:
                 return jsonify(error="Owner permission required"), 403
             elif path.startswith("/api/config") and "parameters" not in perms:
                 return jsonify(error="Owner permission required"), 403
@@ -1399,6 +1401,7 @@ def enforce_security():
             elif path.startswith("/api/plugin/") or path.startswith("/api/mod/") or path.startswith("/api/modpack") or path.startswith("/api/modrinth/"): permission = "filemanager"
             elif path.startswith("/api/worlds/") or path == "/api/motd": permission = "parameters"
             elif path.startswith("/api/resourcepack/"): permission = "parameters"
+            elif path.startswith("/api/panel/update") or path.startswith("/api/system/update"): permission = "admin_only"
             elif path.startswith("/api/system/"): permission = "parameters"
             elif path.startswith("/api/events/"): permission = "events"
             elif path.startswith("/api/panel-addons/") and "/review" in path:
@@ -1583,9 +1586,28 @@ def dashboard():
         mc_port=get_server_port(),
         bedrock_port=get_bedrock_port(),
         panel_port=get_panel_port(),
+        panel_commit=get_cached_panel_commit(),
+        is_admin=(session.get("role") in ("owner", "administrator") or "all" in session.get("permissions", [])),
         max_heap=rt_cfg.get("max_ram", "4G"),
         total_ram_gb=mem_total_gb
     )
+
+_PANEL_COMMIT_CACHE = {"commit": None, "ts": 0}
+
+def get_cached_panel_commit():
+    global _PANEL_COMMIT_CACHE
+    now = time.time()
+    if _PANEL_COMMIT_CACHE["commit"] and (now - _PANEL_COMMIT_CACHE["ts"] < 60):
+        return _PANEL_COMMIT_CACHE["commit"]
+    try:
+        res = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=BASE_DIR, capture_output=True, text=True, timeout=2)
+        if res.returncode == 0 and res.stdout.strip():
+            _PANEL_COMMIT_CACHE["commit"] = res.stdout.strip()
+            _PANEL_COMMIT_CACHE["ts"] = now
+            return _PANEL_COMMIT_CACHE["commit"]
+    except Exception:
+        pass
+    return _PANEL_COMMIT_CACHE["commit"] or "git"
 
 LATEST_PAPER_VERSION_CACHE = {"version": "1.21.4", "ts": 0}
 
@@ -1740,6 +1762,7 @@ def api_status():
         "bans_count": len(banned),
         "whitelist_count": whitelist_count,
         "version": "Active",
+        "panel_commit": get_cached_panel_commit(),
         "platform": f"{platform.system()} ({platform.machine()})",
         "os_platform": platform.system(),
         "server_installed": jar_exists,
@@ -2914,6 +2937,218 @@ def api_system_settings():
             "panel_port": get_panel_port()
         }
     })
+
+# ── FiestaPanel In-Place System Update APIs (Admin Only) ────────
+_PANEL_UPDATE_CACHE = {"data": None, "ts": 0}
+
+def get_panel_git_info(fetch_remote=False):
+    """
+    Inspects local git repository and optionally queries remote upstream for pending commits.
+    Returns structured status with commit hashes, dates, messages, and changelog.
+    """
+    global _PANEL_UPDATE_CACHE
+    now = time.time()
+    if not fetch_remote and _PANEL_UPDATE_CACHE["data"] and (now - _PANEL_UPDATE_CACHE["ts"] < 60):
+        return _PANEL_UPDATE_CACHE["data"]
+
+    info = {
+        "success": True,
+        "is_git_repo": False,
+        "current_commit": "unknown",
+        "current_commit_full": "",
+        "current_commit_date": "",
+        "current_commit_msg": "",
+        "current_branch": "main",
+        "latest_commit": "unknown",
+        "latest_commit_full": "",
+        "latest_commit_date": "",
+        "latest_commit_msg": "",
+        "commits_behind": 0,
+        "update_available": False,
+        "remote_url": "https://github.com/open-fiestasmp/FiestaPanel",
+        "changelog": [],
+        "last_checked": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+        "error": None
+    }
+
+    git_dir = os.path.join(BASE_DIR, ".git")
+    if not os.path.exists(git_dir):
+        info["error"] = "Not a git repository"
+        return info
+
+    info["is_git_repo"] = True
+
+    try:
+        # Get remote URL
+        res = subprocess.run(["git", "config", "--get", "remote.origin.url"], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            info["remote_url"] = res.stdout.strip()
+
+        # Current branch
+        res = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            info["current_branch"] = res.stdout.strip()
+
+        # Current commit hash
+        res = subprocess.run(["git", "rev-parse", "HEAD"], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            full = res.stdout.strip()
+            info["current_commit_full"] = full
+            info["current_commit"] = full[:7]
+            info["latest_commit_full"] = full
+            info["latest_commit"] = full[:7]
+
+        # Current commit date
+        res = subprocess.run(["git", "log", "-1", "--format=%cd", "--date=iso"], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            info["current_commit_date"] = res.stdout.strip()
+
+        # Current commit subject
+        res = subprocess.run(["git", "log", "-1", "--format=%s"], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            info["current_commit_msg"] = res.stdout.strip()
+            info["latest_commit_msg"] = res.stdout.strip()
+
+        # Fetch remote if requested
+        branch = info["current_branch"] or "main"
+        if fetch_remote:
+            fetch_res = subprocess.run(
+                ["git", "fetch", "origin", branch, "--quiet", "--no-tags"],
+                cwd=BASE_DIR,
+                capture_output=True,
+                text=True,
+                timeout=15
+            )
+            if fetch_res.returncode != 0:
+                info["error"] = f"Failed to fetch upstream: {fetch_res.stderr.strip() or 'Network timeout'}"
+
+        # Inspect upstream origin/<branch>
+        target_ref = f"origin/{branch}"
+        res = subprocess.run(["git", "rev-parse", target_ref], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+        if res.returncode == 0 and res.stdout.strip():
+            full_rem = res.stdout.strip()
+            info["latest_commit_full"] = full_rem
+            info["latest_commit"] = full_rem[:7]
+
+            res_d = subprocess.run(["git", "log", "-1", "--format=%cd", "--date=iso", target_ref], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+            if res_d.returncode == 0 and res_d.stdout.strip():
+                info["latest_commit_date"] = res_d.stdout.strip()
+
+            res_m = subprocess.run(["git", "log", "-1", "--format=%s", target_ref], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+            if res_m.returncode == 0 and res_m.stdout.strip():
+                info["latest_commit_msg"] = res_m.stdout.strip()
+
+            # Commits behind count
+            res_c = subprocess.run(["git", "rev-list", "--count", f"HEAD..{target_ref}"], cwd=BASE_DIR, capture_output=True, text=True, timeout=3)
+            if res_c.returncode == 0 and res_c.stdout.strip().isdigit():
+                behind = int(res_c.stdout.strip())
+                info["commits_behind"] = behind
+                info["update_available"] = (behind > 0)
+
+                if behind > 0:
+                    res_log = subprocess.run(
+                        ["git", "log", "--pretty=format:%h|%an|%s|%cd", "--date=short", f"HEAD..{target_ref}", "-n", "30"],
+                        cwd=BASE_DIR,
+                        capture_output=True,
+                        text=True,
+                        timeout=5
+                    )
+                    if res_log.returncode == 0 and res_log.stdout.strip():
+                        changelog = []
+                        for line in res_log.stdout.strip().split("\n"):
+                            parts = line.split("|", 3)
+                            if len(parts) == 4:
+                                changelog.append({
+                                    "hash": parts[0],
+                                    "author": parts[1],
+                                    "message": parts[2],
+                                    "date": parts[3]
+                                })
+                        info["changelog"] = changelog
+
+        _PANEL_UPDATE_CACHE["data"] = info
+        _PANEL_UPDATE_CACHE["ts"] = now
+    except Exception as e:
+        info["error"] = str(e)
+        app.logger.warning(f"Error checking git panel status: {e}")
+
+    return info
+
+
+def apply_panel_git_update():
+    """
+    Executes git pull origin main and triggers a delayed background restart of fiesta-portal.service.
+    """
+    git_dir = os.path.join(BASE_DIR, ".git")
+    if not os.path.exists(git_dir):
+        return False, "Not a git repository"
+
+    try:
+        # Run git pull origin main
+        pull_res = subprocess.run(
+            ["git", "pull", "origin", "main"],
+            cwd=BASE_DIR,
+            capture_output=True,
+            text=True,
+            timeout=30
+        )
+        if pull_res.returncode != 0:
+            err = pull_res.stderr.strip() or pull_res.stdout.strip() or "Git pull failed"
+            return False, f"Git pull failed: {err}"
+
+        # Clear commit and update caches
+        global _PANEL_COMMIT_CACHE, _PANEL_UPDATE_CACHE
+        _PANEL_COMMIT_CACHE = {"commit": None, "ts": 0}
+        _PANEL_UPDATE_CACHE = {"data": None, "ts": 0}
+
+        def trigger_restart():
+            time.sleep(1.2)
+            try:
+                chk = subprocess.run(["sudo", "/usr/bin/systemctl", "is-active", "fiesta-portal.service"], capture_output=True, text=True, timeout=5)
+                if chk.returncode == 0 or "active" in chk.stdout:
+                    subprocess.run(["sudo", "/usr/bin/systemctl", "restart", "fiesta-portal.service"], timeout=15)
+                else:
+                    app.logger.info("fiesta-portal.service not active; skipping systemctl restart")
+            except Exception as ex:
+                app.logger.error(f"Error restarting fiesta-portal.service: {ex}")
+
+        threading.Thread(target=trigger_restart, daemon=True).start()
+        return True, "FiestaPanel updated successfully! Portal service is restarting..."
+    except Exception as e:
+        return False, str(e)
+
+
+@app.route("/api/panel/update/check", methods=["GET"])
+@app.route("/api/system/update/check", methods=["GET"])
+@login_required
+def api_panel_update_check():
+    curr_perms = session.get("permissions", [])
+    curr_role = session.get("role", "")
+    is_admin = (curr_role in ("owner", "administrator") or "all" in curr_perms)
+    if not is_admin:
+        return jsonify({"success": False, "error": "Administrator privileges required to check updates."}), 403
+
+    do_fetch = request.args.get("fetch", "1").lower() in ("1", "true", "yes")
+    status_info = get_panel_git_info(fetch_remote=do_fetch)
+    return jsonify(status_info)
+
+
+@app.route("/api/panel/update/apply", methods=["POST"])
+@app.route("/api/system/update/apply", methods=["POST"])
+@login_required
+def api_panel_update_apply():
+    curr_perms = session.get("permissions", [])
+    curr_role = session.get("role", "")
+    is_admin = (curr_role in ("owner", "administrator") or "all" in curr_perms)
+    if not is_admin:
+        return jsonify({"success": False, "error": "Administrator privileges required to apply updates."}), 403
+
+    ok, msg = apply_panel_git_update()
+    if not ok:
+        return jsonify({"success": False, "error": msg}), 500
+
+    return jsonify({"success": True, "message": msg})
+
 
 # ── Sub-Users & Access Control APIs (Aternos Style) ───────────
 @app.route("/api/access/users", methods=["GET"])

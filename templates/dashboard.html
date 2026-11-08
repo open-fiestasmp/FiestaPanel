@@ -5592,6 +5592,9 @@
             <div class="nav-sub-item" onclick="selectNavView('sys-branding', this)">- Portal Branding</div>
             <div class="nav-sub-item" onclick="selectNavView('sys-themes', this)">- Theme Studio</div>
             <div class="nav-sub-item" onclick="selectNavView('sys-info', this)">- System Information</div>
+            {% if role in ['owner', 'administrator'] or 'all' in permissions %}
+            <div class="nav-sub-item" id="nav-item-sys-update" onclick="selectNavView('sys-update', this)">- FiestaPanel Update <span id="nav-update-pill" class="badge-status online" style="display:none; font-size:9px; padding:1px 5px; margin-left:4px;">● NEW</span></div>
+            {% endif %}
           </div>
         </div>
       </nav>
@@ -5599,6 +5602,29 @@
       <!-- ── CENTER WORKSPACE ─────────────────────────────────── -->
       <main class="center-workspace">
         <div id="tp-alert-banner" class="status-alert"></div>
+
+        <!-- ── FIESTAPANEL CORE UPDATE NOTIFICATION BANNER (ADMIN ONLY) ── -->
+        {% if role in ['owner', 'administrator'] or 'all' in permissions %}
+        <div id="tp-panel-update-banner" class="status-alert banner-themed-success" style="display: none; padding: 10px 14px; margin-bottom: 12px; border-radius: 2px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 9px;">
+              <i class="fa-solid fa-code-branch banner-icon" style="font-size: 16px;"></i>
+              <div>
+                <strong class="banner-title">FiestaPanel Update Available:</strong>
+                <span id="panel-update-banner-msg" style="margin-left: 4px; font-size: 11.5px;">A new version of FiestaPanel is available on GitHub.</span>
+              </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button type="button" class="btn-satin-green" style="height: 23px; padding: 0 10px; font-size: 10.5px; cursor: pointer;" onclick="selectNavView('sys-update')">
+                [ Review &amp; Update ]
+              </button>
+              <button type="button" class="btn-classic" style="height: 23px; padding: 0 8px; font-size: 10.5px; cursor: pointer;" onclick="dismissPanelUpdateBanner()">
+                [ Dismiss ]
+              </button>
+            </div>
+          </div>
+        </div>
+        {% endif %}
 
         <!-- ── SOFTWARE UPDATE NOTIFICATION BANNER ───────────────── -->
         <div id="tp-software-update-banner" class="status-alert banner-themed-success" style="display: none; padding: 10px 14px; margin-bottom: 12px; border-radius: 2px;">
@@ -8067,6 +8093,15 @@
                 <button type="button" id="btn-toggle-autostart" class="btn-classic" onclick="toggleAutoStart()" style="padding:2px 10px; font-size:11px; cursor:pointer;">[ Configure Auto-Start ]</button>
               </td>
             </tr>
+            <tr>
+              <td class="label-col">FiestaPanel Core:</td>
+              <td class="val-col">
+                <code id="sys-info-panel-commit">{{ panel_commit or 'Detecting...' }}</code>
+                {% if role in ['owner', 'administrator'] or 'all' in permissions %}
+                <button type="button" class="btn-classic" onclick="selectNavView('sys-update')" style="margin-left: 8px; padding: 1px 8px; font-size: 10.5px; cursor: pointer;">[ Check for Updates ]</button>
+                {% endif %}
+              </td>
+            </tr>
           </table>
 
           <div class="section-sub-header" style="margin-top: 20px;">Gateway Server Paths &amp; Service Configuration</div>
@@ -8445,6 +8480,116 @@
             </div>
           </div>
         </section>
+
+        <!-- ════ VIEW 21: FIESTAPANEL SYSTEM UPDATE (ADMIN ONLY) ════ -->
+        {% if role in ['owner', 'administrator'] or 'all' in permissions %}
+        <section id="view-sys-update" class="view-panel" style="display:none;">
+          <div class="section-title-bar">
+            <span>System Tools - FiestaPanel System Update</span>
+            <span class="badge-status online" id="panel-update-status-pill" style="font-size: 10px;">Checking...</span>
+          </div>
+
+          <div style="padding: 10px 0;">
+            <p style="margin-bottom: 14px; font-size: 11.5px; color: var(--text-sub);">
+              FiestaPanel supports direct in-place updates from the official upstream GitHub repository. Check for updates, review commit changelogs, and upgrade your panel installation with one click.
+            </p>
+
+            <!-- Current Version & Remote Status Table -->
+            <div class="section-sub-header">Current FiestaPanel Installation</div>
+            <table class="form-layout-table">
+              <tr>
+                <td class="label-col">Installed Commit Hash:</td>
+                <td class="val-col">
+                  <code id="panel-curr-commit" style="font-weight: bold; color: var(--text-main);">{{ panel_commit or 'Detecting...' }}</code>
+                  <span id="panel-curr-branch" style="margin-left: 6px; font-size: 11px; color: var(--text-sub);">(branch: main)</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="label-col">Installed Commit Date:</td>
+                <td class="val-col">
+                  <span id="panel-curr-date" style="color: var(--text-main);">--</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="label-col">Installed Commit Subject:</td>
+                <td class="val-col">
+                  <span id="panel-curr-msg" style="color: var(--text-sub); font-style: italic;">--</span>
+                </td>
+              </tr>
+              <tr>
+                <td class="label-col">Upstream Git Remote:</td>
+                <td class="val-col">
+                  <code id="panel-remote-url">https://github.com/open-fiestasmp/FiestaPanel</code>
+                  <a href="https://github.com/open-fiestasmp/FiestaPanel" target="_blank" rel="noopener noreferrer" style="margin-left: 8px; font-size: 11px; color: #0284c7; font-weight: bold;">[ View GitHub Repo &nearr; ]</a>
+                </td>
+              </tr>
+              <tr>
+                <td class="label-col">Check Upstream:</td>
+                <td class="val-col">
+                  <button type="button" id="btn-panel-check-update" class="btn-classic" style="height: 26px; padding: 0 16px; font-weight: bold; cursor: pointer;" onclick="checkPanelUpdate(true)">
+                    [ Check for Updates ]
+                  </button>
+                  <span id="panel-check-status-msg" style="margin-left: 10px; font-size: 11px;"></span>
+                </td>
+              </tr>
+            </table>
+
+            <!-- Up to Date Box -->
+            <div id="panel-up-to-date-box" style="display: none; margin-top: 18px; padding: 14px; background: rgba(34, 197, 94, 0.08); border: 1px solid #22c55e; border-radius: 3px;">
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: #16a34a; font-weight: bold; font-size: 16px;">✓</span>
+                <div>
+                  <strong style="color: #15803d; font-size: 13px;">FiestaPanel is Up to Date</strong>
+                  <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;">Your panel is running the latest commit from origin/main. No updates required.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Update Available Box -->
+            <div id="panel-update-available-box" style="display: none; margin-top: 18px; padding: 14px; background: rgba(2, 132, 199, 0.08); border: 1px solid #0284c7; border-radius: 3px;">
+              <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; flex-wrap: wrap;">
+                <div>
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="color: #0284c7; font-weight: bold; font-size: 15px;">✦</span>
+                    <strong style="color: #0369a1; font-size: 13px;" id="panel-update-heading">New Update Available!</strong>
+                    <span class="badge-status online" id="panel-commits-behind-badge" style="background: #0284c7; font-size: 10px;">1 new commit</span>
+                  </div>
+                  <div style="font-size: 11.5px; color: var(--text-main); margin-top: 4px;">
+                    Target Commit: <code id="panel-latest-commit" style="font-weight: bold;">--</code> &bull; <span id="panel-latest-date">--</span>
+                  </div>
+                  <div style="font-size: 11px; color: var(--text-sub); margin-top: 2px;" id="panel-latest-msg">--</div>
+                </div>
+                <div>
+                  <button type="button" id="btn-panel-apply-update" class="btn-satin-green" style="height: 30px; padding: 0 18px; font-size: 12px; font-weight: bold; cursor: pointer;" onclick="confirmApplyPanelUpdate()">
+                    [ ✦ Update FiestaPanel Now ]
+                  </button>
+                </div>
+              </div>
+
+              <!-- Changelog list -->
+              <div class="section-sub-header" style="margin-top: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 4px;">Incoming Commits Changelog</div>
+              <div id="panel-changelog-list" style="margin-top: 8px; max-height: 240px; overflow-y: auto; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 2px; padding: 6px 10px; font-family: monospace; font-size: 11px;">
+              </div>
+            </div>
+
+            <!-- Live Update In-Progress Overlay / Container -->
+            <div id="panel-update-progress-box" style="display: none; margin-top: 18px; padding: 18px; background: rgba(0,0,0,0.03); border: 2px dashed #0284c7; border-radius: 4px; text-align: center;">
+              <div style="font-weight: bold; font-size: 14px; color: var(--text-main); margin-bottom: 8px;" id="panel-progress-status-title">
+                Updating FiestaPanel...
+              </div>
+              <div style="font-size: 11.5px; color: var(--text-sub); margin-bottom: 12px;" id="panel-progress-status-desc">
+                Pulling latest changes from GitHub origin/main and restarting background portal daemon...
+              </div>
+              <div class="meter-container" style="width: 100%; max-width: 450px; height: 16px; margin: 0 auto 12px auto;">
+                <div id="panel-update-meter-bar" class="meter-bar" style="width: 15%; transition: width 0.4s ease;"></div>
+              </div>
+              <div style="font-size: 11px; color: var(--text-sub); font-style: italic;">
+                Please keep this window open. The panel will automatically reconnect as soon as the service finishes restarting.
+              </div>
+            </div>
+          </div>
+        </section>
+        {% endif %}
 
         <!-- ════ VIEW 17: PANEL ADDONS & EXTENSIONS (INSTALLED) ════ -->
         <section id="view-panel-addons-installed" class="view-panel" style="display:none;">
@@ -9843,6 +9988,7 @@ def on_action(ctx, action_name, payload):
       if (viewId === 'sys-branding') loadBrandingForm();
       if (viewId === 'sys-themes') loadThemeStudio();
       if (viewId === 'sys-info') loadSystemInfo();
+      if (viewId === 'sys-update') loadPanelUpdateView();
       if (viewId === 'diag-console') { loadConsoleLogArchiveList(); pollLogs(); loadConsoleDiagnostics(); }
       if (viewId === 'diag-ping') runPingTest();
       if (viewId === 'panel-addons-installed') loadPanelAddons();
@@ -19839,6 +19985,8 @@ def on_action(ctx, action_name, payload):
         if (scrEl) scrEl.textContent = s.screen_session || dStatus.screen_session || 'minecraft';
         if (sdirEl) sdirEl.textContent = s.server_dir || dStatus.server_dir || '/server';
         if (bdirEl) bdirEl.textContent = s.backup_dir || dStatus.backup_dir || 'backups';
+        const pCommitEl = document.getElementById('sys-info-panel-commit');
+        if (pCommitEl && dStatus.panel_commit) pCommitEl.textContent = dStatus.panel_commit;
 
         // Populate Config Form Inputs
         const inSdir = document.getElementById('sys-cfg-server-dir');
@@ -19910,6 +20058,274 @@ def on_action(ctx, action_name, payload):
       }
     }
 
+    // ── FiestaPanel In-Place System Update (Admin Only) ────────
+    let panelUpdateData = null;
+    let isPanelUpdating = false;
+
+    async function loadPanelUpdateView() {
+      if (!panelUpdateData) {
+        await checkPanelUpdate(false);
+      } else {
+        renderPanelUpdateUI(panelUpdateData);
+      }
+    }
+
+    function dismissPanelUpdateBanner() {
+      const b = document.getElementById('tp-panel-update-banner');
+      if (b) b.style.display = 'none';
+    }
+
+    async function checkPanelUpdate(forceRemote = true) {
+      const btn = document.getElementById('btn-panel-check-update');
+      const msg = document.getElementById('panel-check-status-msg');
+      if (btn) btn.disabled = true;
+      if (msg) {
+        msg.textContent = forceRemote ? 'Checking upstream GitHub repository...' : 'Reading local repository state...';
+        msg.style.color = 'var(--text-sub)';
+      }
+
+      try {
+        const res = await fetch(`/api/panel/update/check?fetch=${forceRemote ? '1' : '0'}`);
+        if (!res.ok) {
+          throw new Error(`Server returned HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        panelUpdateData = data;
+        renderPanelUpdateUI(data);
+
+        if (msg) {
+          if (data.error && forceRemote) {
+            msg.textContent = `Upstream note: ${data.error}`;
+            msg.style.color = '#e11d48';
+          } else {
+            msg.textContent = `Checked at ${new Date().toLocaleTimeString()}`;
+            msg.style.color = '#16a34a';
+          }
+        }
+      } catch (err) {
+        if (msg) {
+          msg.textContent = `Check failed: ${err.message}`;
+          msg.style.color = '#dc2626';
+        }
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    function renderPanelUpdateUI(data) {
+      if (!data) return;
+
+      const currCommitEl = document.getElementById('panel-curr-commit');
+      const currBranchEl = document.getElementById('panel-curr-branch');
+      const currDateEl = document.getElementById('panel-curr-date');
+      const currMsgEl = document.getElementById('panel-curr-msg');
+      const remoteUrlEl = document.getElementById('panel-remote-url');
+      const sysCommitEl = document.getElementById('sys-info-panel-commit');
+
+      if (currCommitEl) currCommitEl.textContent = data.current_commit || '--';
+      if (sysCommitEl) sysCommitEl.textContent = data.current_commit || '--';
+      if (currBranchEl) currBranchEl.textContent = `(branch: ${data.current_branch || 'main'})`;
+      if (currDateEl) currDateEl.textContent = data.current_commit_date || '--';
+      if (currMsgEl) currMsgEl.textContent = data.current_commit_msg || '--';
+      if (remoteUrlEl && data.remote_url) remoteUrlEl.textContent = data.remote_url;
+
+      const pill = document.getElementById('panel-update-status-pill');
+      const navPill = document.getElementById('nav-update-pill');
+      const banner = document.getElementById('tp-panel-update-banner');
+      const bannerMsg = document.getElementById('panel-update-banner-msg');
+      const upToDateBox = document.getElementById('panel-up-to-date-box');
+      const updateAvailBox = document.getElementById('panel-update-available-box');
+
+      if (data.update_available) {
+        if (pill) {
+          pill.textContent = `● ${data.commits_behind} New Commit(s)`;
+          pill.className = 'badge-status online';
+          pill.style.background = '#0284c7';
+          pill.style.color = '#ffffff';
+        }
+        if (navPill) {
+          navPill.style.display = 'inline-block';
+          navPill.textContent = `● ${data.commits_behind} NEW`;
+        }
+        if (banner) {
+          banner.style.display = 'block';
+          if (bannerMsg) {
+            bannerMsg.textContent = `${data.commits_behind} new update(s) available on origin/main (${data.latest_commit}: ${data.latest_commit_msg || ''})`;
+          }
+        }
+        if (upToDateBox) upToDateBox.style.display = 'none';
+        if (updateAvailBox) {
+          updateAvailBox.style.display = 'block';
+          const heading = document.getElementById('panel-update-heading');
+          const behindBadge = document.getElementById('panel-commits-behind-badge');
+          const latestCommit = document.getElementById('panel-latest-commit');
+          const latestDate = document.getElementById('panel-latest-date');
+          const latestMsg = document.getElementById('panel-latest-msg');
+
+          if (heading) heading.textContent = `Update Available (${data.commits_behind} new commit${data.commits_behind > 1 ? 's' : ''})`;
+          if (behindBadge) behindBadge.textContent = `${data.commits_behind} commit${data.commits_behind > 1 ? 's' : ''} behind`;
+          if (latestCommit) latestCommit.textContent = data.latest_commit;
+          if (latestDate) latestDate.textContent = data.latest_commit_date || '';
+          if (latestMsg) latestMsg.textContent = data.latest_commit_msg || '';
+
+          const changelogBox = document.getElementById('panel-changelog-list');
+          if (changelogBox) {
+            if (data.changelog && data.changelog.length > 0) {
+              changelogBox.innerHTML = data.changelog.map(c => `
+                <div style="padding: 5px 4px; border-bottom: 1px dotted var(--border-color, #cbd5e1); display: flex; align-items: baseline; gap: 8px;">
+                  <span style="font-weight: bold; color: #0284c7; min-width: 65px; font-family: monospace;">[${escapeHtml(c.hash)}]</span>
+                  <span style="flex: 1; color: var(--text-main); font-size: 11px;">${escapeHtml(c.message)}</span>
+                  <span style="color: var(--text-sub); font-size: 10px; white-space: nowrap;">${escapeHtml(c.author)} • ${escapeHtml(c.date)}</span>
+                </div>
+              `).join('');
+            } else {
+              changelogBox.innerHTML = `<div style="padding: 6px; color: var(--text-sub);">Latest commit on origin/${escapeHtml(data.current_branch || 'main')}: ${escapeHtml(data.latest_commit)}</div>`;
+            }
+          }
+        }
+      } else {
+        if (pill) {
+          pill.textContent = '✓ Up to Date';
+          pill.className = 'badge-status online';
+          pill.style.background = '';
+          pill.style.color = '';
+        }
+        if (navPill) navPill.style.display = 'none';
+        if (banner) banner.style.display = 'none';
+        if (upToDateBox) upToDateBox.style.display = 'block';
+        if (updateAvailBox) updateAvailBox.style.display = 'none';
+      }
+    }
+
+    function confirmApplyPanelUpdate() {
+      if (isPanelUpdating) return;
+      const count = (panelUpdateData && panelUpdateData.commits_behind) ? panelUpdateData.commits_behind : 'the latest';
+      const commit = (panelUpdateData && panelUpdateData.latest_commit) ? ` (${panelUpdateData.latest_commit})` : '';
+      if (!confirm(`Are you sure you want to update FiestaPanel now?\n\nTarget: Pull ${count} commit(s)${commit} from origin/main and restart fiesta-portal.service.\n\nThe dashboard will automatically reconnect once the service is back online.`)) {
+        return;
+      }
+      executePanelUpdate();
+    }
+
+    async function executePanelUpdate() {
+      if (isPanelUpdating) return;
+      isPanelUpdating = true;
+
+      const progressBox = document.getElementById('panel-update-progress-box');
+      const updateAvailBox = document.getElementById('panel-update-available-box');
+      const upToDateBox = document.getElementById('panel-up-to-date-box');
+      const meterBar = document.getElementById('panel-update-meter-bar');
+      const statusTitle = document.getElementById('panel-progress-status-title');
+      const statusDesc = document.getElementById('panel-progress-status-desc');
+      const btnCheck = document.getElementById('btn-panel-check-update');
+
+      if (updateAvailBox) updateAvailBox.style.display = 'none';
+      if (upToDateBox) upToDateBox.style.display = 'none';
+      if (progressBox) progressBox.style.display = 'block';
+      if (btnCheck) btnCheck.disabled = true;
+
+      if (meterBar) {
+        meterBar.style.width = '25%';
+        meterBar.style.background = '';
+      }
+      if (statusTitle) {
+        statusTitle.textContent = 'Pulling FiestaPanel Update...';
+        statusTitle.style.color = '';
+      }
+      if (statusDesc) statusDesc.textContent = 'Fetching latest code from GitHub origin/main...';
+
+      const csrfToken = '{{ session.get("csrf_token", "") }}';
+
+      try {
+        const res = await fetch('/api/panel/update/apply', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-Token': csrfToken
+          }
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok || data.success === false) {
+          throw new Error(data.error || `Update failed with HTTP status ${res.status}`);
+        }
+
+        if (meterBar) meterBar.style.width = '65%';
+        if (statusTitle) statusTitle.textContent = 'Restarting FiestaPanel Service...';
+        if (statusDesc) statusDesc.textContent = data.message || 'Update applied. Restarting daemon, waiting for reconnect...';
+
+        pollPanelReconnect();
+
+      } catch (err) {
+        isPanelUpdating = false;
+        if (meterBar) {
+          meterBar.style.width = '100%';
+          meterBar.style.background = '#dc2626';
+        }
+        if (statusTitle) {
+          statusTitle.textContent = 'Update Failed';
+          statusTitle.style.color = '#dc2626';
+        }
+        if (statusDesc) {
+          statusDesc.textContent = `Error: ${err.message}. Your existing FiestaPanel installation was not modified.`;
+        }
+        if (btnCheck) btnCheck.disabled = false;
+      }
+    }
+
+    function pollPanelReconnect() {
+      const meterBar = document.getElementById('panel-update-meter-bar');
+      const statusTitle = document.getElementById('panel-progress-status-title');
+      const statusDesc = document.getElementById('panel-progress-status-desc');
+
+      let attempts = 0;
+      const maxAttempts = 40;
+
+      setTimeout(() => {
+        const checkInterval = setInterval(async () => {
+          attempts++;
+          const progressPct = Math.min(65 + Math.floor(attempts * 0.8), 95);
+          if (meterBar) meterBar.style.width = progressPct + '%';
+
+          try {
+            const resp = await fetch('/api/panel/update/check?fetch=0', { cache: 'no-store' });
+            if (resp.ok) {
+              const info = await resp.json();
+              clearInterval(checkInterval);
+              if (meterBar) {
+                meterBar.style.width = '100%';
+                meterBar.style.background = '#16a34a';
+              }
+              if (statusTitle) {
+                statusTitle.textContent = 'Update Complete!';
+                statusTitle.style.color = '#15803d';
+              }
+              if (statusDesc) {
+                statusDesc.textContent = `FiestaPanel updated to commit ${info.current_commit || ''}. Reconnecting dashboard...`;
+              }
+              setTimeout(() => {
+                window.location.reload();
+              }, 1200);
+              return;
+            }
+          } catch (e) {
+            if (statusDesc) {
+              statusDesc.textContent = `Daemon is restarting (attempt ${attempts}/${maxAttempts})...`;
+            }
+          }
+
+          if (attempts >= maxAttempts) {
+            clearInterval(checkInterval);
+            if (statusTitle) statusTitle.textContent = 'Portal is Taking Longer Than Expected';
+            if (statusDesc) {
+              statusDesc.innerHTML = 'The service may still be starting. Click <a href="javascript:location.reload()" style="font-weight:bold; color:#0284c7;">[ Reload Page ]</a> to reconnect.';
+            }
+          }
+        }, 1400);
+      }, 1500);
+    }
+
     // Initialize timers & console interceptors
     initConsoleLinkInterceptor();
     updateServerPowerButtons(isServerRunning);
@@ -19925,6 +20341,10 @@ def on_action(ctx, action_name, payload):
     loadSystemInfo();
     loadWorldSpawnCoordinates();
     loadEvents();
+    {% if role in ['owner', 'administrator'] or 'all' in permissions %}
+    checkPanelUpdate(false);
+    setTimeout(() => checkPanelUpdate(true), 3000);
+    {% endif %}
     setInterval(loadEvents, 60000); // Poll/refresh scheduled events & reminders every minute
     setInterval(renderUptime, 1000); // High-precision local 1-second ticker (zero latency & zero lag)
     setInterval(pollStatus, 3000);
