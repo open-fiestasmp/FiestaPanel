@@ -74,17 +74,6 @@
       </p>
 
       <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:14px;">
-        <!-- Upload Destination -->
-        <div>
-          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Upload Destination:</label>
-          <select id="swa-instant-target" class="ctrl-input" style="width:100%;">
-            <option value="archive_org">Internet Archive (archive.org S3)</option>
-            <option value="github">GitHub Releases (Direct Asset Upload)</option>
-            <option value="s3">Custom S3 / Cloudflare R2 / AWS</option>
-            <option value="custom_post">Custom HTTP Endpoint</option>
-          </select>
-        </div>
-
         <!-- Snapshot Label / Title -->
         <div>
           <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Snapshot Title / Label:</label>
@@ -95,6 +84,38 @@
         <div>
           <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Release Notes / Changelog:</label>
           <input type="text" id="swa-instant-notes" class="ctrl-input" style="width:100%;" placeholder="e.g. Captured before server maintenance">
+        </div>
+      </div>
+
+      <!-- Multi-Platform Upload Destinations -->
+      <div style="background:rgba(128,128,128,0.06); padding:10px 14px; border-radius:6px; border:1px solid rgba(128,128,128,0.18); margin-bottom:14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <label style="font-size:12px; font-weight:bold; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-cloud-arrow-up" style="color:var(--sec-bar-bg, #16a34a);"></i>
+            <span>Upload Destinations (Choose Multiple Platforms):</span>
+          </label>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-classic" style="font-size:10.5px; padding:1px 8px;" onclick="swaSelectAllInstantTargets(true)">[ Select All ]</button>
+            <button type="button" class="btn-classic" style="font-size:10.5px; padding:1px 8px;" onclick="swaSelectAllInstantTargets(false)">[ Clear All ]</button>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; font-size:12px;">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:6px 10px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-instant-target-chk" value="archive_org" checked>
+            <span><strong>Internet Archive</strong> (archive.org)</span>
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:6px 10px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-instant-target-chk" value="github">
+            <span><strong>GitHub Releases</strong></span>
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:6px 10px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-instant-target-chk" value="s3">
+            <span><strong>Custom S3 / R2</strong></span>
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:6px 10px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-instant-target-chk" value="custom_post">
+            <span><strong>Custom HTTP Endpoint</strong></span>
+          </label>
         </div>
       </div>
 
@@ -180,8 +201,8 @@
         </div>
       </div>
 
-      <!-- Dimensions & Cloud Upload Target -->
-      <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; padding:8px 0; border-top:1px dashed rgba(128,128,128,0.2); border-bottom:1px dashed rgba(128,128,128,0.2); margin-bottom:14px; font-size:12px;">
+      <!-- Dimensions -->
+      <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; padding:8px 0; border-top:1px dashed rgba(128,128,128,0.2); border-bottom:1px dashed rgba(128,128,128,0.2); margin-bottom:12px; font-size:12px;">
         <span style="font-weight:bold;">Dimensions:</span>
         <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
           <input type="checkbox" id="swa-dim-overworld" checked> Overworld (<span style="opacity:0.75;">world/</span>)
@@ -192,17 +213,37 @@
         <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
           <input type="checkbox" id="swa-dim-the-end" checked> The End (<span style="opacity:0.75;">world_the_end/</span>)
         </label>
+      </div>
 
-        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-          <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:bold; color:var(--sec-bar-bg, #0284c7);">
-            <input type="checkbox" id="swa-opt-auto-upload"> Auto-Upload to Cloud:
+      <!-- Auto-Upload Destinations (Multi-Select) -->
+      <div style="background:rgba(128,128,128,0.05); padding:10px 14px; border-radius:6px; border:1px solid rgba(128,128,128,0.18); margin-bottom:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; font-weight:bold; font-size:12px; color:var(--sec-bar-bg, #0284c7);">
+            <input type="checkbox" id="swa-opt-auto-upload">
+            <span>Auto-Upload to Cloud Destinations (Select One or More):</span>
           </label>
-          <select id="swa-input-target-dest" class="ctrl-input" style="font-size:11.5px; padding:2px 6px;">
-            <option value="archive_org">Internet Archive (archive.org)</option>
-            <option value="github">GitHub Releases</option>
-            <option value="s3">Custom S3 / Cloudflare R2</option>
-            <option value="custom_post">Custom HTTP Endpoint</option>
-          </select>
+          <div style="display:flex; gap:6px;">
+            <button type="button" class="btn-classic" style="font-size:10px; padding:1px 6px;" onclick="swaSelectAllSchedTargets(true)">[ Select All ]</button>
+            <button type="button" class="btn-classic" style="font-size:10px; padding:1px 6px;" onclick="swaSelectAllSchedTargets(false)">[ Clear ]</button>
+          </div>
+        </div>
+        <div id="swa-sched-targets-box" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:10px; font-size:12px; margin-top:6px;">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:5px 8px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-sched-target-chk" value="archive_org" checked>
+            <span>Internet Archive (archive.org)</span>
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:5px 8px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-sched-target-chk" value="github">
+            <span>GitHub Releases</span>
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:5px 8px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-sched-target-chk" value="s3">
+            <span>Custom S3 / Cloudflare R2</span>
+          </label>
+          <label style="cursor:pointer; display:flex; align-items:center; gap:6px; background:var(--card-active-bg, rgba(0,0,0,0.03)); padding:5px 8px; border-radius:4px; border:1px solid rgba(128,128,128,0.15);">
+            <input type="checkbox" class="swa-sched-target-chk" value="custom_post">
+            <span>Custom HTTP Endpoint</span>
+          </label>
         </div>
       </div>
 
@@ -383,15 +424,24 @@
           </div>
           <table class="form-layout-table" style="width:100%; font-size:12px;">
             <tr>
-              <td class="label-col" style="width:36%;">Default Cloud Upload Target:</td>
+              <td class="label-col" style="width:36%; vertical-align:top; padding-top:6px;">Default Cloud Upload Targets:</td>
               <td class="val-col">
-                <select id="swa-set-default-target" class="ctrl-input" style="width:70%;">
-                  <option value="archive_org">Internet Archive (archive.org)</option>
-                  <option value="github">GitHub Releases</option>
-                  <option value="s3">Custom S3 / Cloudflare R2</option>
-                  <option value="custom_post">Custom HTTP Endpoint</option>
-                  <option value="local">Local Storage Only</option>
-                </select>
+                <div style="display:flex; flex-wrap:wrap; gap:12px; font-size:12px; margin-bottom:4px;">
+                  <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" class="swa-def-target-chk" value="archive_org" checked> Internet Archive
+                  </label>
+                  <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" class="swa-def-target-chk" value="github"> GitHub Releases
+                  </label>
+                  <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" class="swa-def-target-chk" value="s3"> Custom S3 / R2
+                  </label>
+                  <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <input type="checkbox" class="swa-def-target-chk" value="custom_post"> Custom HTTP Endpoint
+                  </label>
+                </div>
+                <span class="inline-hint" style="display:block; font-size:11px;">Default destinations automatically uploaded to when scheduled releases execute.</span>
+                <input type="hidden" id="swa-set-default-target" value="archive_org">
               </td>
             </tr>
             <tr>
@@ -476,27 +526,45 @@
 
 <!-- Upload Destination Selection Modal -->
 <div id="swa-upload-picker-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
-  <div class="panel-box" style="width:90%; max-width:440px; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
+  <div class="panel-box" style="width:90%; max-width:460px; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
     <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
       <span>Upload World Archive to Cloud</span>
       <button class="btn-classic" style="padding:2px 8px; font-weight:bold;" onclick="swaCloseUploadPicker()">[ X ]</button>
     </div>
     <p class="inline-hint" style="margin-top:6px; margin-bottom:12px;">
-      Select cloud upload target for <strong id="swa-upload-target-title">World Archive</strong>:
+      Select one or multiple cloud destinations to upload <strong id="swa-upload-target-title">World Archive</strong>:
     </p>
     <input type="hidden" id="swa-upload-target-archive-id">
     <div style="margin-bottom:14px;">
-      <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:6px;">Upload Destination:</label>
-      <select id="swa-upload-destination-select" class="ctrl-input" style="width:100%;">
-        <option value="github">GitHub Releases (Direct Asset Upload)</option>
-        <option value="archive_org">Internet Archive (archive.org S3)</option>
-        <option value="s3">Custom S3 / Cloudflare R2 / AWS</option>
-        <option value="custom_post">Custom HTTP Endpoint</option>
-      </select>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <label style="font-size:12px; font-weight:bold;">Upload Destinations:</label>
+        <div style="display:flex; gap:6px;">
+          <button type="button" class="btn-classic" style="font-size:10px; padding:1px 6px;" onclick="swaSelectAllPickerTargets(true)">[ Select All ]</button>
+          <button type="button" class="btn-classic" style="font-size:10px; padding:1px 6px;" onclick="swaSelectAllPickerTargets(false)">[ Clear ]</button>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px; font-size:12px; background:rgba(128,128,128,0.06); padding:10px 14px; border-radius:4px; border:1px solid rgba(128,128,128,0.18);">
+        <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" class="swa-picker-target-chk" value="archive_org" checked>
+          <span>Internet Archive (archive.org S3)</span>
+        </label>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" class="swa-picker-target-chk" value="github">
+          <span>GitHub Releases (Direct Asset Upload)</span>
+        </label>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" class="swa-picker-target-chk" value="s3">
+          <span>Custom S3 / Cloudflare R2 / AWS S3</span>
+        </label>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:8px;">
+          <input type="checkbox" class="swa-picker-target-chk" value="custom_post">
+          <span>Custom HTTP Endpoint</span>
+        </label>
+      </div>
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button class="btn-classic" onclick="swaCloseUploadPicker()">[ Cancel ]</button>
-      <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #0284c7);" onclick="swaConfirmUpload()">[ Start Cloud Upload ]</button>
+      <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #0284c7);" onclick="swaConfirmUpload()">[ Start Multi-Cloud Upload ]</button>
     </div>
   </div>
 </div>
@@ -626,10 +694,25 @@
     }
   };
 
+  window.swaSelectAllInstantTargets = function(select) {
+    document.querySelectorAll('.swa-instant-target-chk').forEach(el => el.checked = select);
+  };
+  window.swaSelectAllSchedTargets = function(select) {
+    document.querySelectorAll('.swa-sched-target-chk').forEach(el => el.checked = select);
+  };
+  window.swaSelectAllPickerTargets = function(select) {
+    document.querySelectorAll('.swa-picker-target-chk').forEach(el => el.checked = select);
+  };
+
   window.swaTriggerInstantSaveAndUpload = async function() {
-    const dest = document.getElementById('swa-instant-target').value;
+    const targets = Array.from(document.querySelectorAll('.swa-instant-target-chk:checked')).map(el => el.value);
+    if (targets.length === 0) {
+      alert('Please select at least one cloud destination for direct upload.');
+      return;
+    }
+
     const title = (document.getElementById('swa-instant-title').value || 'Live World Snapshot').trim();
-    const notes = document.getElementById('swa-instant-notes').value.trim();
+    const notes = (document.getElementById('swa-instant-notes').value || '').trim();
     const dimensions = {
       overworld: document.getElementById('swa-instant-dim-overworld').checked,
       nether: document.getElementById('swa-instant-dim-nether').checked,
@@ -637,21 +720,21 @@
     };
 
     const destLabels = {
-      archive_org: 'Internet Archive (archive.org)',
+      archive_org: 'Internet Archive',
       github: 'GitHub Releases',
-      s3: 'Cloudflare R2 / AWS S3',
+      s3: 'Custom S3 / R2',
       custom_post: 'Custom HTTP Endpoint'
     };
-    const destText = destLabels[dest] || dest;
+    const destListStr = targets.map(t => destLabels[t] || t).join(', ');
 
-    if (!confirm(`Save current Minecraft world state and immediately upload to ${destText}?\n\nThis will flush world data from RAM (save-all flush), compress world dimensions into an archive, and upload it.`)) {
+    if (!confirm(`Save current Minecraft world state and immediately upload to ${targets.length > 1 ? targets.length + ' destinations (' + destListStr + ')' : destListStr}?\n\nThis will flush world data from RAM (save-all flush), package world dimensions into an archive, and dispatch uploads.`)) {
       return;
     }
 
     const fb = document.getElementById('swa-instant-feedback');
     if (fb) {
       fb.style.color = '#0284c7';
-      fb.textContent = 'Saving world & starting direct cloud upload...';
+      fb.textContent = 'Saving world & starting direct multi-cloud upload...';
     }
 
     try {
@@ -672,7 +755,8 @@
             release_time: '',
             dimensions: dimensions,
             auto_upload: true,
-            upload_target: dest,
+            upload_target: targets.join(','),
+            upload_targets: targets,
             notes: notes
           }
         })
@@ -909,6 +993,15 @@
           </div>
         `;
       }
+      if (arc.custom_post_download_url) {
+        cloudHtml += `
+          <div style="margin-bottom:3px;">
+            <a href="${escapeHtml(arc.custom_post_download_url)}" target="_blank" style="font-weight:bold; color:#7c3aed; text-decoration:underline;">
+              <i class="fa-solid fa-cloud-arrow-up"></i> Custom HTTP Download
+            </a>
+          </div>
+        `;
+      }
 
       cloudHtml += `
         <button class="btn-classic" style="font-size:10.5px; font-weight:bold; margin-top:2px;" onclick="swaOpenUploadPicker('${escapeHtml(arc.id)}', '${escapeHtml(arc.title)}')">
@@ -982,7 +1075,7 @@
     const eventSel = document.getElementById('swa-input-event').value || '';
     const releaseTime = document.getElementById('swa-input-release-time').value || '';
     const autoUpload = document.getElementById('swa-opt-auto-upload').checked;
-    const uploadTarget = document.getElementById('swa-input-target-dest').value;
+    const schedTargets = Array.from(document.querySelectorAll('.swa-sched-target-chk:checked')).map(el => el.value);
     const notes = document.getElementById('swa-input-notes').value || '';
 
     const dimensions = {
@@ -1023,7 +1116,8 @@
             release_time: releaseTime,
             dimensions: dimensions,
             auto_upload: autoUpload,
-            upload_target: uploadTarget,
+            upload_target: schedTargets.join(','),
+            upload_targets: schedTargets,
             notes: notes
           }
         })
@@ -1067,7 +1161,11 @@
 
   window.swaConfirmUpload = async function() {
     const archiveId = document.getElementById('swa-upload-target-archive-id').value;
-    const dest = document.getElementById('swa-upload-destination-select').value;
+    const targets = Array.from(document.querySelectorAll('.swa-picker-target-chk:checked')).map(el => el.value);
+    if (targets.length === 0) {
+      alert('Please select at least one cloud destination.');
+      return;
+    }
     swaCloseUploadPicker();
 
     try {
@@ -1079,7 +1177,7 @@
         },
         body: JSON.stringify({
           action: 'upload_archive',
-          payload: { archive_id: archiveId, target: dest }
+          payload: { archive_id: archiveId, targets: targets, target: targets.join(',') }
         })
       });
       const data = await res.json();
@@ -1355,8 +1453,10 @@
   };
 
   window.swaSaveSettings = async function() {
+    const chosenTargets = Array.from(document.querySelectorAll('.swa-def-target-chk:checked')).map(el => el.value);
     const settings = {
-      default_cloud_target: document.getElementById('swa-set-default-target').value,
+      default_cloud_target: chosenTargets[0] || 'archive_org',
+      default_cloud_targets: chosenTargets,
       recurring_snapshot_interval: document.getElementById('swa-set-recur-interval').value,
       google_calendar_feed_url: document.getElementById('swa-set-gcal-url').value.trim(),
       github_token: document.getElementById('swa-set-gh-token').value.trim(),
@@ -1412,10 +1512,10 @@
     const defTgt = document.getElementById('swa-set-default-target');
     if (defTgt && s.default_cloud_target) defTgt.value = s.default_cloud_target;
 
-    const instantTgt = document.getElementById('swa-instant-target');
-    if (instantTgt && s.default_cloud_target && s.default_cloud_target !== 'local') {
-      instantTgt.value = s.default_cloud_target;
-    }
+    const activeTargets = s.default_cloud_targets || (s.default_cloud_target ? [s.default_cloud_target] : ['archive_org']);
+    document.querySelectorAll('.swa-def-target-chk').forEach(chk => {
+      chk.checked = activeTargets.includes(chk.value);
+    });
 
     const rInt = document.getElementById('swa-set-recur-interval');
     if (rInt && s.recurring_snapshot_interval) rInt.value = s.recurring_snapshot_interval;

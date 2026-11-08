@@ -2668,6 +2668,103 @@
       background: var(--nav-sub-item-active-bg);
     }
 
+    /* ── Fiesta Studio Navigation Link & Buttons (High Contrast & Prominent in Light Themes) ── */
+    .nav-sub-studio-link {
+      display: block !important;
+      text-decoration: none !important;
+      position: relative !important;
+      padding: 5px 12px 5px 18px !important;
+      font-weight: 700 !important;
+      transition: all 0.15s ease !important;
+    }
+    .studio-link-inner {
+      display: flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      width: 100% !important;
+    }
+    .studio-link-glyph {
+      color: #0284c7 !important;
+      font-size: 10px !important;
+      flex-shrink: 0 !important;
+    }
+    .studio-link-text {
+      color: #0284c7 !important;
+      font-weight: 700 !important;
+      letter-spacing: 0.2px !important;
+      font-size: 11.5px !important;
+    }
+    .studio-link-pill {
+      margin-left: auto !important;
+      background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+      color: #ffffff !important;
+      font-size: 8.5px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.6px !important;
+      padding: 1px 5px !important;
+      border-radius: 3px !important;
+      box-shadow: 0 1px 3px rgba(2, 132, 199, 0.35) !important;
+    }
+    .nav-sub-studio-link:hover {
+      background: rgba(2, 132, 199, 0.14) !important;
+    }
+    .nav-sub-studio-link:hover .studio-link-text {
+      color: #0369a1 !important;
+    }
+
+    /* Dark Themes: Ensure vivid bright cyan text */
+    [data-theme="dark"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="dark"] .nav-sub-studio-link .studio-link-text,
+    [data-theme="archer-dark"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="archer-dark"] .nav-sub-studio-link .studio-link-text,
+    [data-theme="amber-dark"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="amber-dark"] .nav-sub-studio-link .studio-link-text,
+    [data-theme="matrix"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="matrix"] .nav-sub-studio-link .studio-link-text,
+    [data-theme="synthwave"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="synthwave"] .nav-sub-studio-link .studio-link-text,
+    [data-theme="nighthawk"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="nighthawk"] .nav-sub-studio-link .studio-link-text,
+    [data-theme="catppuccin"] .nav-sub-studio-link .studio-link-glyph,
+    [data-theme="catppuccin"] .nav-sub-studio-link .studio-link-text {
+      color: #38bdf8 !important;
+    }
+
+    /* Win7 Aero theme */
+    [data-theme="win7"] .nav-sub-studio-link {
+      background: rgba(2, 132, 199, 0.08) !important;
+      border-left: 2px solid #0284c7 !important;
+    }
+    [data-theme="win7"] .nav-sub-studio-link .studio-link-text {
+      color: #0369a1 !important;
+    }
+
+    /* Prominent Fiesta Studio Buttons across Light & Dark Themes */
+    .btn-fiesta-studio {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+      color: #ffffff !important;
+      border: 1px solid #0369a1 !important;
+      font-weight: 800 !important;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35) !important;
+      box-shadow: 0 2px 4px rgba(2, 132, 199, 0.3) !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 5px !important;
+      text-decoration: none !important;
+      cursor: pointer !important;
+      transition: all 0.15s ease !important;
+    }
+    .btn-fiesta-studio:hover {
+      background: linear-gradient(135deg, #0369a1 0%, #075985 100%) !important;
+      color: #ffffff !important;
+      box-shadow: 0 3px 8px rgba(2, 132, 199, 0.45) !important;
+      transform: translateY(-1px) !important;
+    }
+    .btn-fiesta-studio:active {
+      transform: translateY(0) !important;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    }
+
     /* ── 2B. Center Workspace ─────────────────────────────────── */
     .center-workspace {
       flex: 1;
@@ -5565,7 +5662,13 @@
             <div class="nav-sub-item" onclick="selectNavView('panel-addons-installed', this)" id="nav-sub-paddons-installed">- Installed Addons</div>
             <div class="nav-sub-item" onclick="selectNavView('panel-addons-store', this)" id="nav-sub-paddons-store">- Plugin Store</div>
             <div class="nav-sub-item" onclick="selectNavView('panel-addons-create', this)" id="nav-sub-paddons-create">- Developer Guide</div>
-            <a href="/admin/addons-publisher" target="_blank" class="nav-sub-item" style="text-decoration: none; color: inherit; display: block;" title="Official FiestaSMP Team Addon Publisher Studio (Dev Key Required)">- Fiesta Studio &#8599;</a>
+            <a href="/admin/addons-publisher" target="_blank" class="nav-sub-item nav-sub-studio-link" title="Official FiestaSMP Team Addon Publisher Studio (Dev Key Required)">
+              <span class="studio-link-inner">
+                <span class="studio-link-glyph">&#10022;</span>
+                <span class="studio-link-text">Fiesta Studio &#8599;</span>
+                <span class="studio-link-pill">STUDIO</span>
+              </span>
+            </a>
             <div id="dynamic-addon-nav-items"></div>
           </div>
         </div>
@@ -8626,7 +8729,7 @@
             <div style="display: flex; gap: 6px; align-items: center;">
               <button class="btn-classic" onclick="loadPanelAddonStore()">[ Refresh Catalog ]</button>
               <button class="btn-classic" style="font-weight: bold;" onclick="selectNavView('panel-addons-create')">[ Developer Guide ]</button>
-              <a href="/admin/addons-publisher" target="_blank" class="btn-classic" style="text-decoration: none; font-weight: bold; color: #1f3a52; background: #e6f0fa; border-color: #3f729b;" title="Official Fiesta Team Addon Publisher Studio (Dev Key Required)">[ Fiesta Studio &#8599; ]</a>
+              <a href="/admin/addons-publisher" target="_blank" class="btn-classic btn-fiesta-studio" title="Official Fiesta Team Addon Publisher Studio (Dev Key Required)">[ &#10022; Fiesta Studio &#8599; ]</a>
             </div>
           </div>
           <p class="inline-hint" style="margin-bottom: 14px;">
@@ -8695,7 +8798,7 @@
             <div style="display: flex; gap: 8px; flex-wrap: wrap;">
               <a href="/api/panel-addons/template/download" class="btn-classic" style="text-decoration: none; padding: 4px 12px; font-weight: bold;">[ Download Starter Boilerplate (.zip) ]</a>
               <button class="btn-classic" style="padding: 4px 12px;" onclick="selectNavView('panel-addons-create')">[ View Developer Guide ]</button>
-              <a href="/admin/addons-publisher" target="_blank" class="btn-classic" style="text-decoration: none; padding: 4px 12px; font-weight: bold; background: #e6f0fa; color: #1f3a52; border-color: #3f729b;">[ Fiesta Studio &#8599; ]</a>
+              <a href="/admin/addons-publisher" target="_blank" class="btn-classic btn-fiesta-studio" style="padding: 4px 12px;" title="Official Fiesta Team Addon Publisher Studio (Dev Key Required)">[ &#10022; Fiesta Studio &#8599; ]</a>
             </div>
           </div>
         </section>
@@ -18154,23 +18257,28 @@ def on_action(ctx, action_name, payload):
         const iconHtml = getAddonIconHtml(a.icon, 20);
 
         const hasTab = a.ui_slots && a.ui_slots.tab;
+        const addonName = a.name || a.id;
+        const rawDesc = (a.description || 'Custom FiestaPanel web extension.').trim();
+        const displayDesc = clampTextEllipsis(rawDesc, 140);
         return `
-          <div class="panel-box" style="margin: 0; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid ${isEnabled ? 'var(--sec-bar-bg, #22c55e)' : '#94a3b8'};">
-            <div>
-              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="panel-box" style="margin: 0; padding: 14px; display: flex; flex-direction: column; justify-content: space-between; border-left: 3px solid ${isEnabled ? 'var(--sec-bar-bg, #22c55e)' : '#94a3b8'}; min-width: 0; overflow: hidden;">
+            <div style="min-width: 0; overflow: hidden;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1; overflow: hidden;">
                   ${iconHtml}
-                  <div>
-                    <strong style="font-size: 13px;">${escapeHtml(a.name || a.id)}</strong>
-                    <span class="inline-badge" style="font-size: 10px; margin-left: 4px;">v${escapeHtml(a.version || '1.0')}</span>
+                  <div style="min-width: 0; flex: 1; overflow: hidden;">
+                    <div style="display: flex; align-items: center; gap: 6px; min-width: 0;">
+                      <strong style="font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; min-width: 0; flex: 1;" title="${escapeQuotes(addonName)}">${escapeHtml(addonName)}</strong>
+                      <span class="inline-badge" style="font-size: 10px; flex-shrink: 0;">v${escapeHtml(a.version || '1.0')}</span>
+                    </div>
                   </div>
                 </div>
-                <span class="inline-badge" style="background: var(--card-active-bg, rgba(0,0,0,0.06)); color: var(--sec-bar-bg, #74b21d); font-size: 10px; font-weight: bold; border: 1px solid var(--sec-bar-border, transparent);">${escapeHtml(a.category || 'Tool')}</span>
+                <span class="inline-badge" style="background: var(--card-active-bg, rgba(0,0,0,0.06)); color: var(--sec-bar-bg, #74b21d); font-size: 10px; font-weight: bold; border: 1px solid var(--sec-bar-border, transparent); flex-shrink: 0;">${escapeHtml(a.category || 'Tool')}</span>
               </div>
-              <p class="inline-hint" style="font-size: 11.5px; margin: 0 0 10px 0; line-height: 1.4; color: var(--text-sub);">
-                ${escapeHtml(a.description || 'Custom FiestaPanel web extension.')}
+              <p class="inline-hint" style="font-size: 11.5px; margin: 0 0 10px 0; line-height: 1.4; color: var(--text-sub); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; min-height: 32px;" title="${escapeQuotes(rawDesc)}">
+                ${escapeHtml(displayDesc)}
               </p>
-              <div style="font-size: 10.5px; color: #94a3b8; margin-bottom: 12px;">
+              <div style="font-size: 10.5px; color: #94a3b8; margin-bottom: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                 By <strong>${escapeHtml(a.author || 'Community')}</strong>
               </div>
             </div>

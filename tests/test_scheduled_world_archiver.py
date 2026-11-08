@@ -59,6 +59,13 @@ class ScheduledWorldArchiverTests(unittest.TestCase):
         self.assertIn("Calendar", html)
         self.assertIn("Scheduled Public Release Date", html)
         self.assertIn("swaTriggerSnapshot", html)
+        # Check for multi-platform checkboxes
+        self.assertIn("swa-instant-target-chk", html)
+        self.assertIn("swa-sched-target-chk", html)
+        self.assertIn("swa-picker-target-chk", html)
+        self.assertIn("swa-def-target-chk", html)
+        self.assertIn("swaSelectAllInstantTargets", html)
+        self.assertIn("swaSelectAllPickerTargets", html)
 
     def test_init_addon_starts_scheduler(self):
         ctx = MagicMock()
@@ -176,6 +183,52 @@ class ScheduledWorldArchiverTests(unittest.TestCase):
         self.assertEqual(resp_act.status_code, 200)
         data = resp_act.get_json()
         self.assertTrue(data.get("success"))
+
+    def test_dispatch_cloud_upload_multi_targets(self):
+        ctx = MagicMock()
+        ctx.get_settings.return_value = {}
+
+        with patch.object(self.swa_mod, "_execute_ia_upload", return_value=(True, "https://ia.mock")) as mock_ia, \
+             patch.object(self.swa_mod, "_execute_github_upload", return_value=(True, "https://gh.mock")) as mock_gh:
+
+            self.swa_mod._dispatch_cloud_upload(ctx, "arc_123", ["archive_org", "github"])
+
+            mock_ia.assert_called_once()
+            mock_gh.assert_called_once()
+            self.assertEqual(self.swa_mod._CURRENT_TASK.get("status"), "completed")
+            self.assertIn("Internet Archive", self.swa_mod._CURRENT_TASK.get("stage", ""))
+            self.assertIn("GitHub Releases", self.swa_mod._CURRENT_TASK.get("stage", ""))
+
+    def test_action_upload_archive_multi_targets(self):
+        ctx = MagicMock()
+        with patch("threading.Thread") as mock_thread:
+            mock_instance = MagicMock()
+            mock_thread.return_value = mock_instance
+
+            res = self.swa_mod.on_action(ctx, "upload_archive", {
+                "archive_id": "arc_abc",
+                "targets": ["archive_org", "s3"]
+            })
+            self.assertTrue(res.get("success"))
+            self.assertIn("archive_org, s3", res.get("message"))
+            mock_instance.start.assert_called_once()
+
+    def test_dashboard_fiesta_studio_and_ellipsis(self):
+        dash_path = ROOT / "templates" / "dashboard.html"
+        self.assertTrue(dash_path.exists())
+        with open(dash_path, "r", encoding="utf-8") as f:
+            html = f.read()
+
+        # Check Fiesta Studio link and buttons
+        self.assertIn("nav-sub-studio-link", html)
+        self.assertIn("btn-fiesta-studio", html)
+        self.assertIn("Fiesta Studio &#8599;", html)
+        self.assertIn("STUDIO", html)
+
+        # Check installed addons ellipsis styling
+        self.assertIn("clampTextEllipsis(rawDesc, 140)", html)
+        self.assertIn("-webkit-line-clamp: 2", html)
+        self.assertIn("text-overflow: ellipsis", html)
 
 if __name__ == "__main__":
     unittest.main()

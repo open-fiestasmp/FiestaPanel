@@ -11,7 +11,7 @@ import urllib.error
 import urllib.parse
 import ssl
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 
 import requests
 try:
@@ -322,7 +322,7 @@ def _release_scheduler_loop(ctx):
                                     "",
                                     {"overworld": True, "nether": True, "the_end": True},
                                     settings.get("auto_upload_cloud", False),
-                                    settings.get("default_cloud_target", "archive_org"),
+                                    settings.get("default_cloud_targets") or settings.get("default_cloud_target", "archive_org"),
                                     f"Automated recurring world snapshot ({recur_interval} interval)."
                                 ),
                                 daemon=True
@@ -523,7 +523,7 @@ def _execute_archive_task(
         # Trigger auto-upload if requested
         settings = ctx.get_settings()
         should_upload = auto_upload or settings.get("auto_upload_cloud", False)
-        target_dest = upload_target or settings.get("default_cloud_target", "archive_org")
+        target_dest = upload_target or settings.get("default_cloud_targets") or settings.get("default_cloud_target", "archive_org")
 
         if should_upload and target_dest != "local":
             logger.info(f"Direct cloud upload starting for archive {archive_id} to destination '{target_dest}'...")
@@ -544,16 +544,87 @@ def _execute_archive_task(
 
 # ── Cloud Upload Dispatcher & Providers ────────────────────────────────────
 
-def _dispatch_cloud_upload(ctx, archive_id: str, target: str):
-    """Dispatches upload task to the selected cloud destination."""
-    if target == "github":
-        _execute_github_upload(ctx, archive_id)
-    elif target == "s3":
-        _execute_s3_upload(ctx, archive_id)
-    elif target == "custom_post":
-        _execute_custom_post_upload(ctx, archive_id)
-    else:  # archive_org default
-        _execute_ia_upload(ctx, archive_id)
+def _dispatch_cloud_upload(ctx, archive_id: str, target: Any):
+    """
+    Dispatches upload task to one or multiple selected cloud destinations.
+    target can be:
+      - list/tuple: ["archive_org", "github"]
+      - comma-separated string: "archive_org,github"
+      - single string: "archive_org" or "all"
+    """
+    if isinstance(target, str):
+        if "," in target:
+            targets = [t.strip() for t in target.split(",") if t.strip()]
+        elif target.lower() in ("all", "multi", "all_configured"):
+            targets = ["archive_org", "github", "s3", "custom_post"]
+        else:
+            targets = [target.strip()]
+    elif isinstance(target, (list, tuple)):
+        targets = [str(t).strip() for t in target if t and str(t).strip()]
+    else:
+        targets = ["archive_org"]
+
+    targets = [t for t in targets if t and t != "local"]
+    if not targets:
+        logger.info("No cloud destinations configured or selected.")
+        return
+
+    total = len(targets)
+    is_multi = total > 1
+    successes = []
+    failures = []
+
+    target_display_names = {
+        "archive_org": "Internet Archive",
+        "github": "GitHub Releases",
+        "s3": "Custom S3 / R2",
+        "custom_post": "Custom HTTP Endpoint"
+    }
+
+    for idx, tgt in enumerate(targets):
+        with _TASK_LOCK:
+            if _CURRENT_TASK.get("cancelled"):
+                break
+        prefix = f"[{idx + 1}/{total}] " if is_multi else ""
+        tgt_name = target_display_names.get(tgt, tgt)
+
+        try:
+            if tgt == "github":
+                ok, msg = _execute_github_upload(ctx, archive_id, is_multi=is_multi, task_prefix=prefix)
+            elif tgt == "s3":
+                ok, msg = _execute_s3_upload(ctx, archive_id, is_multi=is_multi, task_prefix=prefix)
+            elif tgt == "custom_post":
+                ok, msg = _execute_custom_post_upload(ctx, archive_id, is_multi=is_multi, task_prefix=prefix)
+            else:  # archive_org
+                ok, msg = _execute_ia_upload(ctx, archive_id, is_multi=is_multi, task_prefix=prefix)
+
+            if ok:
+                successes.append(tgt_name)
+            else:
+                failures.append((tgt_name, msg))
+        except Exception as e:
+            failures.append((tgt_name, str(e)))
+
+    with _TASK_LOCK:
+        if _CURRENT_TASK.get("cancelled"):
+            _CURRENT_TASK["status"] = "cancelled"
+            _CURRENT_TASK["stage"] = "Multi-cloud upload cancelled by user."
+        elif successes:
+            _CURRENT_TASK["status"] = "completed"
+            _CURRENT_TASK["progress"] = 100
+            succ_str = ", ".join(successes)
+            if failures:
+                fail_str = ", ".join([f"{f[0]} ({f[1]})" for f in failures])
+                _CURRENT_TASK["stage"] = f"Uploaded to {succ_str}. (Issues on: {fail_str})"
+            else:
+                _CURRENT_TASK["stage"] = f"Multi-cloud upload completed across all {len(successes)} platform(s): {succ_str}!"
+            logger.info(f"Archive {archive_id} multi-cloud upload completed: {succ_str}")
+        else:
+            _CURRENT_TASK["status"] = "error"
+            fail_str = "; ".join([f"{f[0]}: {f[1]}" for f in failures])
+            _CURRENT_TASK["error"] = fail_str or "All uploads failed."
+            _CURRENT_TASK["stage"] = f"Upload failed: {fail_str}"
+            logger.error(f"Archive {archive_id} all uploads failed: {fail_str}")
 
 
 # Progress File Wrapper for requests streaming uploads
@@ -584,14 +655,14 @@ class ProgressFileWrapper:
         return chunk
 
 
-def _execute_github_upload(ctx, archive_id: str):
+def _execute_github_upload(ctx, archive_id: str, is_multi: bool = False, task_prefix: str = "") -> Tuple[bool, str]:
     """Uploads an archive zip file as an asset to a GitHub Release."""
     global _CURRENT_TASK
     manifest = _load_manifest(ctx)
     entry = next((e for e in manifest if e.get("id") == archive_id), None)
     if not entry:
         logger.error(f"Archive entry {archive_id} not found in manifest.")
-        return
+        return False, "Archive not found"
 
     filepath = entry.get("filepath")
     if not filepath or not os.path.isfile(filepath):
@@ -599,10 +670,11 @@ def _execute_github_upload(ctx, archive_id: str):
         filepath = os.path.join(archives_dir, entry.get("filename", ""))
 
     if not os.path.isfile(filepath):
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "Local zip file not found on disk."
-        return
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = "Local zip file not found on disk."
+        return False, "Local zip file not found"
 
     settings = ctx.get_settings()
     token = (settings.get("github_token") or "").strip()
@@ -610,10 +682,12 @@ def _execute_github_upload(ctx, archive_id: str):
     tag_prefix = (settings.get("github_tag_prefix") or "v").strip()
 
     if not token or not repo or "/" not in repo:
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "GitHub Personal Access Token and valid repository (owner/repo) are required in settings."
-        return
+        err = "GitHub Personal Access Token and valid repository (owner/repo) are required in settings."
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = err
+        return False, err
 
     filename = entry.get("filename")
     filesize = os.path.getsize(filepath)
@@ -625,7 +699,7 @@ def _execute_github_upload(ctx, archive_id: str):
         _CURRENT_TASK["task_id"] = f"gh_{archive_id}_{int(time.time())}"
         _CURRENT_TASK["type"] = "upload"
         _CURRENT_TASK["status"] = "running"
-        _CURRENT_TASK["stage"] = f"Connecting to GitHub API for {repo}..."
+        _CURRENT_TASK["stage"] = f"{task_prefix}Connecting to GitHub API for {repo}..."
         _CURRENT_TASK["progress"] = 5
         _CURRENT_TASK["total_bytes"] = filesize
         _CURRENT_TASK["processed_bytes"] = 0
@@ -677,7 +751,7 @@ def _execute_github_upload(ctx, archive_id: str):
 
         # Step C: Stream asset upload
         with _TASK_LOCK:
-            _CURRENT_TASK["stage"] = f"Uploading {filename} to GitHub Releases..."
+            _CURRENT_TASK["stage"] = f"{task_prefix}Uploading {filename} to GitHub Releases..."
             _CURRENT_TASK["progress"] = 10
 
         upload_url = f"https://uploads.github.com/repos/{repo}/releases/{release_id}/assets?name={urllib.parse.quote(filename)}"
@@ -690,7 +764,7 @@ def _execute_github_upload(ctx, archive_id: str):
         }
 
         with open(filepath, "rb") as f_obj:
-            wrapper = ProgressFileWrapper(f_obj, filesize, task_label="Uploading to GitHub Releases")
+            wrapper = ProgressFileWrapper(f_obj, filesize, task_label=f"{task_prefix}Uploading to GitHub Releases")
             up_resp = requests.post(upload_url, data=wrapper, headers=upload_headers, timeout=900)
 
         if up_resp.status_code in (200, 201):
@@ -705,41 +779,55 @@ def _execute_github_upload(ctx, archive_id: str):
                     m["cloud_details_url"] = release_html_url
                     m["github_release_url"] = release_html_url
                     m["github_download_url"] = dl_url
+                    if "cloud_uploads" not in m:
+                        m["cloud_uploads"] = {}
+                    m["cloud_uploads"]["github"] = {
+                        "download_url": dl_url,
+                        "release_url": release_html_url,
+                        "uploaded_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
                     m["uploaded_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     break
             _save_manifest(ctx, manifest)
 
-            with _TASK_LOCK:
-                _CURRENT_TASK["status"] = "completed"
-                _CURRENT_TASK["progress"] = 100
-                _CURRENT_TASK["stage"] = "Upload to GitHub Releases succeeded!"
+            if not is_multi:
+                with _TASK_LOCK:
+                    _CURRENT_TASK["status"] = "completed"
+                    _CURRENT_TASK["progress"] = 100
+                    _CURRENT_TASK["stage"] = "Upload to GitHub Releases succeeded!"
             logger.info(f"Archive {archive_id} uploaded to GitHub Releases: {dl_url}")
+            return True, dl_url
         else:
             err_msg = f"GitHub upload returned HTTP {up_resp.status_code}: {up_resp.text[:200]}"
-            with _TASK_LOCK:
-                _CURRENT_TASK["status"] = "error"
-                _CURRENT_TASK["error"] = err_msg
+            if not is_multi:
+                with _TASK_LOCK:
+                    _CURRENT_TASK["status"] = "error"
+                    _CURRENT_TASK["error"] = err_msg
             logger.error(err_msg)
+            return False, err_msg
 
     except InterruptedError:
         with _TASK_LOCK:
             _CURRENT_TASK["status"] = "cancelled"
-            _CURRENT_TASK["stage"] = "GitHub upload cancelled by user."
+            _CURRENT_TASK["stage"] = f"{task_prefix}GitHub upload cancelled by user."
+        return False, "Cancelled"
     except Exception as e:
         logger.error(f"GitHub upload failed: {e}", exc_info=True)
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = str(e)
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = str(e)
+        return False, str(e)
 
 
-def _execute_s3_upload(ctx, archive_id: str):
+def _execute_s3_upload(ctx, archive_id: str, is_multi: bool = False, task_prefix: str = "") -> Tuple[bool, str]:
     """Uploads an archive zip file to Custom S3 / Cloudflare R2 / AWS S3."""
     global _CURRENT_TASK
     manifest = _load_manifest(ctx)
     entry = next((e for e in manifest if e.get("id") == archive_id), None)
     if not entry:
         logger.error(f"Archive entry {archive_id} not found in manifest.")
-        return
+        return False, "Archive not found"
 
     filepath = entry.get("filepath")
     if not filepath or not os.path.isfile(filepath):
@@ -747,10 +835,11 @@ def _execute_s3_upload(ctx, archive_id: str):
         filepath = os.path.join(archives_dir, entry.get("filename", ""))
 
     if not os.path.isfile(filepath):
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "Local zip file not found on disk."
-        return
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = "Local zip file not found on disk."
+        return False, "Local zip file not found"
 
     settings = ctx.get_settings()
     endpoint = (settings.get("s3_endpoint_url") or "").strip()
@@ -761,10 +850,12 @@ def _execute_s3_upload(ctx, archive_id: str):
     public_base = (settings.get("s3_public_base_url") or "").strip()
 
     if not bucket or not access_key or not secret_key:
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "S3 Bucket Name, Access Key, and Secret Key are required in settings."
-        return
+        err = "S3 Bucket Name, Access Key, and Secret Key are required in settings."
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = err
+        return False, err
 
     filename = entry.get("filename")
     filesize = os.path.getsize(filepath)
@@ -773,7 +864,7 @@ def _execute_s3_upload(ctx, archive_id: str):
         _CURRENT_TASK["task_id"] = f"s3_{archive_id}_{int(time.time())}"
         _CURRENT_TASK["type"] = "upload"
         _CURRENT_TASK["status"] = "running"
-        _CURRENT_TASK["stage"] = f"Connecting to S3/Cloud Storage for {bucket}..."
+        _CURRENT_TASK["stage"] = f"{task_prefix}Connecting to S3/Cloud Storage for {bucket}..."
         _CURRENT_TASK["progress"] = 5
         _CURRENT_TASK["total_bytes"] = filesize
         _CURRENT_TASK["processed_bytes"] = 0
@@ -813,7 +904,7 @@ def _execute_s3_upload(ctx, archive_id: str):
                     with _TASK_LOCK:
                         _CURRENT_TASK["processed_bytes"] = self.uploaded
                         _CURRENT_TASK["progress"] = pct
-                        _CURRENT_TASK["stage"] = f"Uploading to S3/R2 ({_format_bytes(self.uploaded)} / {_format_bytes(self.total_size)} • {_format_bytes(int(speed))}/s)..."
+                        _CURRENT_TASK["stage"] = f"{task_prefix}Uploading to S3/R2 ({_format_bytes(self.uploaded)} / {_format_bytes(self.total_size)} • {_format_bytes(int(speed))}/s)..."
 
         object_key = f"worlds/{filename}"
         s3_client.upload_file(filepath, bucket, object_key, Callback=S3ProgressCallback(filesize))
@@ -833,35 +924,46 @@ def _execute_s3_upload(ctx, archive_id: str):
                 m["cloud_download_url"] = dl_url
                 m["cloud_details_url"] = dl_url
                 m["s3_download_url"] = dl_url
+                if "cloud_uploads" not in m:
+                    m["cloud_uploads"] = {}
+                m["cloud_uploads"]["s3"] = {
+                    "download_url": dl_url,
+                    "uploaded_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                }
                 m["uploaded_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 break
         _save_manifest(ctx, manifest)
 
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "completed"
-            _CURRENT_TASK["progress"] = 100
-            _CURRENT_TASK["stage"] = "Upload to S3/Cloud storage succeeded!"
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "completed"
+                _CURRENT_TASK["progress"] = 100
+                _CURRENT_TASK["stage"] = "Upload to S3/Cloud storage succeeded!"
         logger.info(f"Archive {archive_id} uploaded to S3: {dl_url}")
+        return True, dl_url
 
     except InterruptedError:
         with _TASK_LOCK:
             _CURRENT_TASK["status"] = "cancelled"
-            _CURRENT_TASK["stage"] = "S3 upload cancelled by user."
+            _CURRENT_TASK["stage"] = f"{task_prefix}S3 upload cancelled by user."
+        return False, "Cancelled"
     except Exception as e:
         logger.error(f"S3 upload failed: {e}", exc_info=True)
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = str(e)
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = str(e)
+        return False, str(e)
 
 
-def _execute_ia_upload(ctx, archive_id: str):
+def _execute_ia_upload(ctx, archive_id: str, is_multi: bool = False, task_prefix: str = "") -> Tuple[bool, str]:
     """Worker thread that uploads an archive zip to Internet Archive (archive.org) S3 endpoint."""
     global _CURRENT_TASK
     manifest = _load_manifest(ctx)
     entry = next((e for e in manifest if e.get("id") == archive_id), None)
     if not entry:
         logger.error(f"Archive entry {archive_id} not found in manifest.")
-        return
+        return False, "Archive not found"
 
     filepath = entry.get("filepath")
     if not filepath or not os.path.isfile(filepath):
@@ -869,10 +971,11 @@ def _execute_ia_upload(ctx, archive_id: str):
         filepath = os.path.join(archives_dir, entry.get("filename", ""))
 
     if not os.path.isfile(filepath):
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "Local zip file not found on disk."
-        return
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = "Local zip file not found on disk."
+        return False, "Local zip file not found"
 
     settings = ctx.get_settings()
     access_key = (settings.get("archive_org_access_key") or "").strip()
@@ -881,10 +984,12 @@ def _execute_ia_upload(ctx, archive_id: str):
     item_prefix = (settings.get("item_prefix") or "fiestasmp_world_").strip()
 
     if not access_key or not secret_key:
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "Internet Archive S3 Access Key and Secret Key are required in settings."
-        return
+        err = "Internet Archive S3 Access Key and Secret Key are required in settings."
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = err
+        return False, err
 
     ep_num = entry.get("episode_num", 0)
     snap_type = entry.get("type", "snapshot")
@@ -901,7 +1006,7 @@ def _execute_ia_upload(ctx, archive_id: str):
         _CURRENT_TASK["task_id"] = f"upload_{archive_id}_{int(time.time())}"
         _CURRENT_TASK["type"] = "upload"
         _CURRENT_TASK["status"] = "running"
-        _CURRENT_TASK["stage"] = f"Initiating Internet Archive upload for {filename}..."
+        _CURRENT_TASK["stage"] = f"{task_prefix}Initiating Internet Archive upload for {filename}..."
         _CURRENT_TASK["progress"] = 5
         _CURRENT_TASK["total_bytes"] = filesize
         _CURRENT_TASK["processed_bytes"] = 0
@@ -927,7 +1032,7 @@ def _execute_ia_upload(ctx, archive_id: str):
         }
 
         with open(filepath, "rb") as f_obj:
-            wrapped = ProgressFileWrapper(f_obj, filesize, task_label="Uploading to archive.org")
+            wrapped = ProgressFileWrapper(f_obj, filesize, task_label=f"{task_prefix}Uploading to archive.org")
             res = requests.put(url, data=wrapped, headers=headers, timeout=600)
 
         if res.status_code in (200, 201):
@@ -943,54 +1048,79 @@ def _execute_ia_upload(ctx, archive_id: str):
                     m["ia_item_id"] = item_id
                     m["ia_download_url"] = ia_dl
                     m["ia_details_url"] = ia_details
+                    if "cloud_uploads" not in m:
+                        m["cloud_uploads"] = {}
+                    m["cloud_uploads"]["archive_org"] = {
+                        "download_url": ia_dl,
+                        "details_url": ia_details,
+                        "item_id": item_id,
+                        "uploaded_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
                     m["uploaded_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     break
             _save_manifest(ctx, manifest)
 
-            with _TASK_LOCK:
-                _CURRENT_TASK["status"] = "completed"
-                _CURRENT_TASK["progress"] = 100
-                _CURRENT_TASK["stage"] = "Upload to Internet Archive succeeded!"
+            if not is_multi:
+                with _TASK_LOCK:
+                    _CURRENT_TASK["status"] = "completed"
+                    _CURRENT_TASK["progress"] = 100
+                    _CURRENT_TASK["stage"] = "Upload to Internet Archive succeeded!"
             logger.info(f"Archive {archive_id} uploaded to {ia_dl}")
+            return True, ia_dl
         else:
             err_msg = f"Archive.org returned HTTP {res.status_code}: {res.text[:200]}"
-            with _TASK_LOCK:
-                _CURRENT_TASK["status"] = "error"
-                _CURRENT_TASK["error"] = err_msg
+            if not is_multi:
+                with _TASK_LOCK:
+                    _CURRENT_TASK["status"] = "error"
+                    _CURRENT_TASK["error"] = err_msg
             logger.error(err_msg)
+            return False, err_msg
 
     except InterruptedError:
         with _TASK_LOCK:
             _CURRENT_TASK["status"] = "cancelled"
-            _CURRENT_TASK["stage"] = "Upload cancelled by user."
+            _CURRENT_TASK["stage"] = f"{task_prefix}Upload cancelled by user."
+        return False, "Cancelled"
     except Exception as e:
         logger.error(f"Internet Archive upload failed: {e}", exc_info=True)
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = str(e)
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = str(e)
+        return False, str(e)
 
 
-def _execute_custom_post_upload(ctx, archive_id: str):
+def _execute_custom_post_upload(ctx, archive_id: str, is_multi: bool = False, task_prefix: str = "") -> Tuple[bool, str]:
     """Uploads an archive zip file to a custom HTTP/Webhook POST endpoint."""
     global _CURRENT_TASK
     manifest = _load_manifest(ctx)
     entry = next((e for e in manifest if e.get("id") == archive_id), None)
     if not entry:
-        return
+        return False, "Archive not found"
 
     filepath = entry.get("filepath")
     if not filepath or not os.path.isfile(filepath):
-        return
+        archives_dir = _get_archives_dir(ctx)
+        filepath = os.path.join(archives_dir, entry.get("filename", ""))
+
+    if not os.path.isfile(filepath):
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = "Local zip file not found on disk."
+        return False, "Local zip file not found"
 
     settings = ctx.get_settings()
     url = (settings.get("custom_post_url") or "").strip()
     auth_h = (settings.get("custom_post_auth_header") or "").strip()
 
     if not url or not url.startswith("http"):
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = "Valid Custom Upload Endpoint URL is required."
-        return
+        err = "Valid Custom Upload Endpoint URL is required in settings."
+        if not is_multi:
+            with _TASK_LOCK:
+                _CURRENT_TASK["status"] = "error"
+                _CURRENT_TASK["error"] = err
+        return False, err
 
     filename = entry.get("filename")
     filesize = os.path.getsize(filepath)
@@ -999,7 +1129,7 @@ def _execute_custom_post_upload(ctx, archive_id: str):
         _CURRENT_TASK["task_id"] = f"post_{archive_id}_{int(time.time())}"
         _CURRENT_TASK["type"] = "upload"
         _CURRENT_TASK["status"] = "running"
-        _CURRENT_TASK["stage"] = f"Uploading {filename} to custom endpoint..."
+        _CURRENT_TASK["stage"] = f"{task_prefix}Uploading {filename} to custom endpoint..."
         _CURRENT_TASK["progress"] = 5
         _CURRENT_TASK["total_bytes"] = filesize
         _CURRENT_TASK["processed_bytes"] = 0
@@ -1031,22 +1161,36 @@ def _execute_custom_post_upload(ctx, archive_id: str):
                     if dl_url:
                         m["cloud_download_url"] = dl_url
                         m["cloud_details_url"] = dl_url
+                    m["custom_post_download_url"] = dl_url
+                    if "cloud_uploads" not in m:
+                        m["cloud_uploads"] = {}
+                    m["cloud_uploads"]["custom_post"] = {
+                        "download_url": dl_url,
+                        "uploaded_at": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
                     m["uploaded_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     break
             _save_manifest(ctx, manifest)
 
-            with _TASK_LOCK:
-                _CURRENT_TASK["status"] = "completed"
-                _CURRENT_TASK["progress"] = 100
-                _CURRENT_TASK["stage"] = "Upload to custom endpoint succeeded!"
+            if not is_multi:
+                with _TASK_LOCK:
+                    _CURRENT_TASK["status"] = "completed"
+                    _CURRENT_TASK["progress"] = 100
+                    _CURRENT_TASK["stage"] = "Upload to custom endpoint succeeded!"
+            return True, dl_url
         else:
+            err_msg = f"Custom endpoint returned HTTP {r.status_code}: {r.text[:200]}"
+            if not is_multi:
+                with _TASK_LOCK:
+                    _CURRENT_TASK["status"] = "error"
+                    _CURRENT_TASK["error"] = err_msg
+            return False, err_msg
+    except Exception as e:
+        if not is_multi:
             with _TASK_LOCK:
                 _CURRENT_TASK["status"] = "error"
-                _CURRENT_TASK["error"] = f"Custom endpoint returned HTTP {r.status_code}: {r.text[:200]}"
-    except Exception as e:
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "error"
-            _CURRENT_TASK["error"] = str(e)
+                _CURRENT_TASK["error"] = str(e)
+        return False, str(e)
 
 
 # ── Addon Life-Cycle Entrypoints ──────────────────────────────────────────
@@ -1106,7 +1250,7 @@ def on_action(ctx, action_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
         release_time = payload.get("release_time", "")
         dimensions = payload.get("dimensions", {"overworld": True, "nether": True, "the_end": True})
         auto_upload = bool(payload.get("auto_upload", False))
-        upload_target = payload.get("upload_target", "")
+        upload_target = payload.get("upload_targets") or payload.get("upload_target", "")
         notes = (payload.get("notes") or "").strip()
 
         with _TASK_LOCK:
@@ -1134,7 +1278,7 @@ def on_action(ctx, action_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
 
     elif action_name == "upload_archive":
         archive_id = payload.get("archive_id")
-        target = payload.get("target") or "default"
+        target = payload.get("targets") or payload.get("target") or "default"
         if not archive_id:
             return {"success": False, "error": "Missing archive_id parameter."}
 
@@ -1144,10 +1288,11 @@ def on_action(ctx, action_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
 
         settings = ctx.get_settings()
         if target == "default":
-            target = settings.get("default_cloud_target", "archive_org")
+            target = settings.get("default_cloud_targets") or settings.get("default_cloud_target", "archive_org")
 
         threading.Thread(target=_dispatch_cloud_upload, args=(ctx, archive_id, target), daemon=True).start()
-        return {"success": True, "message": f"Initiated cloud upload to '{target}'."}
+        tgt_desc = target if isinstance(target, str) else ", ".join(target)
+        return {"success": True, "message": f"Initiated cloud upload to '{tgt_desc}'."}
 
     elif action_name == "cancel_task":
         with _TASK_LOCK:
