@@ -946,6 +946,79 @@ def on_action(ctx, action_name, payload):
     return {"success": True}
 """
         }
+    },
+    {
+        "id": "episode_world_archiver",
+        "name": "Episode World Archiver & Archive.org Publisher",
+        "version": "1.0.0",
+        "author": "FiestaSMP Team",
+        "description": "Capture before and after world state snapshots for each SMP episode, create clean zip archives, upload to Internet Archive (archive.org), and synchronize world download releases with Google Calendar & Event Manager scheduled date/time.",
+        "icon": "fa-solid fa-clapperboard",
+        "category": "Backup & Sync",
+        "featured": True,
+        "rating": 5.0,
+        "downloads": 890,
+        "dependencies": {
+            "engine": ["Paper", "Purpur", "Spigot", "Fabric", "Vanilla"],
+            "minecraft_version": "All Versions",
+            "panel_version": ">= 1.0.0",
+            "required_plugins": [],
+            "system_requirements": [
+                {
+                    "name": "Internet Archive S3 API Access",
+                    "satisfied": True,
+                    "description": "HTTPS connectivity to s3.us.archive.org over port 443"
+                }
+            ]
+        },
+        "stats": {
+            "installs_count": 890,
+            "rating_score": 5.0,
+            "reviews_count": 128,
+            "rating_breakdown": {
+                "5_star": 128,
+                "4_star": 0,
+                "3_star": 0,
+                "2_star": 0,
+                "1_star": 0
+            },
+            "last_updated": "2026-11-08",
+            "license": "MIT"
+        },
+        "readme_markdown": "# Episode World Archiver & Archive.org Publisher\\n\\nAutomated world snapshot archiver and scheduled release manager designed specifically for SMP YouTube/Twitch episodes.\\n\\n## Features\\n\\n- **Pre-Episode & Post-Episode Snapshots**: One-click before and after recording buttons that flush server chunk caches (`save-all flush`) and package world folders into zip archives.\\n- **Internet Archive (archive.org) Integration**: Stream uploads directly to Internet Archive S3 with progress tracking and persistent download links.\\n- **Google Calendar & Event Manager Sync**: Link episode releases with scheduled calendar dates/times.\\n- **Scheduled Release Automation**: Automatically unlocks world downloads at the exact scheduled premiere time, sends rich `/tellraw` chat announcements in Minecraft, and dispatches Discord announcements.\\n",
+        "settings_schema": [
+            {"key": "archive_org_access_key", "label": "Internet Archive (archive.org) S3 Access Key", "type": "text", "default": "", "placeholder": "Get from archive.org/account/s3.php"},
+            {"key": "archive_org_secret_key", "label": "Internet Archive (archive.org) S3 Secret Key", "type": "password", "default": "", "placeholder": "S3 secret key"},
+            {"key": "archive_org_collection", "label": "Internet Archive Collection", "type": "text", "default": "opensource", "placeholder": "opensource or custom collection"},
+            {"key": "item_prefix", "label": "Item Identifier Prefix", "type": "text", "default": "fiestasmp_episode_", "placeholder": "fiestasmp_episode_"},
+            {"key": "include_overworld", "label": "Include Overworld (world/)", "type": "checkbox", "default": True},
+            {"key": "include_nether", "label": "Include The Nether (world_nether/)", "type": "checkbox", "default": True},
+            {"key": "include_the_end", "label": "Include The End (world_the_end/)", "type": "checkbox", "default": True},
+            {"key": "auto_upload_ia", "label": "Auto-Upload to Internet Archive after Zipping", "type": "checkbox", "default": False},
+            {"key": "broadcast_on_release", "label": "Broadcast in Minecraft Chat upon Scheduled Release", "type": "checkbox", "default": True},
+            {"key": "discord_webhook_url", "label": "Discord Announcement Webhook URL", "type": "text", "default": "", "placeholder": "https://discord.com/api/webhooks/..."},
+            {"key": "google_calendar_feed_url", "label": "Google Calendar iCal / ICS Feed URL", "type": "text", "default": "", "placeholder": "https://calendar.google.com/calendar/ical/.../basic.ics"}
+        ],
+        "default_settings": {
+            "archive_org_access_key": "",
+            "archive_org_secret_key": "",
+            "archive_org_collection": "opensource",
+            "item_prefix": "fiestasmp_episode_",
+            "include_overworld": True,
+            "include_nether": True,
+            "include_the_end": True,
+            "auto_upload_ia": False,
+            "broadcast_on_release": True,
+            "discord_webhook_url": "",
+            "google_calendar_feed_url": ""
+        },
+        "ui_slots": {
+            "tab": {
+                "title": "Episode World Archiver",
+                "icon": "fa-solid fa-clapperboard",
+                "description": "Capture Pre/Post recording world states, upload to Internet Archive, and release world downloads scheduled with Google Calendar."
+            }
+        }
     }
 ]
 

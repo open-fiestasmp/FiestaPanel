@@ -1358,6 +1358,8 @@ def enforce_security():
                 return jsonify(error="Owner permission required"), 403
             elif path.startswith("/api/backup") and "backups" not in perms:
                 return jsonify(error="Owner permission required"), 403
+            elif path.startswith("/api/panel-addons/episode_world_archiver/download") and "backups" not in perms and "filemanager" not in perms:
+                return jsonify(error="Owner permission required"), 403
             elif path.startswith("/api/server/properties") and "parameters" not in perms:
                 return jsonify(error="Owner permission required"), 403
             elif path.startswith("/api/access/users") and "access" not in perms:
@@ -5813,6 +5815,16 @@ def api_panel_addons_action(addon_id):
     payload = data.get("payload", {})
     res = addon_manager.execute_addon_action(addon_id, action_name, payload)
     return jsonify(res)
+
+@app.route("/api/panel-addons/episode_world_archiver/download/<path:filename>", methods=["GET"])
+@login_required
+def api_panel_addons_download_archive(filename):
+    safe_fn = os.path.basename(filename)
+    ep_dir = "/home/ubuntu/backups/episodes"
+    file_path = os.path.join(ep_dir, safe_fn)
+    if not os.path.isfile(file_path):
+        return jsonify({"success": False, "error": "Archive file not found."}), 404
+    return send_file(file_path, as_attachment=True, download_name=safe_fn)
 
 @app.route("/api/panel-addons/store", methods=["GET"])
 @login_required

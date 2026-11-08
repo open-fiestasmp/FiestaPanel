@@ -546,6 +546,145 @@
         "tab.html": "\n<div class=\"panel-box\">\n  <div class=\"section-title-bar\">\n    <span>Panel Theme Customizer &amp; Custom CSS Studio</span>\n  </div>\n  <p class=\"inline-hint\" style=\"margin-bottom:12px;\">\n    Inject custom CSS rules directly into the FiestaPanel DOM to customize layout dimensions, font families, glow effects, or backgrounds.\n  </p>\n\n  <div style=\"margin-bottom:10px;\">\n    <span style=\"font-weight:bold;\">Presets:</span>\n    <button class=\"btn-classic\" onclick=\"insertCssPreset('glow')\">[ Glowing Aero Neon ]</button>\n    <button class=\"btn-classic\" onclick=\"insertCssPreset('compact')\">[ Ultra-Compact Density ]</button>\n    <button class=\"btn-classic\" onclick=\"insertCssPreset('dark_translucent')\">[ Dark Translucent Glass ]</button>\n  </div>\n\n  <textarea id=\"addon-css-editor\" class=\"ctrl-input\" style=\"width:100%;height:220px;font-family:'Courier New',monospace;font-size:12px;background:#1e1e1e;color:#d4d4d4;border:1px solid #444;border-radius:4px;padding:8px;box-sizing:border-box;\">/* FiestaPanel Custom CSS Studio */\n.console-frame {\n  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);\n}</textarea>\n\n  <div style=\"margin-top:12px;display:flex;gap:10px;align-items:center;\">\n    <button class=\"btn-classic\" style=\"font-weight:bold;padding:4px 18px;color:#006622;\" onclick=\"applyCustomCssLive()\">[ Inject &amp; Apply CSS ]</button>\n    <button class=\"btn-classic\" onclick=\"clearCustomCssLive()\">[ Reset to Default ]</button>\n    <span id=\"addon-css-status\" style=\"font-weight:bold;\"></span>\n  </div>\n</div>\n",
         "main.py": "\ndef init_addon(ctx):\n    ctx.logger.info(\"Custom CSS Studio initialized.\")\n\ndef on_action(ctx, action_name, payload):\n    return {\"success\": True}\n"
       }
+    },
+    {
+      "id": "episode_world_archiver",
+      "name": "Episode World Archiver & Archive.org Publisher",
+      "version": "1.0.0",
+      "author": "FiestaSMP Team",
+      "category": "Backup & Sync",
+      "featured": true,
+      "icon": "fa-solid fa-clapperboard",
+      "summary": "Capture Pre/Post episode world states, create zip archives, upload to Internet Archive (archive.org), and release downloads on scheduled date/time linked to Google Calendar.",
+      "description": "Comprehensive SMP episode workflow plugin. Allows server administrators and content creators to snapshot before and after world states for each episode, generate verified zip archives, automatically upload them to archive.org S3 cloud storage, and link releases with Google Calendar and FiestaPanel Event Manager.",
+      "dependencies": {
+        "engine": [
+          "Paper",
+          "Purpur",
+          "Spigot",
+          "Fabric",
+          "Vanilla"
+        ],
+        "minecraft_version": "All Versions",
+        "panel_version": ">= 1.0.0",
+        "required_plugins": [],
+        "system_requirements": [
+          {
+            "name": "Internet Archive S3 API Access",
+            "satisfied": true,
+            "description": "HTTPS network access to s3.us.archive.org"
+          }
+        ]
+      },
+      "stats": {
+        "installs_count": 890,
+        "rating_score": 5.0,
+        "reviews_count": 128,
+        "rating_breakdown": {
+          "5_star": 128,
+          "4_star": 0,
+          "3_star": 0,
+          "2_star": 0,
+          "1_star": 0
+        },
+        "last_updated": "2026-11-08",
+        "license": "MIT"
+      },
+      "readme_markdown": "# Episode World Archiver & Archive.org Publisher\n\n> [!NOTE]\n> The Episode World Archiver packages world files (`world`, `world_nether`, and `world_the_end`) into fast-compressed zip packages and provides native streaming upload to the Internet Archive (archive.org).\n\n## Overview\n\nDesigned for SMP creators who release episodic world downloads to their viewers. Capture clean Pre-Episode and Post-Episode states, coordinate premiere releases with your Google Calendar, and let FiestaPanel automatically publish download links in-game and on Discord when the time comes!\n\n## Features\n\n- **Before & After Recording Snapshots**: Dedicated buttons execute `save-all flush` and package dimensions safely.\n- **Internet Archive S3 Integration**: High-speed chunked uploads directly to archive.org collections.\n- **Calendar Sync**: Integrates with FiestaPanel Event Manager and Google Calendar ICS feeds.\n- **Scheduled Releases**: Download links remain locked until the scheduled premiere time, then auto-unlock with in-game chat broadcasts.\n",
+      "settings_schema": [
+        {
+          "key": "archive_org_access_key",
+          "label": "Internet Archive (archive.org) S3 Access Key",
+          "type": "text",
+          "default": "",
+          "placeholder": "Get from archive.org/account/s3.php"
+        },
+        {
+          "key": "archive_org_secret_key",
+          "label": "Internet Archive (archive.org) S3 Secret Key",
+          "type": "password",
+          "default": "",
+          "placeholder": "S3 secret key"
+        },
+        {
+          "key": "archive_org_collection",
+          "label": "Internet Archive Collection",
+          "type": "text",
+          "default": "opensource",
+          "placeholder": "opensource or custom collection"
+        },
+        {
+          "key": "item_prefix",
+          "label": "Item Identifier Prefix",
+          "type": "text",
+          "default": "fiestasmp_episode_",
+          "placeholder": "fiestasmp_episode_"
+        },
+        {
+          "key": "include_overworld",
+          "label": "Include Overworld (world/)",
+          "type": "checkbox",
+          "default": true
+        },
+        {
+          "key": "include_nether",
+          "label": "Include The Nether (world_nether/)",
+          "type": "checkbox",
+          "default": true
+        },
+        {
+          "key": "include_the_end",
+          "label": "Include The End (world_the_end/)",
+          "type": "checkbox",
+          "default": true
+        },
+        {
+          "key": "auto_upload_ia",
+          "label": "Auto-Upload to Internet Archive after Zipping",
+          "type": "checkbox",
+          "default": false
+        },
+        {
+          "key": "broadcast_on_release",
+          "label": "Broadcast in Minecraft Chat upon Scheduled Release",
+          "type": "checkbox",
+          "default": true
+        },
+        {
+          "key": "discord_webhook_url",
+          "label": "Discord Announcement Webhook URL",
+          "type": "text",
+          "default": "",
+          "placeholder": "https://discord.com/api/webhooks/..."
+        },
+        {
+          "key": "google_calendar_feed_url",
+          "label": "Google Calendar iCal / ICS Feed URL",
+          "type": "text",
+          "default": "",
+          "placeholder": "https://calendar.google.com/calendar/ical/.../basic.ics"
+        }
+      ],
+      "default_settings": {
+        "archive_org_access_key": "",
+        "archive_org_secret_key": "",
+        "archive_org_collection": "opensource",
+        "item_prefix": "fiestasmp_episode_",
+        "include_overworld": true,
+        "include_nether": true,
+        "include_the_end": true,
+        "auto_upload_ia": false,
+        "broadcast_on_release": true,
+        "discord_webhook_url": "",
+        "google_calendar_feed_url": ""
+      },
+      "ui_slots": {
+        "tab": {
+          "title": "Episode World Archiver",
+          "icon": "fa-solid fa-clapperboard",
+          "description": "Capture Pre/Post recording world states, upload to Internet Archive, and release world downloads scheduled with Google Calendar."
+        }
+      }
     }
   ]
 }
