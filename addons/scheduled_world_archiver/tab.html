@@ -1,0 +1,1306 @@
+<div class="panel-box" id="swa-root" style="padding-bottom: 24px;">
+  <!-- Header Bar -->
+  <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <i class="fa-solid fa-cloud-arrow-up" style="font-size:16px;"></i>
+      <span>Scheduled World Archiver &amp; Multi-Cloud Publisher</span>
+      <span class="inline-badge" style="background:var(--sec-bar-bg, #74b21d); color:#fff; font-weight:bold;">Multi-Cloud Sync</span>
+    </div>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-classic" onclick="swaRefreshStatus()">
+        <i class="fa-solid fa-arrows-rotate"></i> [ Refresh ]
+      </button>
+      <button class="btn-classic" style="font-weight:bold;" onclick="swaOpenSettingsModal()">
+        <i class="fa-solid fa-gear"></i> [ Cloud Keys &amp; Schedules ]
+      </button>
+    </div>
+  </div>
+
+  <p class="inline-hint" style="margin-top:6px; margin-bottom:14px; line-height:1.5;">
+    Capture world state snapshots for any scheduled purpose (<strong>SMP Episodes</strong>, <strong>Milestones &amp; Boss Fights</strong>, <strong>Scheduled World Downloads</strong>, or <strong>Maintenance</strong>), package into clean zip archives, upload to <strong>GitHub Releases</strong>, <strong>Internet Archive</strong>, or <strong>Cloudflare R2 / S3</strong>, and link releases to your <strong>Google Calendar &amp; Event Manager</strong> schedule.
+  </p>
+
+  <!-- Live Task Monitor -->
+  <div id="swa-task-monitor" style="display:none; margin-bottom:16px; padding:12px 16px; background:var(--banner-info-bg, rgba(56, 189, 248, 0.08)); border:1px solid var(--banner-info-border, rgba(56, 189, 248, 0.3)); border-radius:6px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <i id="swa-task-spinner" class="fa-solid fa-circle-notch fa-spin" style="color:var(--sec-bar-bg, #0284c7); font-size:16px;"></i>
+        <strong id="swa-task-title" style="font-size:13.5px;">Active Archiving / Cloud Upload Task</strong>
+      </div>
+      <div>
+        <span id="swa-task-percentage" style="font-weight:bold; font-size:13px; margin-right:12px;">0%</span>
+        <button id="swa-task-cancel-btn" class="btn-classic" style="color:#dc2626; font-size:11px; padding:2px 8px;" onclick="swaCancelTask()">[ Cancel ]</button>
+      </div>
+    </div>
+    <!-- Progress Bar -->
+    <div style="background:rgba(128,128,128,0.2); border-radius:4px; height:10px; overflow:hidden; margin-bottom:6px;">
+      <div id="swa-task-progress-bar" style="width:0%; height:100%; background:var(--sec-bar-bg, #0284c7); transition:width 0.3s ease;"></div>
+    </div>
+    <div style="display:flex; justify-content:space-between; font-size:11.5px; opacity:0.85;">
+      <span id="swa-task-stage">Preparing world snapshot...</span>
+      <span id="swa-task-bytes">0 MB / 0 MB</span>
+    </div>
+  </div>
+
+  <!-- Snapshot Studio Card -->
+  <div style="border:1px solid rgba(128,128,128,0.25); border-radius:6px; padding:14px 18px; margin-bottom:18px; background:rgba(128,128,128,0.03);">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid rgba(128,128,128,0.15); padding-bottom:8px;">
+      <div style="font-weight:bold; font-size:13.5px; display:flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-box-archive" style="color:var(--sec-bar-bg, #74b21d);"></i>
+        <span>World Snapshot &amp; Release Studio</span>
+      </div>
+      <div style="font-size:12px; opacity:0.85;">
+        <span>Purpose: </span>
+        <select id="swa-input-purpose" class="ctrl-input" style="font-size:11.5px; padding:2px 8px;" onchange="swaOnPurposeChange()">
+          <option value="episode">SMP Episode (Pre / Post Recording)</option>
+          <option value="milestone">Server Milestone &amp; Boss Fight</option>
+          <option value="release">Scheduled Public World Download</option>
+          <option value="maintenance">Maintenance &amp; Pre-Update</option>
+          <option value="custom">General / Custom Snapshot</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:12px;">
+      <!-- Episode Number (visible when purpose == episode) -->
+      <div id="swa-box-ep-num">
+        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Episode Number:</label>
+        <div style="display:flex; align-items:center; gap:6px;">
+          <input type="number" id="swa-input-ep-num" class="ctrl-input" style="width:90px;" min="1" value="1" onchange="swaOnNumChange()">
+          <span class="inline-hint" style="font-size:11px;">(Auto-increments)</span>
+        </div>
+      </div>
+
+      <!-- Snapshot / Release Title -->
+      <div>
+        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Snapshot / Release Title:</label>
+        <input type="text" id="swa-input-title" class="ctrl-input" style="width:100%;" placeholder="e.g. Episode 1, Dragon Slaying, Weekly Download" value="Episode 1">
+      </div>
+
+      <!-- Linked Event Selector -->
+      <div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+          <label style="font-size:12px; font-weight:bold;">Link Calendar / Scheduled Event:</label>
+          <a href="javascript:void(0)" onclick="swaPromptNewEvent()" style="font-size:11px; text-decoration:underline;">+ New Event</a>
+        </div>
+        <select id="swa-input-event" class="ctrl-input" style="width:100%;" onchange="swaOnEventSelected()">
+          <option value="">-- Manual Schedule or Immediate Release --</option>
+        </select>
+      </div>
+
+      <!-- Scheduled Release Date/Time -->
+      <div>
+        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Scheduled Public Release Date &amp; Time:</label>
+        <input type="datetime-local" id="swa-input-release-time" class="ctrl-input" style="width:100%;">
+        <span class="inline-hint" style="font-size:10.5px; display:block; margin-top:2px;">Leave empty to unlock immediately after snapshot creation.</span>
+      </div>
+    </div>
+
+    <!-- Dimensions & Cloud Upload Target -->
+    <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; padding:8px 0; border-top:1px dashed rgba(128,128,128,0.2); border-bottom:1px dashed rgba(128,128,128,0.2); margin-bottom:14px; font-size:12px;">
+      <span style="font-weight:bold;">Dimensions:</span>
+      <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+        <input type="checkbox" id="swa-dim-overworld" checked> Overworld (<span style="opacity:0.75;">world/</span>)
+      </label>
+      <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+        <input type="checkbox" id="swa-dim-nether" checked> The Nether (<span style="opacity:0.75;">world_nether/</span>)
+      </label>
+      <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+        <input type="checkbox" id="swa-dim-the-end" checked> The End (<span style="opacity:0.75;">world_the_end/</span>)
+      </label>
+
+      <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:bold; color:var(--sec-bar-bg, #0284c7);">
+          <input type="checkbox" id="swa-opt-auto-upload"> Auto-Upload to Cloud:
+        </label>
+        <select id="swa-input-target-dest" class="ctrl-input" style="font-size:11.5px; padding:2px 6px;">
+          <option value="archive_org">Internet Archive (archive.org)</option>
+          <option value="github">GitHub Releases</option>
+          <option value="s3">Custom S3 / Cloudflare R2</option>
+          <option value="custom_post">Custom HTTP Endpoint</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Optional Notes -->
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Changelog / Release Notes (Optional):</label>
+      <input type="text" id="swa-input-notes" class="ctrl-input" style="width:100%;" placeholder="e.g. World state right before starting Dragon battle, coordinates: 0, 70, 0.">
+    </div>
+
+    <!-- Action Buttons for All Scheduled Purposes -->
+    <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-start; margin-top:8px;">
+      <!-- Pre-Event / Before Button -->
+      <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#0284c7; border:1.5px solid #0284c7; background:rgba(2, 132, 199, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('pre')">
+        <i class="fa-solid fa-play"></i>
+        <span>Take Pre-Event Snapshot (Before)</span>
+      </button>
+
+      <!-- Post-Event / After Button -->
+      <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:1.5px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('post')">
+        <i class="fa-solid fa-flag-checkered"></i>
+        <span>Take Post-Event Snapshot (After)</span>
+      </button>
+
+      <!-- Complete Snapshot Package Now -->
+      <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#b45309; border:1.5px solid #b45309; background:rgba(234, 179, 8, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('snapshot')">
+        <i class="fa-solid fa-camera"></i>
+        <span>Create Snapshot Package Now</span>
+      </button>
+
+      <span id="swa-snapshot-feedback" style="font-size:12px; font-weight:bold; margin-left:8px;"></span>
+    </div>
+  </div>
+
+  <!-- Archives & Releases Library -->
+  <div class="section-sub-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+    <div style="display:flex; align-items:center; gap:6px;">
+      <i class="fa-solid fa-database"></i>
+      <span>World Archives &amp; Multi-Cloud Releases</span>
+    </div>
+    <span id="swa-archives-count" class="inline-badge" style="font-size:11px;">0 Archives</span>
+  </div>
+
+  <div style="overflow-x:auto;">
+    <table class="grid-table" style="width:100%; border-collapse:collapse; font-size:12.5px;">
+      <thead>
+        <tr style="text-align:left; border-bottom:2px solid rgba(128,128,128,0.25);">
+          <th style="padding:8px 6px;">Snapshot &amp; Purpose</th>
+          <th style="padding:8px 6px;">Archive Details</th>
+          <th style="padding:8px 6px;">Schedule &amp; Release Status</th>
+          <th style="padding:8px 6px;">Cloud Distribution</th>
+          <th style="padding:8px 6px; text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="swa-archives-tbody">
+        <tr>
+          <td colspan="5" style="text-align:center; padding:24px;" class="inline-hint">
+            No world archives recorded yet. Click one of the snapshot buttons above to create your first world archive!
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Multi-Destination Settings Modal -->
+<div id="swa-settings-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
+  <div class="panel-box" style="width:94%; max-width:680px; max-height:92vh; overflow-y:auto; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
+    <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <i class="fa-solid fa-sliders"></i>
+        <span>Archiver Settings &amp; Multi-Cloud Credentials</span>
+      </div>
+      <button class="btn-classic" style="padding:2px 8px; font-weight:bold;" onclick="swaCloseSettingsModal()">[ X ]</button>
+    </div>
+
+    <p class="inline-hint" style="margin-top:6px; margin-bottom:14px;">
+      Configure <strong>GitHub Releases</strong>, <strong>Internet Archive</strong>, <strong>Cloudflare R2 / AWS S3</strong>, automated recurring snapshot schedules, and announcements.
+    </p>
+
+    <!-- Settings Sections -->
+    <div style="display:flex; flex-direction:column; gap:16px;">
+      <!-- Section 1: General & Default Target -->
+      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
+        <div style="font-weight:bold; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-cloud"></i> General &amp; Recurring Schedule
+        </div>
+        <table class="form-layout-table" style="width:100%; font-size:12px;">
+          <tr>
+            <td class="label-col" style="width:40%;">Default Cloud Destination:</td>
+            <td class="val-col">
+              <select id="swa-set-default-target" class="ctrl-input" style="width:70%;">
+                <option value="archive_org">Internet Archive (archive.org)</option>
+                <option value="github">GitHub Releases</option>
+                <option value="s3">Custom S3 / Cloudflare R2</option>
+                <option value="custom_post">Custom HTTP Endpoint</option>
+                <option value="local">Local Storage Only</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Automated Recurring Snapshots:</td>
+            <td class="val-col">
+              <select id="swa-set-recur-interval" class="ctrl-input" style="width:70%;">
+                <option value="disabled">Disabled (Manual Only)</option>
+                <option value="6h">Every 6 Hours</option>
+                <option value="12h">Every 12 Hours</option>
+                <option value="24h">Daily (Every 24 Hours)</option>
+                <option value="7d">Weekly (Every 7 Days)</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Google Calendar ICS Feed URL:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-gcal-url" class="ctrl-input" style="width:100%;" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics">
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <!-- Section 2: GitHub Releases -->
+      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <i class="fa-brands fa-github"></i> GitHub Releases Integration
+          </div>
+          <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestGitHub()">[ Test GitHub Connection ]</button>
+        </div>
+        <table class="form-layout-table" style="width:100%; font-size:12px;">
+          <tr>
+            <td class="label-col" style="width:40%;">GitHub Personal Access Token:</td>
+            <td class="val-col">
+              <input type="password" id="swa-set-gh-token" class="ctrl-input" style="width:85%;" placeholder="ghp_... (repo / contents:write scope)">
+              <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-gh-token')">[ Show ]</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">GitHub Repository (owner/repo):</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-gh-repo" class="ctrl-input" style="width:70%;" placeholder="e.g. open-fiestasmp/world-downloads">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Release Tag Prefix:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-gh-prefix" class="ctrl-input" style="width:30%;" placeholder="v or release-" value="v">
+            </td>
+          </tr>
+        </table>
+        <span id="swa-test-gh-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
+      </div>
+
+      <!-- Section 3: Internet Archive (archive.org) -->
+      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-landmark"></i> Internet Archive (archive.org) S3
+          </div>
+          <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestIA()">[ Test Archive.org ]</button>
+        </div>
+        <table class="form-layout-table" style="width:100%; font-size:12px;">
+          <tr>
+            <td class="label-col" style="width:40%;">Archive.org S3 Access Key:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-ia-access-key" class="ctrl-input" style="width:85%;" placeholder="From archive.org/account/s3.php">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Archive.org S3 Secret Key:</td>
+            <td class="val-col">
+              <input type="password" id="swa-set-ia-secret-key" class="ctrl-input" style="width:85%;" placeholder="S3 Secret Key">
+              <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-ia-secret-key')">[ Show ]</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Collection:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-ia-collection" class="ctrl-input" style="width:50%;" placeholder="opensource" value="opensource">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Item Identifier Prefix:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-ia-prefix" class="ctrl-input" style="width:50%;" placeholder="fiestasmp_world_" value="fiestasmp_world_">
+            </td>
+          </tr>
+        </table>
+        <span id="swa-test-ia-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
+      </div>
+
+      <!-- Section 4: Custom S3 / Cloudflare R2 -->
+      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-server"></i> Custom S3 / Cloudflare R2 / AWS
+          </div>
+          <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestS3()">[ Test S3 Connection ]</button>
+        </div>
+        <table class="form-layout-table" style="width:100%; font-size:12px;">
+          <tr>
+            <td class="label-col" style="width:40%;">S3 Endpoint URL:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-s3-endpoint" class="ctrl-input" style="width:100%;" placeholder="https://<account_id>.r2.cloudflarestorage.com or empty for AWS">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Bucket Name:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-s3-bucket" class="ctrl-input" style="width:60%;" placeholder="e.g. fiestasmp-world-downloads">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Access Key ID:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-s3-access" class="ctrl-input" style="width:85%;" placeholder="Access Key ID">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Secret Access Key:</td>
+            <td class="val-col">
+              <input type="password" id="swa-set-s3-secret" class="ctrl-input" style="width:85%;" placeholder="Secret Access Key">
+              <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-s3-secret')">[ Show ]</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Region:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-s3-region" class="ctrl-input" style="width:30%;" placeholder="auto" value="auto">
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Public Download CDN Base URL:</td>
+            <td class="val-col">
+              <input type="text" id="swa-set-s3-public" class="ctrl-input" style="width:100%;" placeholder="https://pub-...r2.dev or https://dl.yourdomain.com">
+            </td>
+          </tr>
+        </table>
+        <span id="swa-test-s3-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
+      </div>
+
+      <!-- Section 5: Notifications -->
+      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
+        <div style="font-weight:bold; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-bullhorn"></i> Release Announcements
+        </div>
+        <table class="form-layout-table" style="width:100%; font-size:12px;">
+          <tr>
+            <td class="label-col" style="width:40%;">In-Game Chat Broadcast:</td>
+            <td class="val-col">
+              <label style="cursor:pointer; display:flex; align-items:center; gap:6px;">
+                <input type="checkbox" id="swa-set-broadcast" checked>
+                Broadcast clickable download link in Minecraft chat upon scheduled release
+              </label>
+            </td>
+          </tr>
+          <tr>
+            <td class="label-col">Discord Webhook URL:</td>
+            <td class="val-col">
+              <input type="password" id="swa-set-discord-webhook" class="ctrl-input" style="width:100%;" placeholder="https://discord.com/api/webhooks/...">
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(128,128,128,0.2); display:flex; justify-content:space-between; align-items:center;">
+      <span id="swa-set-save-feedback" style="font-weight:bold; font-size:12px;"></span>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-classic" onclick="swaCloseSettingsModal()">[ Cancel ]</button>
+        <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a); padding:4px 16px;" onclick="swaSaveSettings()">[ Save Settings ]</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Upload Destination Selection Modal -->
+<div id="swa-upload-picker-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
+  <div class="panel-box" style="width:90%; max-width:440px; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
+    <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Upload World Archive to Cloud</span>
+      <button class="btn-classic" style="padding:2px 8px; font-weight:bold;" onclick="swaCloseUploadPicker()">[ X ]</button>
+    </div>
+    <p class="inline-hint" style="margin-top:6px; margin-bottom:12px;">
+      Select cloud upload target for <strong id="swa-upload-target-title">World Archive</strong>:
+    </p>
+    <input type="hidden" id="swa-upload-target-archive-id">
+    <div style="margin-bottom:14px;">
+      <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:6px;">Upload Destination:</label>
+      <select id="swa-upload-destination-select" class="ctrl-input" style="width:100%;">
+        <option value="github">GitHub Releases (Direct Asset Upload)</option>
+        <option value="archive_org">Internet Archive (archive.org S3)</option>
+        <option value="s3">Custom S3 / Cloudflare R2 / AWS</option>
+        <option value="custom_post">Custom HTTP Endpoint</option>
+      </select>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button class="btn-classic" onclick="swaCloseUploadPicker()">[ Cancel ]</button>
+      <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #0284c7);" onclick="swaConfirmUpload()">[ Start Cloud Upload ]</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reschedule Modal -->
+<div id="swa-reschedule-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
+  <div class="panel-box" style="width:90%; max-width:440px; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
+    <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+      <span>Reschedule World Release</span>
+      <button class="btn-classic" style="padding:2px 8px; font-weight:bold;" onclick="swaCloseRescheduleModal()">[ X ]</button>
+    </div>
+    <p class="inline-hint" style="margin-top:6px; margin-bottom:12px;">
+      Update the public release date &amp; time for <strong id="swa-resched-title">Release</strong>.
+    </p>
+    <input type="hidden" id="swa-resched-archive-id">
+    <div style="margin-bottom:12px;">
+      <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">New Scheduled Release Time:</label>
+      <input type="datetime-local" id="swa-resched-time-input" class="ctrl-input" style="width:100%;">
+      <span class="inline-hint" style="display:block; font-size:11px; margin-top:4px;">Leave empty to set to Ready / Unscheduled.</span>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:14px;">
+      <button class="btn-classic" onclick="swaCloseRescheduleModal()">[ Cancel ]</button>
+      <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a);" onclick="swaSubmitReschedule()">[ Update Schedule ]</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let swaPollTimer = null;
+  let swaCurrentArchives = [];
+  let swaCalendarEvents = [];
+
+  function getCsrf() {
+    return (typeof csrfToken !== 'undefined' ? csrfToken : '');
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  window.swaRefreshStatus = async function() {
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({ action: 'get_status', payload: {} })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        console.warn('Scheduled World Archiver get_status error:', data.error);
+        return;
+      }
+
+      swaCurrentArchives = data.archives || [];
+      swaCalendarEvents = data.calendar_events || [];
+
+      // Update recommended next episode
+      const nextNum = data.next_episode_num || 1;
+      const numInput = document.getElementById('swa-input-ep-num');
+      const titleInput = document.getElementById('swa-input-title');
+      const purposeSel = document.getElementById('swa-input-purpose');
+
+      if (numInput && !numInput.dataset.userEdited) {
+        numInput.value = nextNum;
+        if (titleInput && !titleInput.dataset.userEdited && purposeSel && purposeSel.value === 'episode') {
+          titleInput.value = 'Episode ' + nextNum;
+        }
+      }
+
+      populateCalendarDropdown(swaCalendarEvents);
+      renderArchivesTable(swaCurrentArchives);
+      renderTaskMonitor(data.task);
+
+      if (data.task && data.task.status === 'running') {
+        if (!swaPollTimer) {
+          swaPollTimer = setInterval(window.swaRefreshStatus, 1500);
+        }
+      } else {
+        if (swaPollTimer) {
+          clearInterval(swaPollTimer);
+          swaPollTimer = null;
+        }
+      }
+
+      if (data.settings) {
+        window.__ACTIVE_ADDON_SETTINGS__ = data.settings;
+        syncSettingsFields(data.settings);
+      }
+    } catch (e) {
+      console.error('Error fetching Scheduled World Archiver status:', e);
+    }
+  };
+
+  window.swaOnPurposeChange = function() {
+    const p = document.getElementById('swa-input-purpose').value;
+    const epBox = document.getElementById('swa-box-ep-num');
+    const titleInput = document.getElementById('swa-input-title');
+    const epNum = document.getElementById('swa-input-ep-num').value || '1';
+
+    if (epBox) {
+      epBox.style.display = (p === 'episode') ? 'block' : 'none';
+    }
+
+    if (titleInput && !titleInput.dataset.userEdited) {
+      if (p === 'episode') titleInput.value = 'Episode ' + epNum;
+      else if (p === 'milestone') titleInput.value = 'Ender Dragon Victory & End Gateway';
+      else if (p === 'release') titleInput.value = 'Weekly Public World Download';
+      else if (p === 'maintenance') titleInput.value = 'Pre-Update Maintenance Snapshot';
+      else titleInput.value = 'World Snapshot';
+    }
+  };
+
+  function populateCalendarDropdown(events) {
+    const sel = document.getElementById('swa-input-event');
+    if (!sel) return;
+    const curVal = sel.value;
+    sel.innerHTML = '<option value="">-- Manual Schedule or Immediate Release --</option>';
+
+    if (!events || events.length === 0) return;
+
+    events.forEach(evt => {
+      const opt = document.createElement('option');
+      opt.value = evt.id;
+      opt.dataset.startTime = evt.start_time || '';
+      opt.dataset.title = evt.title || '';
+      const srcBadge = evt.source ? ` [${evt.source}]` : '';
+      const timeStr = evt.start_time ? ` (${evt.start_time.replace('T', ' ')})` : '';
+      opt.textContent = `${evt.title}${timeStr}${srcBadge}`;
+      sel.appendChild(opt);
+    });
+
+    if (curVal) sel.value = curVal;
+  }
+
+  window.swaOnEventSelected = function() {
+    const sel = document.getElementById('swa-input-event');
+    const timeInput = document.getElementById('swa-input-release-time');
+    const titleInput = document.getElementById('swa-input-title');
+    if (!sel || !timeInput) return;
+
+    const opt = sel.options[sel.selectedIndex];
+    if (opt && opt.value) {
+      const st = opt.dataset.startTime;
+      if (st && timeInput) timeInput.value = st;
+      if (opt.dataset.title && titleInput && !titleInput.dataset.userEdited) {
+        titleInput.value = opt.dataset.title;
+      }
+    }
+  };
+
+  window.swaOnNumChange = function() {
+    const numInput = document.getElementById('swa-input-ep-num');
+    const titleInput = document.getElementById('swa-input-title');
+    const p = document.getElementById('swa-input-purpose').value;
+    if (numInput) numInput.dataset.userEdited = 'true';
+    if (titleInput && !titleInput.dataset.userEdited && numInput && p === 'episode') {
+      titleInput.value = 'Episode ' + numInput.value;
+    }
+  };
+
+  const titleInp = document.getElementById('swa-input-title');
+  if (titleInp) {
+    titleInp.addEventListener('input', function() {
+      this.dataset.userEdited = 'true';
+    });
+  }
+
+  function renderTaskMonitor(task) {
+    const monitor = document.getElementById('swa-task-monitor');
+    if (!monitor) return;
+
+    if (!task || task.status === 'idle') {
+      monitor.style.display = 'none';
+      return;
+    }
+
+    monitor.style.display = 'block';
+    const titleEl = document.getElementById('swa-task-title');
+    const pctEl = document.getElementById('swa-task-percentage');
+    const barEl = document.getElementById('swa-task-progress-bar');
+    const stageEl = document.getElementById('swa-task-stage');
+    const bytesEl = document.getElementById('swa-task-bytes');
+    const spinner = document.getElementById('swa-task-spinner');
+    const cancelBtn = document.getElementById('swa-task-cancel-btn');
+
+    const pct = Math.min(Math.max(task.progress || 0, 0), 100);
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+    if (stageEl) stageEl.textContent = task.stage || 'In progress...';
+
+    const fmtBytes = (b) => {
+      if (!b) return '0 B';
+      if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+      if (b < 1073741824) return (b / 1048576).toFixed(1) + ' MB';
+      return (b / 1073741824).toFixed(2) + ' GB';
+    };
+
+    if (bytesEl) {
+      if (task.total_bytes > 0) {
+        bytesEl.textContent = `${fmtBytes(task.processed_bytes)} / ${fmtBytes(task.total_bytes)}`;
+      } else {
+        bytesEl.textContent = '';
+      }
+    }
+
+    if (task.status === 'running') {
+      if (titleEl) titleEl.textContent = task.type === 'upload' ? 'Uploading Archive to Cloud...' : 'Creating World Archive Snapshot...';
+      if (spinner) spinner.className = 'fa-solid fa-circle-notch fa-spin';
+      if (cancelBtn) cancelBtn.style.display = 'inline-block';
+    } else if (task.status === 'completed') {
+      if (titleEl) titleEl.textContent = 'Operation Completed Successfully!';
+      if (spinner) spinner.className = 'fa-solid fa-circle-check';
+      if (spinner) spinner.style.color = '#16a34a';
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    } else if (task.status === 'error') {
+      if (titleEl) titleEl.textContent = 'Task Failed: ' + (task.error || 'Unknown error');
+      if (spinner) spinner.className = 'fa-solid fa-circle-xmark';
+      if (spinner) spinner.style.color = '#dc2626';
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    } else if (task.status === 'cancelled') {
+      if (titleEl) titleEl.textContent = 'Task was cancelled.';
+      if (spinner) spinner.className = 'fa-solid fa-ban';
+      if (cancelBtn) cancelBtn.style.display = 'none';
+    }
+  }
+
+  function renderArchivesTable(archives) {
+    const tbody = document.getElementById('swa-archives-tbody');
+    const countTag = document.getElementById('swa-archives-count');
+    if (!tbody) return;
+
+    if (countTag) countTag.textContent = archives.length + ' Archives';
+
+    if (!archives || archives.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="5" style="text-align:center; padding:24px;" class="inline-hint">
+            No world archives recorded yet. Use the snapshot studio above to capture your first world archive!
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = archives.map(arc => {
+      let stageBadge = '';
+      if (arc.type === 'pre') {
+        stageBadge = `<span class="inline-badge" style="background:rgba(2, 132, 199, 0.15); color:#0284c7; border:1px solid rgba(2, 132, 199, 0.3); font-weight:bold;"><i class="fa-solid fa-play"></i> Pre-Event (Before)</span>`;
+      } else if (arc.type === 'post') {
+        stageBadge = `<span class="inline-badge" style="background:rgba(22, 163, 74, 0.15); color:#16a34a; border:1px solid rgba(22, 163, 74, 0.3); font-weight:bold;"><i class="fa-solid fa-flag-checkered"></i> Post-Event (After)</span>`;
+      } else {
+        stageBadge = `<span class="inline-badge" style="background:rgba(234, 179, 8, 0.15); color:#b45309; border:1px solid rgba(234, 179, 8, 0.3); font-weight:bold;"><i class="fa-solid fa-box-archive"></i> Complete Snapshot</span>`;
+      }
+
+      const purposeBadge = `<span class="inline-badge" style="font-size:10px; opacity:0.85; text-transform:uppercase;">${escapeHtml(arc.purpose || 'custom')}</span>`;
+
+      // Status Badge
+      let statusHtml = '';
+      if (arc.status === 'released') {
+        statusHtml = `<span class="inline-badge" style="background:rgba(22, 163, 74, 0.15); color:#16a34a; font-weight:bold;"><i class="fa-solid fa-unlock"></i> RELEASED / PUBLIC</span>`;
+        if (arc.released_at) {
+          statusHtml += `<div style="font-size:10.5px; opacity:0.8; margin-top:2px;">Live since ${escapeHtml(arc.released_at)}</div>`;
+        }
+      } else if (arc.status === 'scheduled') {
+        statusHtml = `<span class="inline-badge" style="background:rgba(234, 179, 8, 0.15); color:#b45309; font-weight:bold;"><i class="fa-solid fa-clock"></i> Scheduled</span>`;
+        if (arc.release_time) {
+          statusHtml += `<div style="font-size:10.5px; font-weight:bold; margin-top:2px;">${escapeHtml(arc.release_time.replace('T', ' '))}</div>`;
+        }
+      } else {
+        statusHtml = `<span class="inline-badge" style="opacity:0.75;"><i class="fa-solid fa-lock"></i> Ready (Unscheduled)</span>`;
+      }
+
+      // Cloud Distribution Links
+      let cloudHtml = '';
+      const hasCloud = arc.cloud_download_url || arc.ia_download_url || arc.github_download_url || arc.s3_download_url;
+
+      if (arc.github_download_url) {
+        cloudHtml += `
+          <div style="margin-bottom:3px;">
+            <a href="${escapeHtml(arc.github_download_url)}" target="_blank" style="font-weight:bold; color:var(--text-color, #1f2937); text-decoration:underline;">
+              <i class="fa-brands fa-github"></i> GitHub Release Download
+            </a>
+            ${arc.github_release_url ? `<a href="${escapeHtml(arc.github_release_url)}" target="_blank" style="font-size:10.5px; opacity:0.8; margin-left:4px;">(Release Page)</a>` : ''}
+          </div>
+        `;
+      }
+      if (arc.ia_download_url) {
+        cloudHtml += `
+          <div style="margin-bottom:3px;">
+            <a href="${escapeHtml(arc.ia_download_url)}" target="_blank" style="font-weight:bold; color:var(--sec-bar-bg, #0284c7); text-decoration:underline;">
+              <i class="fa-solid fa-landmark"></i> archive.org Download
+            </a>
+          </div>
+        `;
+      }
+      if (arc.s3_download_url) {
+        cloudHtml += `
+          <div style="margin-bottom:3px;">
+            <a href="${escapeHtml(arc.s3_download_url)}" target="_blank" style="font-weight:bold; color:#059669; text-decoration:underline;">
+              <i class="fa-solid fa-server"></i> S3 / R2 Cloud Download
+            </a>
+          </div>
+        `;
+      }
+
+      cloudHtml += `
+        <button class="btn-classic" style="font-size:10.5px; font-weight:bold; margin-top:2px;" onclick="swaOpenUploadPicker('${escapeHtml(arc.id)}', '${escapeHtml(arc.title)}')">
+          <i class="fa-solid fa-cloud-arrow-up"></i> [ Upload to Cloud... ]
+        </button>
+      `;
+
+      const safeId = escapeHtml(arc.id);
+      const safeTitle = escapeHtml(arc.title);
+      const safeFilename = escapeHtml(arc.filename);
+      const safeDownloadUrl = arc.cloud_download_url || arc.ia_download_url || arc.github_download_url || arc.s3_download_url || arc.local_download_url || ('/api/panel-addons/scheduled_world_archiver/download/' + arc.filename);
+
+      return `
+        <tr style="border-bottom:1px solid rgba(128,128,128,0.15);">
+          <!-- Col 1: Snapshot & Purpose -->
+          <td style="padding:10px 6px; vertical-align:top;">
+            <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+              <strong style="font-size:13px;">${safeTitle}</strong>
+              ${purposeBadge}
+            </div>
+            <div>${stageBadge}</div>
+            ${arc.notes ? `<div style="font-size:11px; opacity:0.8; margin-top:4px; font-style:italic;">"${escapeHtml(arc.notes)}"</div>` : ''}
+          </td>
+
+          <!-- Col 2: Archive Details -->
+          <td style="padding:10px 6px; vertical-align:top;">
+            <div style="font-family:monospace; font-size:11.5px; word-break:break-all;">${safeFilename}</div>
+            <div style="font-size:11.5px; opacity:0.85; margin-top:2px;">
+              <strong>${escapeHtml(arc.filesize_formatted || '0 MB')}</strong> • Created ${escapeHtml(arc.created_at || 'Just now')}
+            </div>
+            ${arc.sha256 ? `<div style="font-size:10px; opacity:0.65; font-family:monospace; margin-top:2px;">SHA256: ${arc.sha256.substring(0, 14)}...</div>` : ''}
+          </td>
+
+          <!-- Col 3: Schedule & Status -->
+          <td style="padding:10px 6px; vertical-align:top;">
+            ${statusHtml}
+          </td>
+
+          <!-- Col 4: Cloud Distribution -->
+          <td style="padding:10px 6px; vertical-align:top;">
+            ${cloudHtml}
+          </td>
+
+          <!-- Col 5: Actions -->
+          <td style="padding:10px 6px; vertical-align:top; text-align:right;">
+            <div style="display:inline-flex; flex-direction:column; gap:4px; align-items:flex-end;">
+              <div style="display:flex; gap:4px;">
+                ${arc.status === 'released' ? `
+                  <button class="btn-classic" style="font-size:11px; color:#b45309;" onclick="swaLock('${safeId}')">[ Lock / Unpublish ]</button>
+                ` : `
+                  <button class="btn-classic" style="font-size:11px; font-weight:bold; color:#16a34a;" onclick="swaReleaseNow('${safeId}')">[ Release Now ]</button>
+                `}
+                <button class="btn-classic" style="font-size:11px;" onclick="swaOpenReschedule('${safeId}', '${safeTitle}', '${escapeHtml(arc.release_time || '')}')">[ Reschedule ]</button>
+              </div>
+              <div style="display:flex; gap:4px;">
+                <a href="${safeDownloadUrl}" download class="btn-classic" style="font-size:11px; text-decoration:none; display:inline-block;">[ Download Zip ]</a>
+                <button class="btn-classic" style="font-size:11px;" onclick="swaCopyLink('${escapeHtml(safeDownloadUrl)}')">[ Copy Link ]</button>
+                <button class="btn-classic" style="font-size:11px; color:#dc2626;" onclick="swaDeleteArchive('${safeId}')">[ Delete ]</button>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  }
+
+  window.swaTriggerSnapshot = async function(snapType) {
+    const purpose = document.getElementById('swa-input-purpose').value;
+    const epNum = parseInt(document.getElementById('swa-input-ep-num').value) || 0;
+    const title = document.getElementById('swa-input-title').value.trim();
+    const eventSel = document.getElementById('swa-input-event').value || '';
+    const releaseTime = document.getElementById('swa-input-release-time').value || '';
+    const autoUpload = document.getElementById('swa-opt-auto-upload').checked;
+    const uploadTarget = document.getElementById('swa-input-target-dest').value;
+    const notes = document.getElementById('swa-input-notes').value || '';
+
+    const dimensions = {
+      overworld: document.getElementById('swa-dim-overworld').checked,
+      nether: document.getElementById('swa-dim-nether').checked,
+      the_end: document.getElementById('swa-dim-the-end').checked
+    };
+
+    let typeLabel = "Complete Snapshot";
+    if (snapType === 'pre') typeLabel = "Pre-Event Snapshot (Before)";
+    else if (snapType === 'post') typeLabel = "Post-Event Snapshot (After)";
+
+    if (!confirm(`Are you ready to create the ${typeLabel} for '${title || 'World'}'?\n\nThis will flush world chunks from RAM and package world dimensions into a zip archive.`)) {
+      return;
+    }
+
+    const fb = document.getElementById('swa-snapshot-feedback');
+    if (fb) {
+      fb.style.color = '#0284c7';
+      fb.textContent = 'Initiating snapshot task...';
+    }
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({
+          action: 'start_snapshot',
+          payload: {
+            purpose: purpose,
+            episode_num: epNum,
+            title: title,
+            type: snapType,
+            linked_event_id: eventSel,
+            release_time: releaseTime,
+            dimensions: dimensions,
+            auto_upload: autoUpload,
+            upload_target: uploadTarget,
+            notes: notes
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (fb) {
+          fb.style.color = '#16a34a';
+          fb.textContent = data.message;
+        }
+        window.swaRefreshStatus();
+      } else {
+        if (fb) {
+          fb.style.color = '#dc2626';
+          fb.textContent = 'Failed: ' + (data.error || 'Unknown error');
+        }
+        alert(data.error || 'Failed to start snapshot.');
+      }
+    } catch (e) {
+      if (fb) {
+        fb.style.color = '#dc2626';
+        fb.textContent = 'Network error starting snapshot.';
+      }
+    }
+  };
+
+  window.swaOpenUploadPicker = function(archiveId, title) {
+    const modal = document.getElementById('swa-upload-picker-modal');
+    const idInput = document.getElementById('swa-upload-target-archive-id');
+    const titleEl = document.getElementById('swa-upload-target-title');
+    if (idInput) idInput.value = archiveId;
+    if (titleEl) titleEl.textContent = title;
+    if (modal) modal.style.display = 'flex';
+  };
+
+  window.swaCloseUploadPicker = function() {
+    const modal = document.getElementById('swa-upload-picker-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.swaConfirmUpload = async function() {
+    const archiveId = document.getElementById('swa-upload-target-archive-id').value;
+    const dest = document.getElementById('swa-upload-destination-select').value;
+    swaCloseUploadPicker();
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({
+          action: 'upload_archive',
+          payload: { archive_id: archiveId, target: dest }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.swaRefreshStatus();
+      } else {
+        alert(data.error || 'Upload could not be initiated.');
+      }
+    } catch (e) {
+      alert('Error triggering upload: ' + e);
+    }
+  };
+
+  window.swaCancelTask = async function() {
+    if (!confirm('Cancel the active archiving or cloud upload task?')) return;
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({ action: 'cancel_task', payload: {} })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.swaRefreshStatus();
+      } else {
+        alert(data.error || 'Could not cancel task.');
+      }
+    } catch (e) {
+      alert('Error cancelling task: ' + e);
+    }
+  };
+
+  window.swaReleaseNow = async function(archiveId) {
+    if (!confirm('Release this world archive publicly now?\n\nIf enabled, this will broadcast the download link in Minecraft chat and Discord.')) {
+      return;
+    }
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({ action: 'release_now', payload: { archive_id: archiveId } })
+      });
+      const data = await res.json();
+      if (data.success) window.swaRefreshStatus();
+      else alert(data.error || 'Failed to release archive.');
+    } catch (e) {
+      alert('Error releasing archive: ' + e);
+    }
+  };
+
+  window.swaLock = async function(archiveId) {
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({ action: 'lock_archive', payload: { archive_id: archiveId } })
+      });
+      const data = await res.json();
+      if (data.success) window.swaRefreshStatus();
+      else alert(data.error || 'Failed to lock archive.');
+    } catch (e) {
+      alert('Error locking archive: ' + e);
+    }
+  };
+
+  window.swaDeleteArchive = async function(archiveId) {
+    if (!confirm('Are you sure you want to delete this archive record and its local zip file?')) return;
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({ action: 'delete_archive', payload: { archive_id: archiveId, delete_file: true } })
+      });
+      const data = await res.json();
+      if (data.success) window.swaRefreshStatus();
+      else alert(data.error || 'Failed to delete archive.');
+    } catch (e) {
+      alert('Error deleting archive: ' + e);
+    }
+  };
+
+  window.swaCopyLink = function(url) {
+    let full = url;
+    if (url.startsWith('/')) full = window.location.origin + url;
+    navigator.clipboard.writeText(full).then(() => {
+      alert('World download URL copied to clipboard:\n' + full);
+    }).catch(() => {
+      prompt('Copy download link:', full);
+    });
+  };
+
+  window.swaOpenReschedule = function(archiveId, title, currentTime) {
+    const modal = document.getElementById('swa-reschedule-modal');
+    const idInput = document.getElementById('swa-resched-archive-id');
+    const titleEl = document.getElementById('swa-resched-title');
+    const timeInp = document.getElementById('swa-resched-time-input');
+
+    if (idInput) idInput.value = archiveId;
+    if (titleEl) titleEl.textContent = title;
+    if (timeInp) timeInp.value = currentTime || '';
+    if (modal) modal.style.display = 'flex';
+  };
+
+  window.swaCloseRescheduleModal = function() {
+    const modal = document.getElementById('swa-reschedule-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.swaSubmitReschedule = async function() {
+    const archiveId = document.getElementById('swa-resched-archive-id').value;
+    const releaseTime = document.getElementById('swa-resched-time-input').value;
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({
+          action: 'set_schedule',
+          payload: { archive_id: archiveId, release_time: releaseTime }
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        swaCloseRescheduleModal();
+        window.swaRefreshStatus();
+      } else {
+        alert(data.error || 'Failed to update schedule.');
+      }
+    } catch (e) {
+      alert('Error updating schedule: ' + e);
+    }
+  };
+
+  window.swaPromptNewEvent = function() {
+    const title = prompt('Enter Event Title for FiestaPanel Event Manager:', `SMP World Download Release`);
+    if (!title) return;
+
+    const defaultTime = document.getElementById('swa-input-release-time').value || new Date(Date.now() + 86400000).toISOString().slice(0, 16);
+    const startTime = prompt('Enter Scheduled Start Time (YYYY-MM-DDTHH:MM):', defaultTime);
+    if (!startTime) return;
+
+    fetch('/api/panel-addons/scheduled_world_archiver/action', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-Token': getCsrf()
+      },
+      body: JSON.stringify({
+        action: 'create_calendar_event',
+        payload: { title: title, start_time: startTime }
+      })
+    }).then(r => r.json()).then(d => {
+      if (d.success) {
+        alert(d.message);
+        window.swaRefreshStatus();
+      } else {
+        alert(d.error || 'Failed to create event.');
+      }
+    });
+  };
+
+  // Settings Modal Functions
+  window.swaOpenSettingsModal = function() {
+    const modal = document.getElementById('swa-settings-modal');
+    if (modal) modal.style.display = 'flex';
+  };
+
+  window.swaCloseSettingsModal = function() {
+    const modal = document.getElementById('swa-settings-modal');
+    if (modal) modal.style.display = 'none';
+  };
+
+  window.swaToggleSecret = function(inputId) {
+    const inp = document.getElementById(inputId);
+    if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
+  };
+
+  window.swaTestGitHub = async function() {
+    const token = document.getElementById('swa-set-gh-token').value.trim();
+    const repo = document.getElementById('swa-set-gh-repo').value.trim();
+    const fb = document.getElementById('swa-test-gh-feedback');
+
+    if (fb) {
+      fb.style.color = '#0284c7';
+      fb.textContent = 'Connecting to GitHub API...';
+    }
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() },
+        body: JSON.stringify({ action: 'test_github_credentials', payload: { github_token: token, github_repo: repo } })
+      });
+      const data = await res.json();
+      if (fb) {
+        fb.style.color = data.success ? '#16a34a' : '#dc2626';
+        fb.textContent = (data.success ? '[OK] ' : '[Error] ') + (data.message || data.error);
+      }
+    } catch (e) {
+      if (fb) {
+        fb.style.color = '#dc2626';
+        fb.textContent = 'Network error testing GitHub connection.';
+      }
+    }
+  };
+
+  window.swaTestIA = async function() {
+    const ak = document.getElementById('swa-set-ia-access-key').value.trim();
+    const sk = document.getElementById('swa-set-ia-secret-key').value.trim();
+    const fb = document.getElementById('swa-test-ia-feedback');
+
+    if (fb) {
+      fb.style.color = '#0284c7';
+      fb.textContent = 'Testing connection to archive.org S3...';
+    }
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() },
+        body: JSON.stringify({ action: 'test_ia_credentials', payload: { archive_org_access_key: ak, archive_org_secret_key: sk } })
+      });
+      const data = await res.json();
+      if (fb) {
+        fb.style.color = data.success ? '#16a34a' : '#dc2626';
+        fb.textContent = (data.success ? '[OK] ' : '[Error] ') + (data.message || data.error);
+      }
+    } catch (e) {
+      if (fb) {
+        fb.style.color = '#dc2626';
+        fb.textContent = 'Network error testing Archive.org credentials.';
+      }
+    }
+  };
+
+  window.swaTestS3 = async function() {
+    const ep = document.getElementById('swa-set-s3-endpoint').value.trim();
+    const bucket = document.getElementById('swa-set-s3-bucket').value.trim();
+    const ak = document.getElementById('swa-set-s3-access').value.trim();
+    const sk = document.getElementById('swa-set-s3-secret').value.trim();
+    const reg = document.getElementById('swa-set-s3-region').value.trim();
+    const fb = document.getElementById('swa-test-s3-feedback');
+
+    if (fb) {
+      fb.style.color = '#0284c7';
+      fb.textContent = 'Testing connection to S3/Cloud storage...';
+    }
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() },
+        body: JSON.stringify({
+          action: 'test_s3_credentials',
+          payload: { s3_endpoint_url: ep, s3_bucket_name: bucket, s3_access_key: ak, s3_secret_key: sk, s3_region: reg }
+        })
+      });
+      const data = await res.json();
+      if (fb) {
+        fb.style.color = data.success ? '#16a34a' : '#dc2626';
+        fb.textContent = (data.success ? '[OK] ' : '[Error] ') + (data.message || data.error);
+      }
+    } catch (e) {
+      if (fb) {
+        fb.style.color = '#dc2626';
+        fb.textContent = 'Network error testing S3 credentials.';
+      }
+    }
+  };
+
+  window.swaSaveSettings = async function() {
+    const settings = {
+      default_cloud_target: document.getElementById('swa-set-default-target').value,
+      recurring_snapshot_interval: document.getElementById('swa-set-recur-interval').value,
+      google_calendar_feed_url: document.getElementById('swa-set-gcal-url').value.trim(),
+      github_token: document.getElementById('swa-set-gh-token').value.trim(),
+      github_repo: document.getElementById('swa-set-gh-repo').value.trim(),
+      github_tag_prefix: document.getElementById('swa-set-gh-prefix').value.trim() || 'v',
+      archive_org_access_key: document.getElementById('swa-set-ia-access-key').value.trim(),
+      archive_org_secret_key: document.getElementById('swa-set-ia-secret-key').value.trim(),
+      archive_org_collection: document.getElementById('swa-set-ia-collection').value.trim() || 'opensource',
+      item_prefix: document.getElementById('swa-set-ia-prefix').value.trim() || 'fiestasmp_world_',
+      s3_endpoint_url: document.getElementById('swa-set-s3-endpoint').value.trim(),
+      s3_bucket_name: document.getElementById('swa-set-s3-bucket').value.trim(),
+      s3_access_key: document.getElementById('swa-set-s3-access').value.trim(),
+      s3_secret_key: document.getElementById('swa-set-s3-secret').value.trim(),
+      s3_region: document.getElementById('swa-set-s3-region').value.trim() || 'auto',
+      s3_public_base_url: document.getElementById('swa-set-s3-public').value.trim(),
+      broadcast_on_release: document.getElementById('swa-set-broadcast').checked,
+      discord_webhook_url: document.getElementById('swa-set-discord-webhook').value.trim()
+    };
+
+    const fb = document.getElementById('swa-set-save-feedback');
+    if (fb) {
+      fb.style.color = '#0284c7';
+      fb.textContent = 'Saving settings...';
+    }
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': getCsrf() },
+        body: JSON.stringify({ action: 'save_settings', payload: { settings: settings } })
+      });
+      const data = await res.json();
+      if (fb) {
+        if (data.success) {
+          fb.style.color = '#16a34a';
+          fb.textContent = data.message;
+          setTimeout(window.swaCloseSettingsModal, 900);
+          window.swaRefreshStatus();
+        } else {
+          fb.style.color = '#dc2626';
+          fb.textContent = data.error || 'Failed to save settings.';
+        }
+      }
+    } catch (e) {
+      if (fb) {
+        fb.style.color = '#dc2626';
+        fb.textContent = 'Error saving settings.';
+      }
+    }
+  };
+
+  function syncSettingsFields(s) {
+    if (!s) return;
+    const defTgt = document.getElementById('swa-set-default-target');
+    if (defTgt && s.default_cloud_target) defTgt.value = s.default_cloud_target;
+
+    const rInt = document.getElementById('swa-set-recur-interval');
+    if (rInt && s.recurring_snapshot_interval) rInt.value = s.recurring_snapshot_interval;
+
+    const gcal = document.getElementById('swa-set-gcal-url');
+    if (gcal && s.google_calendar_feed_url !== undefined) gcal.value = s.google_calendar_feed_url;
+
+    const ghTok = document.getElementById('swa-set-gh-token');
+    if (ghTok && s.github_token !== undefined) ghTok.value = s.github_token;
+
+    const ghRepo = document.getElementById('swa-set-gh-repo');
+    if (ghRepo && s.github_repo !== undefined) ghRepo.value = s.github_repo;
+
+    const ghPfx = document.getElementById('swa-set-gh-prefix');
+    if (ghPfx && s.github_tag_prefix !== undefined) ghPfx.value = s.github_tag_prefix;
+
+    const ak = document.getElementById('swa-set-ia-access-key');
+    if (ak && s.archive_org_access_key !== undefined) ak.value = s.archive_org_access_key;
+
+    const sk = document.getElementById('swa-set-ia-secret-key');
+    if (sk && s.archive_org_secret_key !== undefined) sk.value = s.archive_org_secret_key;
+
+    const col = document.getElementById('swa-set-ia-collection');
+    if (col && s.archive_org_collection !== undefined) col.value = s.archive_org_collection;
+
+    const iaPfx = document.getElementById('swa-set-ia-prefix');
+    if (iaPfx && s.item_prefix !== undefined) iaPfx.value = s.item_prefix;
+
+    const s3Ep = document.getElementById('swa-set-s3-endpoint');
+    if (s3Ep && s.s3_endpoint_url !== undefined) s3Ep.value = s.s3_endpoint_url;
+
+    const s3Bk = document.getElementById('swa-set-s3-bucket');
+    if (s3Bk && s.s3_bucket_name !== undefined) s3Bk.value = s.s3_bucket_name;
+
+    const s3Ak = document.getElementById('swa-set-s3-access');
+    if (s3Ak && s.s3_access_key !== undefined) s3Ak.value = s.s3_access_key;
+
+    const s3Sk = document.getElementById('swa-set-s3-secret');
+    if (s3Sk && s.s3_secret_key !== undefined) s3Sk.value = s.s3_secret_key;
+
+    const s3Reg = document.getElementById('swa-set-s3-region');
+    if (s3Reg && s.s3_region !== undefined) s3Reg.value = s.s3_region;
+
+    const s3Pub = document.getElementById('swa-set-s3-public');
+    if (s3Pub && s.s3_public_base_url !== undefined) s3Pub.value = s.s3_public_base_url;
+
+    const bc = document.getElementById('swa-set-broadcast');
+    if (bc && s.broadcast_on_release !== undefined) bc.checked = Boolean(s.broadcast_on_release);
+
+    const dw = document.getElementById('swa-set-discord-webhook');
+    if (dw && s.discord_webhook_url !== undefined) dw.value = s.discord_webhook_url;
+  }
+
+  // Initialize
+  window.swaOnPurposeChange();
+  window.swaRefreshStatus();
+})();
+</script>

@@ -548,15 +548,15 @@
       }
     },
     {
-      "id": "episode_world_archiver",
-      "name": "Episode World Archiver & Archive.org Publisher",
-      "version": "1.0.0",
+      "id": "scheduled_world_archiver",
+      "name": "Scheduled World Archiver & Multi-Cloud Publisher",
+      "version": "1.1.0",
       "author": "FiestaSMP Team",
       "category": "Backup & Sync",
       "featured": true,
-      "icon": "fa-solid fa-clapperboard",
-      "summary": "Capture Pre/Post episode world states, create zip archives, upload to Internet Archive (archive.org), and release downloads on scheduled date/time linked to Google Calendar.",
-      "description": "Comprehensive SMP episode workflow plugin. Allows server administrators and content creators to snapshot before and after world states for each episode, generate verified zip archives, automatically upload them to archive.org S3 cloud storage, and link releases with Google Calendar and FiestaPanel Event Manager.",
+      "icon": "fa-solid fa-cloud-arrow-up",
+      "summary": "Capture world snapshots for any scheduled purpose, create zip archives, publish to GitHub Releases, Internet Archive, or Cloudflare R2 / S3, and synchronize releases.",
+      "description": "Enterprise-grade Minecraft world archiving and scheduled release manager. Supports SMP episodes, milestone events, automated recurring public world releases, and maintenance backups. Uploads directly to GitHub Releases, Internet Archive (archive.org), Cloudflare R2 / AWS S3, or custom HTTP endpoints.",
       "dependencies": {
         "engine": [
           "Paper",
@@ -570,18 +570,18 @@
         "required_plugins": [],
         "system_requirements": [
           {
-            "name": "Internet Archive S3 API Access",
+            "name": "Outbound HTTPS Connectivity",
             "satisfied": true,
-            "description": "HTTPS network access to s3.us.archive.org"
+            "description": "HTTPS network access to api.github.com, archive.org, or custom S3"
           }
         ]
       },
       "stats": {
-        "installs_count": 890,
+        "installs_count": 950,
         "rating_score": 5.0,
-        "reviews_count": 128,
+        "reviews_count": 142,
         "rating_breakdown": {
-          "5_star": 128,
+          "5_star": 142,
           "4_star": 0,
           "3_star": 0,
           "2_star": 0,
@@ -590,59 +590,80 @@
         "last_updated": "2026-11-08",
         "license": "MIT"
       },
-      "readme_markdown": "# Episode World Archiver & Archive.org Publisher\n\n> [!NOTE]\n> The Episode World Archiver packages world files (`world`, `world_nether`, and `world_the_end`) into fast-compressed zip packages and provides native streaming upload to the Internet Archive (archive.org).\n\n## Overview\n\nDesigned for SMP creators who release episodic world downloads to their viewers. Capture clean Pre-Episode and Post-Episode states, coordinate premiere releases with your Google Calendar, and let FiestaPanel automatically publish download links in-game and on Discord when the time comes!\n\n## Features\n\n- **Before & After Recording Snapshots**: Dedicated buttons execute `save-all flush` and package dimensions safely.\n- **Internet Archive S3 Integration**: High-speed chunked uploads directly to archive.org collections.\n- **Calendar Sync**: Integrates with FiestaPanel Event Manager and Google Calendar ICS feeds.\n- **Scheduled Releases**: Download links remain locked until the scheduled premiere time, then auto-unlock with in-game chat broadcasts.\n",
+      "readme_markdown": "# Scheduled World Archiver & Multi-Cloud Publisher\n\n> [!NOTE]\n> The Scheduled World Archiver packages world files (`world`, `world_nether`, and `world_the_end`) into fast-compressed zip packages and provides multi-cloud publishing to GitHub Releases, Internet Archive, or S3/R2 storage.\n\n## Overview\n\nDesigned for server admins and SMP creators who need reliable world archiving for any scheduled purpose: episodes, boss battles, tournaments, weekly public downloads, or maintenance snapshots.\n",
       "settings_schema": [
         {
-          "key": "archive_org_access_key",
-          "label": "Internet Archive (archive.org) S3 Access Key",
+          "key": "default_cloud_target",
+          "label": "Default Cloud Destination",
+          "type": "select",
+          "options": ["archive_org", "github", "s3", "custom_post", "local"],
+          "default": "archive_org"
+        },
+        {
+          "key": "github_token",
+          "label": "GitHub Personal Access Token",
+          "type": "password",
+          "default": "",
+          "placeholder": "ghp_..."
+        },
+        {
+          "key": "github_repo",
+          "label": "GitHub Repository (owner/repo)",
           "type": "text",
           "default": "",
-          "placeholder": "Get from archive.org/account/s3.php"
+          "placeholder": "e.g. open-fiestasmp/world-downloads"
+        },
+        {
+          "key": "archive_org_access_key",
+          "label": "Internet Archive Access Key",
+          "type": "text",
+          "default": "",
+          "placeholder": "Access Key"
         },
         {
           "key": "archive_org_secret_key",
-          "label": "Internet Archive (archive.org) S3 Secret Key",
+          "label": "Internet Archive Secret Key",
           "type": "password",
           "default": "",
-          "placeholder": "S3 secret key"
+          "placeholder": "Secret Key"
         },
         {
-          "key": "archive_org_collection",
-          "label": "Internet Archive Collection",
+          "key": "s3_endpoint_url",
+          "label": "S3 Endpoint URL",
           "type": "text",
-          "default": "opensource",
-          "placeholder": "opensource or custom collection"
+          "default": ""
         },
         {
-          "key": "item_prefix",
-          "label": "Item Identifier Prefix",
+          "key": "s3_bucket_name",
+          "label": "S3 Bucket Name",
           "type": "text",
-          "default": "fiestasmp_episode_",
-          "placeholder": "fiestasmp_episode_"
+          "default": ""
         },
         {
-          "key": "include_overworld",
-          "label": "Include Overworld (world/)",
-          "type": "checkbox",
-          "default": true
+          "key": "s3_access_key",
+          "label": "S3 Access Key",
+          "type": "text",
+          "default": ""
         },
         {
-          "key": "include_nether",
-          "label": "Include The Nether (world_nether/)",
-          "type": "checkbox",
-          "default": true
+          "key": "s3_secret_key",
+          "label": "S3 Secret Key",
+          "type": "password",
+          "default": ""
         },
         {
-          "key": "include_the_end",
-          "label": "Include The End (world_the_end/)",
-          "type": "checkbox",
-          "default": true
+          "key": "recurring_snapshot_interval",
+          "label": "Recurring Interval",
+          "type": "select",
+          "options": ["disabled", "6h", "12h", "24h", "7d"],
+          "default": "disabled"
         },
         {
-          "key": "auto_upload_ia",
-          "label": "Auto-Upload to Internet Archive after Zipping",
-          "type": "checkbox",
-          "default": false
+          "key": "google_calendar_feed_url",
+          "label": "Google Calendar iCal / ICS Feed URL",
+          "type": "text",
+          "default": "",
+          "placeholder": "https://calendar.google.com/calendar/ical/.../basic.ics"
         },
         {
           "key": "broadcast_on_release",
@@ -656,33 +677,30 @@
           "type": "text",
           "default": "",
           "placeholder": "https://discord.com/api/webhooks/..."
-        },
-        {
-          "key": "google_calendar_feed_url",
-          "label": "Google Calendar iCal / ICS Feed URL",
-          "type": "text",
-          "default": "",
-          "placeholder": "https://calendar.google.com/calendar/ical/.../basic.ics"
         }
       ],
       "default_settings": {
+        "default_cloud_target": "archive_org",
+        "github_token": "",
+        "github_repo": "",
         "archive_org_access_key": "",
         "archive_org_secret_key": "",
         "archive_org_collection": "opensource",
-        "item_prefix": "fiestasmp_episode_",
-        "include_overworld": true,
-        "include_nether": true,
-        "include_the_end": true,
-        "auto_upload_ia": false,
+        "item_prefix": "fiestasmp_world_",
+        "s3_endpoint_url": "",
+        "s3_bucket_name": "",
+        "s3_access_key": "",
+        "s3_secret_key": "",
+        "recurring_snapshot_interval": "disabled",
+        "google_calendar_feed_url": "",
         "broadcast_on_release": true,
-        "discord_webhook_url": "",
-        "google_calendar_feed_url": ""
+        "discord_webhook_url": ""
       },
       "ui_slots": {
         "tab": {
-          "title": "Episode World Archiver",
-          "icon": "fa-solid fa-clapperboard",
-          "description": "Capture Pre/Post recording world states, upload to Internet Archive, and release world downloads scheduled with Google Calendar."
+          "title": "Scheduled World Archiver",
+          "icon": "fa-solid fa-cloud-arrow-up",
+          "description": "Capture world snapshots for any scheduled purpose, publish to GitHub Releases, Internet Archive, or Cloudflare R2 / S3, and synchronize releases."
         }
       }
     }

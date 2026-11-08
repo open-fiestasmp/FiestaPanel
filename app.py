@@ -1358,7 +1358,7 @@ def enforce_security():
                 return jsonify(error="Owner permission required"), 403
             elif path.startswith("/api/backup") and "backups" not in perms:
                 return jsonify(error="Owner permission required"), 403
-            elif path.startswith("/api/panel-addons/episode_world_archiver/download") and "backups" not in perms and "filemanager" not in perms:
+            elif (path.startswith("/api/panel-addons/scheduled_world_archiver/download") or path.startswith("/api/panel-addons/episode_world_archiver/download")) and "backups" not in perms and "filemanager" not in perms:
                 return jsonify(error="Owner permission required"), 403
             elif path.startswith("/api/server/properties") and "parameters" not in perms:
                 return jsonify(error="Owner permission required"), 403
@@ -5816,6 +5816,7 @@ def api_panel_addons_action(addon_id):
     res = addon_manager.execute_addon_action(addon_id, action_name, payload)
     return jsonify(res)
 
+@app.route("/api/panel-addons/scheduled_world_archiver/download/<path:filename>", methods=["GET"])
 @app.route("/api/panel-addons/episode_world_archiver/download/<path:filename>", methods=["GET"])
 @login_required
 def api_panel_addons_download_archive(filename):
