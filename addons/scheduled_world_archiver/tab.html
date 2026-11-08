@@ -7,11 +7,11 @@
       <span class="inline-badge" style="background:var(--sec-bar-bg, #74b21d); color:#fff; font-size:10px; font-weight:bold; padding:1px 6px;">Multi-Cloud Publisher</span>
     </div>
     <div style="display:flex; gap:6px; flex-shrink:0; align-items:center;">
-      <button class="btn-classic" style="height:22px; line-height:20px; padding:0 8px; font-size:11px; display:inline-flex; align-items:center; gap:4px; vertical-align:middle;" onclick="swaRefreshStatus()">
-        <i class="fa-solid fa-arrows-rotate"></i> [ Refresh ]
+      <button class="btn-classic" style="height:22px; line-height:20px; padding:0 8px; font-size:11px; display:inline-flex; align-items:center; vertical-align:middle;" onclick="swaRefreshStatus()">
+        [ Refresh ]
       </button>
-      <button class="btn-classic" style="height:22px; line-height:20px; padding:0 8px; font-size:11px; font-weight:bold; display:inline-flex; align-items:center; gap:4px; vertical-align:middle;" onclick="swaSwitchView('settings')">
-        <i class="fa-solid fa-gear"></i> [ Cloud Settings ]
+      <button class="btn-classic" style="height:22px; line-height:20px; padding:0 8px; font-size:11px; font-weight:bold; display:inline-flex; align-items:center; vertical-align:middle;" onclick="swaSwitchView('settings')">
+        [ Cloud Settings ]
       </button>
     </div>
   </div>
@@ -23,16 +23,16 @@
   <!-- Addon Section Switcher Sub-Tabs -->
   <div style="display:flex; gap:6px; margin-bottom:14px; border-bottom:1px solid rgba(128,128,128,0.2); padding-bottom:8px; flex-wrap:wrap;">
     <button id="swa-nav-instant" class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a); padding:4px 12px; font-size:12px; border-color:var(--sec-bar-bg, #16a34a);" onclick="swaSwitchView('instant')">
-      <i class="fa-solid fa-bolt"></i> [ Instant Save &amp; Upload ]
+      [ Instant Save &amp; Upload ]
     </button>
     <button id="swa-nav-studio" class="btn-classic" style="font-weight:bold; padding:4px 12px; font-size:12px;" onclick="swaSwitchView('studio')">
-      <i class="fa-solid fa-box-archive"></i> [ Studio &amp; Scheduling ]
+      [ Studio &amp; Scheduling ]
     </button>
     <button id="swa-nav-library" class="btn-classic" style="padding:4px 12px; font-size:12px;" onclick="swaSwitchView('library')">
-      <i class="fa-solid fa-database"></i> [ Archives Library ]
+      [ Archives Library ]
     </button>
     <button id="swa-nav-settings" class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #0284c7); padding:4px 12px; font-size:12px;" onclick="swaSwitchView('settings')">
-      <i class="fa-solid fa-cloud"></i> [ Cloud Providers &amp; Settings ]
+      [ Cloud Providers &amp; Settings ]
     </button>
   </div>
 
@@ -114,12 +114,11 @@
 
       <!-- Prominent Save & Direct Upload Button -->
       <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-        <button type="button" class="btn-classic" style="padding:9px 24px; font-size:13px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:2px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; gap:8px; cursor:pointer;" onclick="swaTriggerInstantSaveAndUpload()">
-          <i class="fa-solid fa-cloud-arrow-up"></i>
+        <button type="button" class="btn-classic" style="padding:9px 24px; font-size:13px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:2px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; cursor:pointer;" onclick="swaTriggerInstantSaveAndUpload()">
           <span>Save Current World &amp; Directly Upload</span>
         </button>
         <button type="button" class="btn-classic" style="padding:9px 18px; font-size:12px;" onclick="swaSwitchView('settings')">
-          <i class="fa-solid fa-key"></i> [ Configure Cloud API Keys ]
+          [ Configure Cloud API Keys ]
         </button>
         <span id="swa-instant-feedback" style="font-size:12px; font-weight:bold; margin-left:8px;"></span>
       </div>
@@ -215,18 +214,15 @@
 
       <!-- Action Buttons -->
       <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-start; margin-top:8px;">
-        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#0284c7; border:1.5px solid #0284c7; background:rgba(2, 132, 199, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('pre')">
-          <i class="fa-solid fa-play"></i>
+        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#0284c7; border:1.5px solid #0284c7; background:rgba(2, 132, 199, 0.08); display:flex; align-items:center; cursor:pointer;" onclick="swaTriggerSnapshot('pre')">
           <span>Take Pre-Event Snapshot (Before)</span>
         </button>
 
-        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:1.5px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('post')">
-          <i class="fa-solid fa-flag-checkered"></i>
+        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:1.5px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; cursor:pointer;" onclick="swaTriggerSnapshot('post')">
           <span>Take Post-Event Snapshot (After)</span>
         </button>
 
-        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#b45309; border:1.5px solid #b45309; background:rgba(234, 179, 8, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('snapshot')">
-          <i class="fa-solid fa-camera"></i>
+        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#b45309; border:1.5px solid #b45309; background:rgba(234, 179, 8, 0.08); display:flex; align-items:center; cursor:pointer;" onclick="swaTriggerSnapshot('snapshot')">
           <span>Create Snapshot Package Now</span>
         </button>
 
@@ -916,7 +912,7 @@
 
       cloudHtml += `
         <button class="btn-classic" style="font-size:10.5px; font-weight:bold; margin-top:2px;" onclick="swaOpenUploadPicker('${escapeHtml(arc.id)}', '${escapeHtml(arc.title)}')">
-          <i class="fa-solid fa-cloud-arrow-up"></i> [ Upload to Cloud... ]
+          [ Upload to Cloud... ]
         </button>
       `;
 
