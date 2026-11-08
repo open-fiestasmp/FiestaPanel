@@ -269,7 +269,7 @@ def _release_scheduler_loop(ctx):
                                     type_label = ep.get("type_label") or "World Download"
                                     _send_discord_announcement(
                                         discord_url,
-                                        f"📦 FiestaSMP World Download Released: {ep_title}!",
+                                        f"[FiestaSMP] World Download Released: {ep_title}",
                                         f"The official world archive for **{ep_title}** ({type_label}) has reached its scheduled release time and is now publicly available for download!",
                                         [
                                             {"name": "Snapshot Title", "value": ep_title, "inline": True},
@@ -526,13 +526,8 @@ def _execute_archive_task(
         target_dest = upload_target or settings.get("default_cloud_target", "archive_org")
 
         if should_upload and target_dest != "local":
-            logger.info(f"Auto-uploading archive {archive_id} to destination '{target_dest}'...")
-            t_up = threading.Thread(
-                target=_dispatch_cloud_upload,
-                args=(ctx, archive_id, target_dest),
-                daemon=True
-            )
-            t_up.start()
+            logger.info(f"Direct cloud upload starting for archive {archive_id} to destination '{target_dest}'...")
+            _dispatch_cloud_upload(ctx, archive_id, target_dest)
 
     except InterruptedError:
         logger.info("Snapshot archive task was cancelled.")

@@ -1,24 +1,40 @@
 <div class="panel-box" id="swa-root" style="padding-bottom: 24px;">
   <!-- Header Bar -->
-  <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
-    <div style="display:flex; align-items:center; gap:8px;">
-      <i class="fa-solid fa-cloud-arrow-up" style="font-size:16px;"></i>
-      <span>Scheduled World Archiver &amp; Multi-Cloud Publisher</span>
-      <span class="inline-badge" style="background:var(--sec-bar-bg, #74b21d); color:#fff; font-weight:bold;">Multi-Cloud Sync</span>
+  <div class="section-title-bar" style="height:auto; min-height:28px; padding:4px 10px; box-sizing:border-box; display:flex; justify-content:space-between; align-items:center; flex-wrap:nowrap; margin-bottom:12px;">
+    <div style="display:flex; align-items:center; gap:8px; overflow:hidden; white-space:nowrap;">
+      <i class="fa-solid fa-cloud-arrow-up" style="font-size:14px;"></i>
+      <span style="font-weight:bold; font-size:12px;">Scheduled World Archiver</span>
+      <span class="inline-badge" style="background:var(--sec-bar-bg, #74b21d); color:#fff; font-size:10px; font-weight:bold; padding:1px 6px;">Multi-Cloud Publisher</span>
     </div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn-classic" onclick="swaRefreshStatus()">
+    <div style="display:flex; gap:6px; flex-shrink:0; align-items:center;">
+      <button class="btn-classic" style="height:22px; line-height:20px; padding:0 8px; font-size:11px; display:inline-flex; align-items:center; gap:4px; vertical-align:middle;" onclick="swaRefreshStatus()">
         <i class="fa-solid fa-arrows-rotate"></i> [ Refresh ]
       </button>
-      <button class="btn-classic" style="font-weight:bold;" onclick="swaOpenSettingsModal()">
-        <i class="fa-solid fa-gear"></i> [ Cloud Keys &amp; Schedules ]
+      <button class="btn-classic" style="height:22px; line-height:20px; padding:0 8px; font-size:11px; font-weight:bold; display:inline-flex; align-items:center; gap:4px; vertical-align:middle;" onclick="swaSwitchView('settings')">
+        <i class="fa-solid fa-gear"></i> [ Cloud Settings ]
       </button>
     </div>
   </div>
 
-  <p class="inline-hint" style="margin-top:6px; margin-bottom:14px; line-height:1.5;">
-    Capture world state snapshots for any scheduled purpose (<strong>SMP Episodes</strong>, <strong>Milestones &amp; Boss Fights</strong>, <strong>Scheduled World Downloads</strong>, or <strong>Maintenance</strong>), package into clean zip archives, upload to <strong>GitHub Releases</strong>, <strong>Internet Archive</strong>, or <strong>Cloudflare R2 / S3</strong>, and link releases to your <strong>Google Calendar &amp; Event Manager</strong> schedule.
+  <p class="inline-hint" style="margin-top:2px; margin-bottom:12px; line-height:1.45;">
+    Capture world state snapshots for any scheduled purpose (<strong>SMP Episodes</strong>, <strong>Server Milestones</strong>, <strong>Scheduled World Downloads</strong>, or <strong>Maintenance</strong>), package into clean zip archives, upload to <strong>GitHub Releases</strong>, <strong>Internet Archive</strong>, or <strong>Cloudflare R2 / S3</strong>, and link releases to your <strong>Google Calendar &amp; Event Manager</strong> schedule.
   </p>
+
+  <!-- Addon Section Switcher Sub-Tabs -->
+  <div style="display:flex; gap:6px; margin-bottom:14px; border-bottom:1px solid rgba(128,128,128,0.2); padding-bottom:8px; flex-wrap:wrap;">
+    <button id="swa-nav-instant" class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a); padding:4px 12px; font-size:12px; border-color:var(--sec-bar-bg, #16a34a);" onclick="swaSwitchView('instant')">
+      <i class="fa-solid fa-bolt"></i> [ Instant Save &amp; Upload ]
+    </button>
+    <button id="swa-nav-studio" class="btn-classic" style="font-weight:bold; padding:4px 12px; font-size:12px;" onclick="swaSwitchView('studio')">
+      <i class="fa-solid fa-box-archive"></i> [ Studio &amp; Scheduling ]
+    </button>
+    <button id="swa-nav-library" class="btn-classic" style="padding:4px 12px; font-size:12px;" onclick="swaSwitchView('library')">
+      <i class="fa-solid fa-database"></i> [ Archives Library ]
+    </button>
+    <button id="swa-nav-settings" class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #0284c7); padding:4px 12px; font-size:12px;" onclick="swaSwitchView('settings')">
+      <i class="fa-solid fa-cloud"></i> [ Cloud Providers &amp; Settings ]
+    </button>
+  </div>
 
   <!-- Live Task Monitor -->
   <div id="swa-task-monitor" style="display:none; margin-bottom:16px; padding:12px 16px; background:var(--banner-info-bg, rgba(56, 189, 248, 0.08)); border:1px solid var(--banner-info-border, rgba(56, 189, 248, 0.3)); border-radius:6px;">
@@ -42,355 +58,422 @@
     </div>
   </div>
 
-  <!-- Snapshot Studio Card -->
-  <div style="border:1px solid rgba(128,128,128,0.25); border-radius:6px; padding:14px 18px; margin-bottom:18px; background:rgba(128,128,128,0.03);">
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid rgba(128,128,128,0.15); padding-bottom:8px;">
-      <div style="font-weight:bold; font-size:13.5px; display:flex; align-items:center; gap:6px;">
-        <i class="fa-solid fa-box-archive" style="color:var(--sec-bar-bg, #74b21d);"></i>
-        <span>World Snapshot &amp; Release Studio</span>
+  <!-- ════ VIEW 1: INSTANT SAVE & DIRECT CLOUD UPLOAD ════ -->
+  <div id="swa-view-instant" style="display:block;">
+    <div style="border:1px solid rgba(128,128,128,0.25); border-radius:6px; padding:16px 20px; margin-bottom:18px; background:rgba(128,128,128,0.03);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid rgba(128,128,128,0.15); padding-bottom:8px;">
+        <div style="font-weight:bold; font-size:13.5px; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-bolt" style="color:var(--sec-bar-bg, #16a34a);"></i>
+          <span>Instant World Save &amp; Direct Cloud Upload</span>
+        </div>
+        <span class="inline-badge" style="font-size:11px;">One-Click Pipeline</span>
       </div>
-      <div style="font-size:12px; opacity:0.85;">
-        <span>Purpose: </span>
-        <select id="swa-input-purpose" class="ctrl-input" style="font-size:11.5px; padding:2px 8px;" onchange="swaOnPurposeChange()">
-          <option value="episode">SMP Episode (Pre / Post Recording)</option>
-          <option value="milestone">Server Milestone &amp; Boss Fight</option>
-          <option value="release">Scheduled Public World Download</option>
-          <option value="maintenance">Maintenance &amp; Pre-Update</option>
-          <option value="custom">General / Custom Snapshot</option>
-        </select>
-      </div>
-    </div>
 
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:12px;">
-      <!-- Episode Number (visible when purpose == episode) -->
-      <div id="swa-box-ep-num">
-        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Episode Number:</label>
-        <div style="display:flex; align-items:center; gap:6px;">
-          <input type="number" id="swa-input-ep-num" class="ctrl-input" style="width:90px;" min="1" value="1" onchange="swaOnNumChange()">
-          <span class="inline-hint" style="font-size:11px;">(Auto-increments)</span>
+      <p class="inline-hint" style="margin-top:0; margin-bottom:14px; font-size:12px;">
+        Flushes chunk cache from RAM to disk with <code>save-all flush</code>, packages all dimensions into an optimized zip file, and streams directly to your selected cloud provider immediately without waiting for a schedule.
+      </p>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:14px;">
+        <!-- Upload Destination -->
+        <div>
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Upload Destination:</label>
+          <select id="swa-instant-target" class="ctrl-input" style="width:100%;">
+            <option value="archive_org">Internet Archive (archive.org S3)</option>
+            <option value="github">GitHub Releases (Direct Asset Upload)</option>
+            <option value="s3">Custom S3 / Cloudflare R2 / AWS</option>
+            <option value="custom_post">Custom HTTP Endpoint</option>
+          </select>
+        </div>
+
+        <!-- Snapshot Label / Title -->
+        <div>
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Snapshot Title / Label:</label>
+          <input type="text" id="swa-instant-title" class="ctrl-input" style="width:100%;" placeholder="e.g. Instant World Snapshot" value="Live World Snapshot">
+        </div>
+
+        <!-- Optional Notes -->
+        <div>
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Release Notes / Changelog:</label>
+          <input type="text" id="swa-instant-notes" class="ctrl-input" style="width:100%;" placeholder="e.g. Captured before server maintenance">
         </div>
       </div>
 
-      <!-- Snapshot / Release Title -->
-      <div>
-        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Snapshot / Release Title:</label>
-        <input type="text" id="swa-input-title" class="ctrl-input" style="width:100%;" placeholder="e.g. Episode 1, Dragon Slaying, Weekly Download" value="Episode 1">
-      </div>
-
-      <!-- Linked Event Selector -->
-      <div>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <label style="font-size:12px; font-weight:bold;">Link Calendar / Scheduled Event:</label>
-          <a href="javascript:void(0)" onclick="swaPromptNewEvent()" style="font-size:11px; text-decoration:underline;">+ New Event</a>
-        </div>
-        <select id="swa-input-event" class="ctrl-input" style="width:100%;" onchange="swaOnEventSelected()">
-          <option value="">-- Manual Schedule or Immediate Release --</option>
-        </select>
-      </div>
-
-      <!-- Scheduled Release Date/Time -->
-      <div>
-        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Scheduled Public Release Date &amp; Time:</label>
-        <input type="datetime-local" id="swa-input-release-time" class="ctrl-input" style="width:100%;">
-        <span class="inline-hint" style="font-size:10.5px; display:block; margin-top:2px;">Leave empty to unlock immediately after snapshot creation.</span>
-      </div>
-    </div>
-
-    <!-- Dimensions & Cloud Upload Target -->
-    <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; padding:8px 0; border-top:1px dashed rgba(128,128,128,0.2); border-bottom:1px dashed rgba(128,128,128,0.2); margin-bottom:14px; font-size:12px;">
-      <span style="font-weight:bold;">Dimensions:</span>
-      <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-        <input type="checkbox" id="swa-dim-overworld" checked> Overworld (<span style="opacity:0.75;">world/</span>)
-      </label>
-      <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-        <input type="checkbox" id="swa-dim-nether" checked> The Nether (<span style="opacity:0.75;">world_nether/</span>)
-      </label>
-      <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
-        <input type="checkbox" id="swa-dim-the-end" checked> The End (<span style="opacity:0.75;">world_the_end/</span>)
-      </label>
-
-      <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
-        <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:bold; color:var(--sec-bar-bg, #0284c7);">
-          <input type="checkbox" id="swa-opt-auto-upload"> Auto-Upload to Cloud:
+      <!-- Dimensions -->
+      <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center; padding:8px 0; border-top:1px dashed rgba(128,128,128,0.2); border-bottom:1px dashed rgba(128,128,128,0.2); margin-bottom:16px; font-size:12px;">
+        <span style="font-weight:bold;">Dimensions to Include:</span>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="swa-instant-dim-overworld" checked> Overworld (<span style="opacity:0.75;">world/</span>)
         </label>
-        <select id="swa-input-target-dest" class="ctrl-input" style="font-size:11.5px; padding:2px 6px;">
-          <option value="archive_org">Internet Archive (archive.org)</option>
-          <option value="github">GitHub Releases</option>
-          <option value="s3">Custom S3 / Cloudflare R2</option>
-          <option value="custom_post">Custom HTTP Endpoint</option>
-        </select>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="swa-instant-dim-nether" checked> The Nether (<span style="opacity:0.75;">world_nether/</span>)
+        </label>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="swa-instant-dim-the-end" checked> The End (<span style="opacity:0.75;">world_the_end/</span>)
+        </label>
       </div>
-    </div>
 
-    <!-- Optional Notes -->
-    <div style="margin-bottom:14px;">
-      <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Changelog / Release Notes (Optional):</label>
-      <input type="text" id="swa-input-notes" class="ctrl-input" style="width:100%;" placeholder="e.g. World state right before starting Dragon battle, coordinates: 0, 70, 0.">
-    </div>
-
-    <!-- Action Buttons for All Scheduled Purposes -->
-    <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-start; margin-top:8px;">
-      <!-- Pre-Event / Before Button -->
-      <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#0284c7; border:1.5px solid #0284c7; background:rgba(2, 132, 199, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('pre')">
-        <i class="fa-solid fa-play"></i>
-        <span>Take Pre-Event Snapshot (Before)</span>
-      </button>
-
-      <!-- Post-Event / After Button -->
-      <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:1.5px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('post')">
-        <i class="fa-solid fa-flag-checkered"></i>
-        <span>Take Post-Event Snapshot (After)</span>
-      </button>
-
-      <!-- Complete Snapshot Package Now -->
-      <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#b45309; border:1.5px solid #b45309; background:rgba(234, 179, 8, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('snapshot')">
-        <i class="fa-solid fa-camera"></i>
-        <span>Create Snapshot Package Now</span>
-      </button>
-
-      <span id="swa-snapshot-feedback" style="font-size:12px; font-weight:bold; margin-left:8px;"></span>
+      <!-- Prominent Save & Direct Upload Button -->
+      <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
+        <button type="button" class="btn-classic" style="padding:9px 24px; font-size:13px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:2px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; gap:8px; cursor:pointer;" onclick="swaTriggerInstantSaveAndUpload()">
+          <i class="fa-solid fa-cloud-arrow-up"></i>
+          <span>Save Current World &amp; Directly Upload</span>
+        </button>
+        <button type="button" class="btn-classic" style="padding:9px 18px; font-size:12px;" onclick="swaSwitchView('settings')">
+          <i class="fa-solid fa-key"></i> [ Configure Cloud API Keys ]
+        </button>
+        <span id="swa-instant-feedback" style="font-size:12px; font-weight:bold; margin-left:8px;"></span>
+      </div>
     </div>
   </div>
 
-  <!-- Archives & Releases Library -->
-  <div class="section-sub-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-    <div style="display:flex; align-items:center; gap:6px;">
-      <i class="fa-solid fa-database"></i>
-      <span>World Archives &amp; Multi-Cloud Releases</span>
+  <!-- ════ VIEW 2: STUDIO & SCHEDULING ════ -->
+  <div id="swa-view-studio" style="display:none;">
+    <div style="border:1px solid rgba(128,128,128,0.25); border-radius:6px; padding:14px 18px; margin-bottom:18px; background:rgba(128,128,128,0.03);">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; border-bottom:1px solid rgba(128,128,128,0.15); padding-bottom:8px;">
+        <div style="font-weight:bold; font-size:13.5px; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-calendar-check" style="color:var(--sec-bar-bg, #74b21d);"></i>
+          <span>Snapshot &amp; Schedule Studio</span>
+        </div>
+        <div style="font-size:12px; opacity:0.85;">
+          <span>Purpose: </span>
+          <select id="swa-input-purpose" class="ctrl-input" style="font-size:11.5px; padding:2px 8px;" onchange="swaOnPurposeChange()">
+            <option value="episode">SMP Episode (Pre / Post Recording)</option>
+            <option value="milestone">Server Milestone &amp; Boss Fight</option>
+            <option value="release">Scheduled Public World Download</option>
+            <option value="maintenance">Maintenance &amp; Pre-Update</option>
+            <option value="custom">General / Custom Snapshot</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; margin-bottom:12px;">
+        <!-- Episode Number (visible when purpose == episode) -->
+        <div id="swa-box-ep-num">
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Episode Number:</label>
+          <div style="display:flex; align-items:center; gap:6px;">
+            <input type="number" id="swa-input-ep-num" class="ctrl-input" style="width:90px;" min="1" value="1" onchange="swaOnNumChange()">
+            <span class="inline-hint" style="font-size:11px;">(Auto-increments)</span>
+          </div>
+        </div>
+
+        <!-- Snapshot / Release Title -->
+        <div>
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Snapshot / Release Title:</label>
+          <input type="text" id="swa-input-title" class="ctrl-input" style="width:100%;" placeholder="e.g. Episode 1, Dragon Slaying, Weekly Download" value="Episode 1">
+        </div>
+
+        <!-- Linked Event Selector -->
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <label style="font-size:12px; font-weight:bold;">Link Calendar / Scheduled Event:</label>
+            <a href="javascript:void(0)" onclick="swaPromptNewEvent()" style="font-size:11px; text-decoration:underline;">+ New Event</a>
+          </div>
+          <select id="swa-input-event" class="ctrl-input" style="width:100%;" onchange="swaOnEventSelected()">
+            <option value="">-- Manual Schedule or Immediate Release --</option>
+          </select>
+        </div>
+
+        <!-- Scheduled Release Date/Time -->
+        <div>
+          <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Scheduled Public Release Date &amp; Time:</label>
+          <input type="datetime-local" id="swa-input-release-time" class="ctrl-input" style="width:100%;">
+          <span class="inline-hint" style="font-size:10.5px; display:block; margin-top:2px;">Leave empty to unlock immediately after snapshot creation.</span>
+        </div>
+      </div>
+
+      <!-- Dimensions & Cloud Upload Target -->
+      <div style="display:flex; flex-wrap:wrap; gap:18px; align-items:center; padding:8px 0; border-top:1px dashed rgba(128,128,128,0.2); border-bottom:1px dashed rgba(128,128,128,0.2); margin-bottom:14px; font-size:12px;">
+        <span style="font-weight:bold;">Dimensions:</span>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="swa-dim-overworld" checked> Overworld (<span style="opacity:0.75;">world/</span>)
+        </label>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="swa-dim-nether" checked> The Nether (<span style="opacity:0.75;">world_nether/</span>)
+        </label>
+        <label style="cursor:pointer; display:flex; align-items:center; gap:5px;">
+          <input type="checkbox" id="swa-dim-the-end" checked> The End (<span style="opacity:0.75;">world_the_end/</span>)
+        </label>
+
+        <div style="margin-left:auto; display:flex; align-items:center; gap:10px;">
+          <label style="cursor:pointer; display:flex; align-items:center; gap:5px; font-weight:bold; color:var(--sec-bar-bg, #0284c7);">
+            <input type="checkbox" id="swa-opt-auto-upload"> Auto-Upload to Cloud:
+          </label>
+          <select id="swa-input-target-dest" class="ctrl-input" style="font-size:11.5px; padding:2px 6px;">
+            <option value="archive_org">Internet Archive (archive.org)</option>
+            <option value="github">GitHub Releases</option>
+            <option value="s3">Custom S3 / Cloudflare R2</option>
+            <option value="custom_post">Custom HTTP Endpoint</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Optional Notes -->
+      <div style="margin-bottom:14px;">
+        <label style="display:block; font-size:12px; font-weight:bold; margin-bottom:4px;">Changelog / Release Notes (Optional):</label>
+        <input type="text" id="swa-input-notes" class="ctrl-input" style="width:100%;" placeholder="e.g. World state right before starting Dragon battle, coordinates: 0, 70, 0.">
+      </div>
+
+      <!-- Action Buttons -->
+      <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:flex-start; margin-top:8px;">
+        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#0284c7; border:1.5px solid #0284c7; background:rgba(2, 132, 199, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('pre')">
+          <i class="fa-solid fa-play"></i>
+          <span>Take Pre-Event Snapshot (Before)</span>
+        </button>
+
+        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:var(--sec-bar-bg, #16a34a); border:1.5px solid var(--sec-bar-bg, #16a34a); background:rgba(22, 163, 74, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('post')">
+          <i class="fa-solid fa-flag-checkered"></i>
+          <span>Take Post-Event Snapshot (After)</span>
+        </button>
+
+        <button type="button" class="btn-classic" style="padding:8px 18px; font-size:12.5px; font-weight:bold; color:#b45309; border:1.5px solid #b45309; background:rgba(234, 179, 8, 0.08); display:flex; align-items:center; gap:6px; cursor:pointer;" onclick="swaTriggerSnapshot('snapshot')">
+          <i class="fa-solid fa-camera"></i>
+          <span>Create Snapshot Package Now</span>
+        </button>
+
+        <span id="swa-snapshot-feedback" style="font-size:12px; font-weight:bold; margin-left:8px;"></span>
+      </div>
     </div>
-    <span id="swa-archives-count" class="inline-badge" style="font-size:11px;">0 Archives</span>
   </div>
 
-  <div style="overflow-x:auto;">
-    <table class="grid-table" style="width:100%; border-collapse:collapse; font-size:12.5px;">
-      <thead>
-        <tr style="text-align:left; border-bottom:2px solid rgba(128,128,128,0.25);">
-          <th style="padding:8px 6px;">Snapshot &amp; Purpose</th>
-          <th style="padding:8px 6px;">Archive Details</th>
-          <th style="padding:8px 6px;">Schedule &amp; Release Status</th>
-          <th style="padding:8px 6px;">Cloud Distribution</th>
-          <th style="padding:8px 6px; text-align:right;">Actions</th>
-        </tr>
-      </thead>
-      <tbody id="swa-archives-tbody">
-        <tr>
-          <td colspan="5" style="text-align:center; padding:24px;" class="inline-hint">
-            No world archives recorded yet. Click one of the snapshot buttons above to create your first world archive!
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- ════ VIEW 3: CLOUD PROVIDERS & SETTINGS ════ -->
+  <div id="swa-view-settings" style="display:none;">
+    <div style="border:1px solid rgba(128,128,128,0.25); border-radius:6px; padding:16px 20px; margin-bottom:18px; background:rgba(128,128,128,0.03);">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; border-bottom:1px solid rgba(128,128,128,0.15); padding-bottom:8px;">
+        <div style="font-weight:bold; font-size:13.5px; display:flex; align-items:center; gap:6px;">
+          <i class="fa-solid fa-sliders" style="color:var(--sec-bar-bg, #0284c7);"></i>
+          <span>Multi-Cloud Credentials &amp; Automation Configuration</span>
+        </div>
+        <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a); padding:3px 14px;" onclick="swaSaveSettings()">
+          [ Save Settings ]
+        </button>
+      </div>
+
+      <!-- Quick Guidance Banner -->
+      <div style="background:var(--banner-info-bg, rgba(56, 189, 248, 0.08)); border-left:3px solid var(--sec-bar-bg, #0284c7); padding:8px 12px; margin-bottom:16px; font-size:12px; line-height:1.5;">
+        Configure your cloud endpoints below. Once saved, you can upload any world snapshot directly to <strong>GitHub Releases</strong>, <strong>Internet Archive</strong>, or <strong>Cloudflare R2 / AWS S3</strong> with one click.
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:16px;">
+        <!-- Card A: GitHub Releases -->
+        <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+              <i class="fa-brands fa-github"></i> GitHub Releases
+            </div>
+            <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestGitHub()">[ Test GitHub Connection ]</button>
+          </div>
+          <p class="inline-hint" style="margin-top:0; margin-bottom:10px; font-size:11.5px;">
+            Create a Personal Access Token at <a href="https://github.com/settings/tokens" target="_blank" style="text-decoration:underline;">github.com/settings/tokens</a> with <code>repo</code> or <code>contents:write</code> scope.
+          </p>
+          <table class="form-layout-table" style="width:100%; font-size:12px;">
+            <tr>
+              <td class="label-col" style="width:36%;">Personal Access Token:</td>
+              <td class="val-col">
+                <input type="password" id="swa-set-gh-token" class="ctrl-input" style="width:80%;" placeholder="ghp_... or github_pat_...">
+                <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-gh-token')">[ Show ]</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Target Repository (owner/repo):</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-gh-repo" class="ctrl-input" style="width:70%;" placeholder="e.g. open-fiestasmp/world-downloads">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Release Tag Prefix:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-gh-prefix" class="ctrl-input" style="width:30%;" placeholder="v or release-" value="v">
+              </td>
+            </tr>
+          </table>
+          <span id="swa-test-gh-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
+        </div>
+
+        <!-- Card B: Internet Archive -->
+        <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-landmark"></i> Internet Archive (archive.org) S3
+            </div>
+            <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestIA()">[ Test Archive.org ]</button>
+          </div>
+          <p class="inline-hint" style="margin-top:0; margin-bottom:10px; font-size:11.5px;">
+            Get free permanent S3 API keys from <a href="https://archive.org/account/s3.php" target="_blank" style="text-decoration:underline;">archive.org/account/s3.php</a>. Direct public downloads are generated automatically.
+          </p>
+          <table class="form-layout-table" style="width:100%; font-size:12px;">
+            <tr>
+              <td class="label-col" style="width:36%;">S3 Access Key:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-ia-access-key" class="ctrl-input" style="width:80%;" placeholder="Access Key">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">S3 Secret Key:</td>
+              <td class="val-col">
+                <input type="password" id="swa-set-ia-secret-key" class="ctrl-input" style="width:80%;" placeholder="Secret Key">
+                <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-ia-secret-key')">[ Show ]</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Collection:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-ia-collection" class="ctrl-input" style="width:50%;" placeholder="opensource" value="opensource">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Item Identifier Prefix:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-ia-prefix" class="ctrl-input" style="width:50%;" placeholder="fiestasmp_world_" value="fiestasmp_world_">
+              </td>
+            </tr>
+          </table>
+          <span id="swa-test-ia-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
+        </div>
+
+        <!-- Card C: Custom S3 / Cloudflare R2 -->
+        <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 16px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
+              <i class="fa-solid fa-server"></i> Custom S3 / Cloudflare R2 / AWS S3
+            </div>
+            <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestS3()">[ Test S3 Connection ]</button>
+          </div>
+          <table class="form-layout-table" style="width:100%; font-size:12px;">
+            <tr>
+              <td class="label-col" style="width:36%;">S3 Endpoint URL:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-s3-endpoint" class="ctrl-input" style="width:100%;" placeholder="https://<account_id>.r2.cloudflarestorage.com or empty for AWS">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Bucket Name:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-s3-bucket" class="ctrl-input" style="width:60%;" placeholder="e.g. fiestasmp-world-downloads">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Access Key ID:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-s3-access" class="ctrl-input" style="width:80%;" placeholder="Access Key ID">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Secret Access Key:</td>
+              <td class="val-col">
+                <input type="password" id="swa-set-s3-secret" class="ctrl-input" style="width:80%;" placeholder="Secret Access Key">
+                <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-s3-secret')">[ Show ]</button>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Region:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-s3-region" class="ctrl-input" style="width:30%;" placeholder="auto" value="auto">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Public Download CDN Base URL:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-s3-public" class="ctrl-input" style="width:100%;" placeholder="https://pub-...r2.dev or https://dl.yourdomain.com">
+              </td>
+            </tr>
+          </table>
+          <span id="swa-test-s3-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
+        </div>
+
+        <!-- Card D: General, Recurring & Calendar -->
+        <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 16px;">
+          <div style="font-weight:bold; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+            <i class="fa-solid fa-clock"></i> General, Recurring &amp; Calendar Synchronization
+          </div>
+          <table class="form-layout-table" style="width:100%; font-size:12px;">
+            <tr>
+              <td class="label-col" style="width:36%;">Default Cloud Upload Target:</td>
+              <td class="val-col">
+                <select id="swa-set-default-target" class="ctrl-input" style="width:70%;">
+                  <option value="archive_org">Internet Archive (archive.org)</option>
+                  <option value="github">GitHub Releases</option>
+                  <option value="s3">Custom S3 / Cloudflare R2</option>
+                  <option value="custom_post">Custom HTTP Endpoint</option>
+                  <option value="local">Local Storage Only</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Automated Recurring Snapshots:</td>
+              <td class="val-col">
+                <select id="swa-set-recur-interval" class="ctrl-input" style="width:70%;">
+                  <option value="disabled">Disabled (Manual Only)</option>
+                  <option value="6h">Every 6 Hours</option>
+                  <option value="12h">Every 12 Hours</option>
+                  <option value="24h">Daily (Every 24 Hours)</option>
+                  <option value="7d">Weekly (Every 7 Days)</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Google Calendar ICS Feed URL:</td>
+              <td class="val-col">
+                <input type="text" id="swa-set-gcal-url" class="ctrl-input" style="width:100%;" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics">
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">In-Game Chat Broadcast:</td>
+              <td class="val-col">
+                <label style="cursor:pointer; display:flex; align-items:center; gap:6px;">
+                  <input type="checkbox" id="swa-set-broadcast" checked>
+                  Broadcast clickable download link in Minecraft chat upon scheduled release
+                </label>
+              </td>
+            </tr>
+            <tr>
+              <td class="label-col">Discord Announcement Webhook:</td>
+              <td class="val-col">
+                <input type="password" id="swa-set-discord-webhook" class="ctrl-input" style="width:100%;" placeholder="https://discord.com/api/webhooks/...">
+              </td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Settings Action Bar -->
+      <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(128,128,128,0.2); display:flex; justify-content:space-between; align-items:center;">
+        <span id="swa-set-save-feedback" style="font-weight:bold; font-size:12px;"></span>
+        <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a); padding:5px 20px;" onclick="swaSaveSettings()">
+          [ Save Settings ]
+        </button>
+      </div>
+    </div>
   </div>
-</div>
 
-<!-- Multi-Destination Settings Modal -->
-<div id="swa-settings-modal" style="display:none; position:fixed; z-index:99999; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.65); backdrop-filter:blur(2px); align-items:center; justify-content:center;">
-  <div class="panel-box" style="width:94%; max-width:680px; max-height:92vh; overflow-y:auto; border-radius:8px; box-shadow:0 12px 36px rgba(0,0,0,0.5);">
-    <div class="section-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
-      <div style="display:flex; align-items:center; gap:8px;">
-        <i class="fa-solid fa-sliders"></i>
-        <span>Archiver Settings &amp; Multi-Cloud Credentials</span>
+  <!-- ════ VIEW 4: ARCHIVES & RELEASES LIBRARY ════ -->
+  <div id="swa-view-library" style="display:block;">
+    <div class="section-sub-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+      <div style="display:flex; align-items:center; gap:6px;">
+        <i class="fa-solid fa-database"></i>
+        <span>World Archives &amp; Multi-Cloud Releases</span>
       </div>
-      <button class="btn-classic" style="padding:2px 8px; font-weight:bold;" onclick="swaCloseSettingsModal()">[ X ]</button>
+      <span id="swa-archives-count" class="inline-badge" style="font-size:11px;">0 Archives</span>
     </div>
 
-    <p class="inline-hint" style="margin-top:6px; margin-bottom:14px;">
-      Configure <strong>GitHub Releases</strong>, <strong>Internet Archive</strong>, <strong>Cloudflare R2 / AWS S3</strong>, automated recurring snapshot schedules, and announcements.
-    </p>
-
-    <!-- Settings Sections -->
-    <div style="display:flex; flex-direction:column; gap:16px;">
-      <!-- Section 1: General & Default Target -->
-      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
-        <div style="font-weight:bold; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          <i class="fa-solid fa-cloud"></i> General &amp; Recurring Schedule
-        </div>
-        <table class="form-layout-table" style="width:100%; font-size:12px;">
+    <div style="overflow-x:auto;">
+      <table class="grid-table" style="width:100%; border-collapse:collapse; font-size:12.5px;">
+        <thead>
+          <tr style="text-align:left; border-bottom:2px solid rgba(128,128,128,0.25);">
+            <th style="padding:8px 6px;">Snapshot &amp; Purpose</th>
+            <th style="padding:8px 6px;">Archive Details</th>
+            <th style="padding:8px 6px;">Schedule &amp; Release Status</th>
+            <th style="padding:8px 6px;">Cloud Distribution</th>
+            <th style="padding:8px 6px; text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="swa-archives-tbody">
           <tr>
-            <td class="label-col" style="width:40%;">Default Cloud Destination:</td>
-            <td class="val-col">
-              <select id="swa-set-default-target" class="ctrl-input" style="width:70%;">
-                <option value="archive_org">Internet Archive (archive.org)</option>
-                <option value="github">GitHub Releases</option>
-                <option value="s3">Custom S3 / Cloudflare R2</option>
-                <option value="custom_post">Custom HTTP Endpoint</option>
-                <option value="local">Local Storage Only</option>
-              </select>
+            <td colspan="5" style="text-align:center; padding:24px;" class="inline-hint">
+              No world archives recorded yet. Click <strong>[ Instant Save &amp; Upload ]</strong> above to create your first world archive!
             </td>
           </tr>
-          <tr>
-            <td class="label-col">Automated Recurring Snapshots:</td>
-            <td class="val-col">
-              <select id="swa-set-recur-interval" class="ctrl-input" style="width:70%;">
-                <option value="disabled">Disabled (Manual Only)</option>
-                <option value="6h">Every 6 Hours</option>
-                <option value="12h">Every 12 Hours</option>
-                <option value="24h">Daily (Every 24 Hours)</option>
-                <option value="7d">Weekly (Every 7 Days)</option>
-              </select>
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Google Calendar ICS Feed URL:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-gcal-url" class="ctrl-input" style="width:100%;" placeholder="https://calendar.google.com/calendar/ical/.../basic.ics">
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- Section 2: GitHub Releases -->
-      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
-            <i class="fa-brands fa-github"></i> GitHub Releases Integration
-          </div>
-          <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestGitHub()">[ Test GitHub Connection ]</button>
-        </div>
-        <table class="form-layout-table" style="width:100%; font-size:12px;">
-          <tr>
-            <td class="label-col" style="width:40%;">GitHub Personal Access Token:</td>
-            <td class="val-col">
-              <input type="password" id="swa-set-gh-token" class="ctrl-input" style="width:85%;" placeholder="ghp_... (repo / contents:write scope)">
-              <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-gh-token')">[ Show ]</button>
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">GitHub Repository (owner/repo):</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-gh-repo" class="ctrl-input" style="width:70%;" placeholder="e.g. open-fiestasmp/world-downloads">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Release Tag Prefix:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-gh-prefix" class="ctrl-input" style="width:30%;" placeholder="v or release-" value="v">
-            </td>
-          </tr>
-        </table>
-        <span id="swa-test-gh-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
-      </div>
-
-      <!-- Section 3: Internet Archive (archive.org) -->
-      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
-            <i class="fa-solid fa-landmark"></i> Internet Archive (archive.org) S3
-          </div>
-          <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestIA()">[ Test Archive.org ]</button>
-        </div>
-        <table class="form-layout-table" style="width:100%; font-size:12px;">
-          <tr>
-            <td class="label-col" style="width:40%;">Archive.org S3 Access Key:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-ia-access-key" class="ctrl-input" style="width:85%;" placeholder="From archive.org/account/s3.php">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Archive.org S3 Secret Key:</td>
-            <td class="val-col">
-              <input type="password" id="swa-set-ia-secret-key" class="ctrl-input" style="width:85%;" placeholder="S3 Secret Key">
-              <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-ia-secret-key')">[ Show ]</button>
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Collection:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-ia-collection" class="ctrl-input" style="width:50%;" placeholder="opensource" value="opensource">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Item Identifier Prefix:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-ia-prefix" class="ctrl-input" style="width:50%;" placeholder="fiestasmp_world_" value="fiestasmp_world_">
-            </td>
-          </tr>
-        </table>
-        <span id="swa-test-ia-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
-      </div>
-
-      <!-- Section 4: Custom S3 / Cloudflare R2 -->
-      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-          <div style="font-weight:bold; font-size:13px; display:flex; align-items:center; gap:6px;">
-            <i class="fa-solid fa-server"></i> Custom S3 / Cloudflare R2 / AWS
-          </div>
-          <button type="button" class="btn-classic" style="color:var(--sec-bar-bg, #0284c7); font-size:11px;" onclick="swaTestS3()">[ Test S3 Connection ]</button>
-        </div>
-        <table class="form-layout-table" style="width:100%; font-size:12px;">
-          <tr>
-            <td class="label-col" style="width:40%;">S3 Endpoint URL:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-s3-endpoint" class="ctrl-input" style="width:100%;" placeholder="https://<account_id>.r2.cloudflarestorage.com or empty for AWS">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Bucket Name:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-s3-bucket" class="ctrl-input" style="width:60%;" placeholder="e.g. fiestasmp-world-downloads">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Access Key ID:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-s3-access" class="ctrl-input" style="width:85%;" placeholder="Access Key ID">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Secret Access Key:</td>
-            <td class="val-col">
-              <input type="password" id="swa-set-s3-secret" class="ctrl-input" style="width:85%;" placeholder="Secret Access Key">
-              <button type="button" class="btn-classic" onclick="swaToggleSecret('swa-set-s3-secret')">[ Show ]</button>
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Region:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-s3-region" class="ctrl-input" style="width:30%;" placeholder="auto" value="auto">
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Public Download CDN Base URL:</td>
-            <td class="val-col">
-              <input type="text" id="swa-set-s3-public" class="ctrl-input" style="width:100%;" placeholder="https://pub-...r2.dev or https://dl.yourdomain.com">
-            </td>
-          </tr>
-        </table>
-        <span id="swa-test-s3-feedback" style="display:block; font-size:11px; margin-top:4px;"></span>
-      </div>
-
-      <!-- Section 5: Notifications -->
-      <div style="border:1px solid rgba(128,128,128,0.2); border-radius:6px; padding:12px 14px;">
-        <div style="font-weight:bold; font-size:13px; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
-          <i class="fa-solid fa-bullhorn"></i> Release Announcements
-        </div>
-        <table class="form-layout-table" style="width:100%; font-size:12px;">
-          <tr>
-            <td class="label-col" style="width:40%;">In-Game Chat Broadcast:</td>
-            <td class="val-col">
-              <label style="cursor:pointer; display:flex; align-items:center; gap:6px;">
-                <input type="checkbox" id="swa-set-broadcast" checked>
-                Broadcast clickable download link in Minecraft chat upon scheduled release
-              </label>
-            </td>
-          </tr>
-          <tr>
-            <td class="label-col">Discord Webhook URL:</td>
-            <td class="val-col">
-              <input type="password" id="swa-set-discord-webhook" class="ctrl-input" style="width:100%;" placeholder="https://discord.com/api/webhooks/...">
-            </td>
-          </tr>
-        </table>
-      </div>
-    </div>
-
-    <!-- Modal Footer -->
-    <div style="margin-top:16px; padding-top:12px; border-top:1px solid rgba(128,128,128,0.2); display:flex; justify-content:space-between; align-items:center;">
-      <span id="swa-set-save-feedback" style="font-weight:bold; font-size:12px;"></span>
-      <div style="display:flex; gap:8px;">
-        <button class="btn-classic" onclick="swaCloseSettingsModal()">[ Cancel ]</button>
-        <button class="btn-classic" style="font-weight:bold; color:var(--sec-bar-bg, #16a34a); padding:4px 16px;" onclick="swaSaveSettings()">[ Save Settings ]</button>
-      </div>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -450,6 +533,7 @@
   let swaPollTimer = null;
   let swaCurrentArchives = [];
   let swaCalendarEvents = [];
+  let swaActiveTab = 'instant';
 
   function getCsrf() {
     return (typeof csrfToken !== 'undefined' ? csrfToken : '');
@@ -464,6 +548,31 @@
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
   }
+
+  window.swaSwitchView = function(viewName) {
+    swaActiveTab = viewName;
+    const views = ['instant', 'studio', 'settings', 'library'];
+    views.forEach(v => {
+      const el = document.getElementById('swa-view-' + v);
+      const navBtn = document.getElementById('swa-nav-' + v);
+      if (el) {
+        if (v === 'library') {
+          // Library remains visible under instant and studio, or stands alone
+          el.style.display = (viewName === 'settings') ? 'none' : 'block';
+        } else {
+          el.style.display = (v === viewName) ? 'block' : 'none';
+        }
+      }
+      if (navBtn) {
+        if (v === viewName) {
+          navBtn.style.background = 'rgba(128,128,128,0.18)';
+          navBtn.style.fontWeight = 'bold';
+        } else {
+          navBtn.style.background = '';
+        }
+      }
+    });
+  };
 
   window.swaRefreshStatus = async function() {
     try {
@@ -518,6 +627,80 @@
       }
     } catch (e) {
       console.error('Error fetching Scheduled World Archiver status:', e);
+    }
+  };
+
+  window.swaTriggerInstantSaveAndUpload = async function() {
+    const dest = document.getElementById('swa-instant-target').value;
+    const title = (document.getElementById('swa-instant-title').value || 'Live World Snapshot').trim();
+    const notes = document.getElementById('swa-instant-notes').value.trim();
+    const dimensions = {
+      overworld: document.getElementById('swa-instant-dim-overworld').checked,
+      nether: document.getElementById('swa-instant-dim-nether').checked,
+      the_end: document.getElementById('swa-instant-dim-the-end').checked
+    };
+
+    const destLabels = {
+      archive_org: 'Internet Archive (archive.org)',
+      github: 'GitHub Releases',
+      s3: 'Cloudflare R2 / AWS S3',
+      custom_post: 'Custom HTTP Endpoint'
+    };
+    const destText = destLabels[dest] || dest;
+
+    if (!confirm(`Save current Minecraft world state and immediately upload to ${destText}?\n\nThis will flush world data from RAM (save-all flush), compress world dimensions into an archive, and upload it.`)) {
+      return;
+    }
+
+    const fb = document.getElementById('swa-instant-feedback');
+    if (fb) {
+      fb.style.color = '#0284c7';
+      fb.textContent = 'Saving world & starting direct cloud upload...';
+    }
+
+    try {
+      const res = await fetch('/api/panel-addons/scheduled_world_archiver/action', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': getCsrf()
+        },
+        body: JSON.stringify({
+          action: 'start_snapshot',
+          payload: {
+            purpose: 'manual',
+            episode_num: 0,
+            title: title,
+            type: 'snapshot',
+            linked_event_id: '',
+            release_time: '',
+            dimensions: dimensions,
+            auto_upload: true,
+            upload_target: dest,
+            notes: notes
+          }
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        if (fb) {
+          fb.style.color = '#16a34a';
+          fb.textContent = data.message;
+        }
+        window.swaRefreshStatus();
+      } else {
+        if (fb) {
+          fb.style.color = '#dc2626';
+          fb.textContent = 'Failed: ' + (data.error || 'Unknown error');
+        }
+        alert(data.error || 'Failed to start instant save and upload.');
+      }
+    } catch (e) {
+      if (fb) {
+        fb.style.color = '#dc2626';
+        fb.textContent = 'Network error starting upload.';
+      }
     }
   };
 
@@ -665,7 +848,7 @@
       tbody.innerHTML = `
         <tr>
           <td colspan="5" style="text-align:center; padding:24px;" class="inline-hint">
-            No world archives recorded yet. Use the snapshot studio above to capture your first world archive!
+            No world archives recorded yet. Use <strong>[ Instant Save &amp; Upload ]</strong> above to capture your first world archive!
           </td>
         </tr>
       `;
@@ -702,8 +885,6 @@
 
       // Cloud Distribution Links
       let cloudHtml = '';
-      const hasCloud = arc.cloud_download_url || arc.ia_download_url || arc.github_download_url || arc.s3_download_url;
-
       if (arc.github_download_url) {
         cloudHtml += `
           <div style="margin-bottom:3px;">
@@ -1079,17 +1260,6 @@
     });
   };
 
-  // Settings Modal Functions
-  window.swaOpenSettingsModal = function() {
-    const modal = document.getElementById('swa-settings-modal');
-    if (modal) modal.style.display = 'flex';
-  };
-
-  window.swaCloseSettingsModal = function() {
-    const modal = document.getElementById('swa-settings-modal');
-    if (modal) modal.style.display = 'none';
-  };
-
   window.swaToggleSecret = function(inputId) {
     const inp = document.getElementById(inputId);
     if (inp) inp.type = inp.type === 'password' ? 'text' : 'password';
@@ -1227,7 +1397,6 @@
         if (data.success) {
           fb.style.color = '#16a34a';
           fb.textContent = data.message;
-          setTimeout(window.swaCloseSettingsModal, 900);
           window.swaRefreshStatus();
         } else {
           fb.style.color = '#dc2626';
@@ -1246,6 +1415,11 @@
     if (!s) return;
     const defTgt = document.getElementById('swa-set-default-target');
     if (defTgt && s.default_cloud_target) defTgt.value = s.default_cloud_target;
+
+    const instantTgt = document.getElementById('swa-instant-target');
+    if (instantTgt && s.default_cloud_target && s.default_cloud_target !== 'local') {
+      instantTgt.value = s.default_cloud_target;
+    }
 
     const rInt = document.getElementById('swa-set-recur-interval');
     if (rInt && s.recurring_snapshot_interval) rInt.value = s.recurring_snapshot_interval;

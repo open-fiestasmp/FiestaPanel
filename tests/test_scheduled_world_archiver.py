@@ -49,6 +49,9 @@ class ScheduledWorldArchiverTests(unittest.TestCase):
         self.assertIn("Take Pre-Event Snapshot (Before)", html)
         self.assertIn("Take Post-Event Snapshot (After)", html)
         self.assertIn("Create Snapshot Package Now", html)
+        # Check for Instant Save & Direct Cloud Upload
+        self.assertIn("Save Current World & Directly Upload", html.replace("&amp;", "&"))
+        self.assertIn("swaTriggerInstantSaveAndUpload", html)
         # Check for multi-cloud references
         self.assertIn("GitHub Releases", html)
         self.assertIn("archive.org", html.lower())
