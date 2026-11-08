@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FiestaSMP News Studio (2009 Aero Edition)</title>
+  <link rel="icon" href="/server-icon.webp" type="image/webp">
+  <link rel="stylesheet" href="/static/microsoft-2009.css?v=20261108b">
+  <script src="/static/marked.min.js"></script>
+  <style>
+    /* ── News Studio 2009 Aero Workbench Styles ────────────────────────── */
+    :root {
+      --ms-blue-grad: linear-gradient(180deg, #3a82d0 0%, #2063b0 50%, #154c8a 100%);
+      --ms-aero-border: #7ba2c7;
+      --ms-glass-bg: rgba(240, 246, 252, 0.92);
+    }
+
+    body {
+      background: #e4edf6 url('/assets/img/microsoft-2009.jpg') no-repeat center top fixed;
+      background-size: cover;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+      color: #222222;
+      margin: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .studio-shell {
+      width: 100%;
+      max-width: 1380px;
+      background: #ffffff;
+      border: 1px solid var(--ms-aero-border);
+      border-radius: 8px;
+      box-shadow: 0 8px 28px rgba(0, 30, 80, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 24px);
+    }
+
+    /* Aero Top Window Titlebar */
+    .studio-window-titlebar {
+      background: var(--ms-blue-grad);
+      border-bottom: 1px solid #103c6e;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #ffffff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    }
+    .studio-title-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    }
+    .studio-title-brand img {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+    }
+    .studio-window-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Studio Header & Brand */
+    .studio-header {
+      background: linear-gradient(180deg, #f7faff 0%, #e8f1fb 100%);
+      border-bottom: 1px solid #b9d2ea;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .studio-brand-info h1 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a4f82;
+      margin: 0 0 2px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .studio-brand-info p {
+      margin: 0;
+      font-size: 12px;
+      color: #555555;
+    }
+    .studio-header-btns {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* 2009 Aero Navigation Tabs */
+    .studio-tabs-bar {
+      background: linear-gradient(180deg, #e3edf7 0%, #d2e2f2 100%);
+      border-bottom: 1px solid #a3c2de;
+      padding: 6px 16px 0 16px;
+      display: flex;
+      gap: 4px;
+      align-items: flex-end;
+    }
+    .studio-tab-btn {
+      background: linear-gradient(180deg, #f0f5fa 0%, #d8e5f2 100%);
+      border: 1px solid #a3c2de;
+      border-bottom: none;
+      border-radius: 5px 5px 0 0;
+      padding: 8px 18px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #2b5782;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: -1px;
+    }
+    .studio-tab-btn:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #eef5fc 100%);
+      color: #004b97;
+    }
+    .studio-tab-btn.active {
+      background: #ffffff;
+      color: #003366;
+      border-color: #7ba2c7;
+      border-bottom: 1px solid #ffffff;
+      font-weight: 700;
+      box-shadow: 0 -2px 5px rgba(0, 50, 100, 0.08);
+      z-index: 2;
+    }
+    .tab-badge {
+      background: #0066cc;
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* Main Workspace Views */
+    .studio-body {
+      flex: 1;
+      background: #ffffff;
+      padding: 20px;
+      overflow-y: auto;
+    }
+    .studio-view {
+      display: none;
+    }
+    .studio-view.active {
+      display: block;
+    }
+
+    /* Archive Table View */
+    .archive-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      padding: 7px 12px;
+      font-size: 13px;
+      border: 1px solid #9ebdd8;
+      border-radius: 4px;
+      width: 320px;
+      max-width: 100%;
+      background: #ffffff;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
+    }
+    .ms-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1px solid #c2d8eb;
+      font-size: 13px;
+    }
+    .ms-table th {
+      background: linear-gradient(180deg, #f3f8fc 0%, #e2eef8 100%);
+      color: #1a4f82;
+      font-weight: 700;
+      padding: 9px 12px;
+      text-align: left;
+      border-bottom: 1px solid #b5d1e8;
+      border-right: 1px solid #d4e4f2;
+    }
+    .ms-table td {
+      padding: 9px 12px;
+      border-bottom: 1px solid #e1ecf5;
+      border-right: 1px solid #eef4fa;
+      vertical-align: middle;
+    }
+    .ms-table tr:hover {
+      background: #f5f9fd;
+    }
+    .ms-table tr.draft-row {
+      background: #fffdf5;
+    }
+    .article-title-cell {
+      font-weight: 600;
+      color: #0055aa;
+    }
+    .badge-tag {
+      display: inline-block;
+      background: #eef4fa;
+      border: 1px solid #cbdde9;
+      color: #2b5782;
+      font-size: 10.5px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-right: 4px;
+      margin-bottom: 2px;
+    }
+    .badge-status-pub {
+      background: #eaf7ee;
+      border: 1px solid #a8e0b6;
+      color: #1e7039;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+    .badge-status-draft {
+      background: #fff8e6;
+      border: 1px solid #f2d080;
+      color: #946800;
+      font-size: 10.5px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+    }
+
+    /* ── Split Editor Layout ────────────────────────────────────────────── */
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .meta-form-card {
+      background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+      border: 1px solid #bad2ea;
+      border-radius: 6px;
+      padding: 14px 18px;
+      box-shadow: 0 1px 3px rgba(0, 50, 100, 0.05);
+    }
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .meta-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .meta-field label {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: #204b73;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .meta-input, .meta-select {
+      padding: 6px 10px;
+      font-size: 13px;
+      border: 1px solid #9ebdd8;
+      border-radius: 4px;
+      background: #ffffff;
+      color: #222222;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    .meta-input:focus, .meta-select:focus {
+      border-color: #0066cc;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.2);
+    }
+
+    /* Toolbar */
+    .editor-toolbar {
+      background: linear-gradient(180deg, #f5f9fd 0%, #e5eff8 100%);
+      border: 1px solid #b8cee2;
+      border-radius: 5px 5px 0 0;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    }
+    .tb-group {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 4px;
+      border-right: 1px solid #c9ddec;
+    }
+    .tb-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      padding: 4px 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1e456e;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 26px;
+      height: 26px;
+    }
+    .tb-btn:hover {
+      background: linear-gradient(180deg, #ffffff 0%, #e2eefa 100%);
+      border-color: #9cbdd8;
+      color: #003366;
+    }
+    .tb-btn:active {
+      background: #d4e4f2;
+      border-color: #7ba2c7;
+    }
+    .tb-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    .tb-dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #ffffff;
+      border: 1px solid #7ba2c7;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      min-width: 170px;
+      padding: 4px 0;
+    }
+    .tb-dropdown.open .tb-dropdown-content {
+      display: block;
+    }
+    .tb-dropdown-item {
+      padding: 6px 14px;
+      font-size: 12px;
+      color: #222222;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tb-dropdown-item:hover {
+      background: #0066cc;
+      color: #ffffff;
+    }
+
+    /* Workspace Split Panes */
+    .editor-panes-wrapper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border: 1px solid #b8cee2;
+      border-top: none;
+      border-radius: 0 0 5px 5px;
+      min-height: 520px;
+      background: #ffffff;
+    }
+    .editor-panes-wrapper.editor-only {
+      grid-template-columns: 1fr;
+    }
+    .editor-panes-wrapper.editor-only .preview-pane {
+      display: none;
+    }
+    .editor-panes-wrapper.preview-only {
+      grid-template-columns: 1fr;
+    }
+    .editor-panes-wrapper.preview-only .editor-pane {
+      display: none;
+    }
+
+    .editor-pane {
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid #cbdde9;
+    }
+    .editor-panes-wrapper.editor-only .editor-pane {
+      border-right: none;
+    }
+    .markdown-textarea {
+      width: 100%;
+      flex: 1;
+      padding: 14px 16px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 13.5px;
+      line-height: 1.55;
+      color: #1a1a1a;
+      border: none;
+      resize: vertical;
+      min-height: 500px;
+      background: #ffffff;
+      outline: none;
+    }
+
+    .preview-pane {
+      padding: 20px 24px;
+      background: #ffffff;
+      overflow-y: auto;
+      min-height: 500px;
+    }
+    .preview-header-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #888888;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed #d0dce6;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    /* Editor Footer / Metrics */
+    .editor-statusbar {
+      background: linear-gradient(180deg, #f2f7fc 0%, #e2eef7 100%);
+      border-top: 1px solid #bad2ea;
+      padding: 6px 14px;
+      font-size: 11.5px;
+      color: #555555;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .editor-actions-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* Media Library Grid */
+    .media-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .media-card {
+      border: 1px solid #cbdde9;
+      border-radius: 5px;
+      background: #ffffff;
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .media-thumb-wrap {
+      width: 100%;
+      height: 110px;
+      background: #f0f4f8;
+      border: 1px solid #e1ebf2;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .media-thumb {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+    .media-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #1a4f82;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 2px;
+    }
+    .media-info {
+      font-size: 10px;
+      color: #777777;
+      margin-bottom: 6px;
+    }
+    .media-card-btns {
+      display: flex;
+      gap: 4px;
+      margin-top: auto;
+    }
+    .media-btn-small {
+      flex: 1;
+      padding: 3px 6px;
+      font-size: 10.5px;
+      text-align: center;
+    }
+
+    /* Upload Drop Zone */
+    .upload-dropzone {
+      border: 2px dashed #9cbdd8;
+      border-radius: 6px;
+      background: #f7faff;
+      padding: 24px;
+      text-align: center;
+      color: #2b5782;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    .upload-dropzone:hover {
+      background: #eff6fc;
+      border-color: #0066cc;
+    }
+
+    /* Deploy & RSS View */
+    .deploy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 900px) {
+      .deploy-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+    .deploy-card {
+      border: 1px solid #b9d2ea;
+      border-radius: 6px;
+      background: linear-gradient(180deg, #ffffff 0%, #f7faff 100%);
+      padding: 16px 20px;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+    .deploy-card h3 {
+      font-size: 15px;
+      color: #1a4f82;
+      margin: 0 0 8px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .terminal-console {
+      background: #111a24;
+      color: #7ce38b;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+      padding: 12px;
+      border-radius: 4px;
+      height: 240px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      border: 1px solid #233446;
+      box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Dialog Modals */
+    .ms-modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 20, 50, 0.45);
+      backdrop-filter: blur(2px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .ms-modal-backdrop.open {
+      display: flex;
+    }
+    .ms-modal-box {
+      width: 480px;
+      max-width: 92%;
+      background: #ffffff;
+      border: 1px solid var(--ms-aero-border);
+      border-radius: 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+      overflow: hidden;
+    }
+    .ms-modal-header {
+      background: var(--ms-blue-grad);
+      color: #ffffff;
+      padding: 8px 14px;
+      font-size: 13.5px;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .ms-modal-body {
+      padding: 16px;
+      font-size: 13px;
+    }
+    .ms-modal-footer {
+      background: #f0f5fa;
+      border-top: 1px solid #bad2ea;
+      padding: 10px 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Notification Toast */
+    .studio-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #1e3a5f;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 5px;
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+      display: none;
+      z-index: 2000;
+      border: 1px solid #3d6a9e;
+    }
+  </style>
+</head>
+<body>
+
+<div class="studio-shell">
+
+  <!-- Windows 7 Aero Titlebar -->
+  <div class="studio-window-titlebar">
+    <div class="studio-title-brand">
+      <img src="/server-icon.webp" alt="Fiesta Logo">
+      <span>FiestaSMP Official Website &bull; News Studio &amp; Article CMS (2009 Aero Edition)</span>
+    </div>
+    <div class="studio-window-actions">
+      <span style="font-size: 11px; opacity: 0.85;">Hugo Engine: v0.154.5</span>
+    </div>
+  </div>
+
+  <!-- Studio Header -->
+  <div class="studio-header">
+    <div class="studio-brand-info">
+      <h1>
+        <span>Fiesta<em>SMP</em> News &amp; Updates Studio</span>
+      </h1>
+      <p>Edit, create, and delete official articles without touching raw HTML &bull; Full Markdown Editor &bull; Live Media Embeds &bull; Instant RSS 2.0 Feed Sync</p>
+    </div>
+    <div class="studio-header-btns">
+      <button class="ms-btn-aero-primary" onclick="openNewArticleModal()">+ Create New Article</button>
+      <button class="ms-btn-aero-secondary" onclick="triggerBuildSite()">Build Site (Hugo)</button>
+      <button class="ms-btn-aero-secondary" onclick="triggerDeployGitHub()">Deploy to GitHub</button>
+      <a href="https://open-fiestasmp.github.io/news/" target="_blank" class="ms-btn-aero-secondary" style="text-decoration:none;">Live News &rsaquo;</a>
+      <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" class="ms-btn-aero-rss">
+        <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+        <span>RSS Feed</span>
+      </a>
+      <a href="/" class="ms-btn-aero-secondary" style="text-decoration:none;">&larr; FiestaPanel</a>
+    </div>
+  </div>
+
+  <!-- Tab Strip -->
+  <div class="studio-tabs-bar">
+    <button class="studio-tab-btn active" id="tab-btn-articles" onclick="switchStudioTab('articles')">
+      <span>Articles Archive</span>
+      <span class="tab-badge" id="badge-article-count">0</span>
+    </button>
+    <button class="studio-tab-btn" id="tab-btn-editor" onclick="switchStudioTab('editor')">
+      <span id="tab-editor-title">Article Editor</span>
+    </button>
+    <button class="studio-tab-btn" id="tab-btn-media" onclick="switchStudioTab('media')">
+      <span>Media Library &amp; Uploads</span>
+      <span class="tab-badge" id="badge-media-count">0</span>
+    </button>
+    <button class="studio-tab-btn" id="tab-btn-deploy" onclick="switchStudioTab('deploy')">
+      <span>Build, RSS &amp; Deployment</span>
+    </button>
+  </div>
+
+  <!-- Main Viewports -->
+  <div class="studio-body">
+
+    <!-- ════ VIEW 1: ARTICLES ARCHIVE ════ -->
+    <div class="studio-view active" id="view-articles">
+      <div class="archive-toolbar">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <input type="text" id="archive-search" class="search-input" placeholder="Filter articles by title, author, or tag..." oninput="filterArticlesTable()">
+          <select id="archive-status-filter" class="meta-select" onchange="filterArticlesTable()">
+            <option value="all">All Articles</option>
+            <option value="published">Published Only</option>
+            <option value="draft">Drafts Only</option>
+          </select>
+        </div>
+        <div style="font-size:12px; color:#555;">
+          <span>Showing <strong id="visible-articles-count">0</strong> articles</span>
+        </div>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="ms-table" id="articles-table">
+          <thead>
+            <tr>
+              <th style="width: 28%;">Title</th>
+              <th style="width: 14%;">Slug</th>
+              <th style="width: 14%;">Author</th>
+              <th style="width: 12%;">Date</th>
+              <th style="width: 12%;">Tags</th>
+              <th style="width: 8%;">Status</th>
+              <th style="width: 12%; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="articles-table-body">
+            <!-- Dynamically populated via JS loadArticles() -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ════ VIEW 2: MARKDOWN EDITOR ════ -->
+    <div class="studio-view" id="view-editor">
+      <div class="editor-container">
+
+        <!-- Article Metadata Form Card -->
+        <div class="meta-form-card">
+          <div class="meta-grid">
+            <div class="meta-field" style="grid-column: span 2;">
+              <label for="ed-title">Article Title *</label>
+              <input type="text" id="ed-title" class="meta-input" placeholder="e.g. FiestaSMP Season 2 is Live" oninput="onTitleChanged()">
+            </div>
+            <div class="meta-field">
+              <label for="ed-slug">URL Slug * <span style="font-size:10px;color:#0066cc;cursor:pointer;font-weight:normal;" onclick="autoGenerateSlug()">[ Auto-Generate ]</span></label>
+              <input type="text" id="ed-slug" class="meta-input" placeholder="e.g. season-2-launch-server-guide">
+            </div>
+            <div class="meta-field">
+              <label for="ed-date">Publication Date *</label>
+              <input type="datetime-local" id="ed-date" class="meta-input">
+            </div>
+            <div class="meta-field">
+              <label for="ed-author">Primary Author *</label>
+              <select id="ed-author" class="meta-select">
+                <option value="cbladeOfficial">cbladeOfficial</option>
+                <option value="debarkak">debarkak</option>
+                <option value="FiestaSMP Team">FiestaSMP Team</option>
+                <option value="Server Administration">Server Administration</option>
+              </select>
+            </div>
+            <div class="meta-field">
+              <label for="ed-coauthor">Co-Author (Optional)</label>
+              <select id="ed-coauthor" class="meta-select">
+                <option value="">None</option>
+                <option value="debarkak">debarkak</option>
+                <option value="cbladeOfficial">cbladeOfficial</option>
+                <option value="FiestaSMP Team">FiestaSMP Team</option>
+              </select>
+            </div>
+            <div class="meta-field" style="grid-column: span 2;">
+              <label for="ed-summary">Summary (Appears in RSS &amp; News Cards) *</label>
+              <input type="text" id="ed-summary" class="meta-input" placeholder="Brief 1-2 sentence description for RSS readers and news feed cards...">
+            </div>
+            <div class="meta-field">
+              <label for="ed-tags">Tags (Comma-separated)</label>
+              <input type="text" id="ed-tags" class="meta-input" placeholder="Announcements, Guides, Season 2">
+            </div>
+            <div class="meta-field" style="justify-content:center;">
+              <label style="display:flex; align-items:center; gap:6px; cursor:pointer; margin-top:14px;">
+                <input type="checkbox" id="ed-draft">
+                <span style="font-weight:700; color:#b55d10;">Save as Draft (Don't publish yet)</span>
+              </label>
+            </div>
+          </div>
+          <input type="hidden" id="ed-orig-slug" value="">
+        </div>
+
+        <!-- Markdown Toolbar & View Switcher -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; gap:8px;">
+          <div class="editor-toolbar" style="flex:1;">
+            <!-- Text Formatting -->
+            <div class="tb-group">
+              <button class="tb-btn" title="Bold (Ctrl+B)" onclick="wrapSelection('**', '**')"><strong>B</strong></button>
+              <button class="tb-btn" title="Italic (Ctrl+I)" onclick="wrapSelection('*', '*')"><em>I</em></button>
+              <button class="tb-btn" title="Strikethrough" onclick="wrapSelection('~~', '~~')"><del>S</del></button>
+            </div>
+            <!-- Headings -->
+            <div class="tb-group">
+              <button class="tb-btn" title="Heading 1" onclick="insertHeading(1)">H1</button>
+              <button class="tb-btn" title="Heading 2" onclick="insertHeading(2)">H2</button>
+              <button class="tb-btn" title="Heading 3" onclick="insertHeading(3)">H3</button>
+            </div>
+            <!-- Lists & Structure -->
+            <div class="tb-group">
+              <button class="tb-btn" title="Bullet List" onclick="insertList('- ')">&bull; List</button>
+              <button class="tb-btn" title="Numbered List" onclick="insertList('1. ')">1. List</button>
+              <button class="tb-btn" title="Task Checklist" onclick="insertList('- [ ] ')">&#9745; Task</button>
+              <button class="tb-btn" title="Quote" onclick="insertList('> ')">&ldquo; Quote</button>
+              <button class="tb-btn" title="Inline Code" onclick="wrapSelection('`', '`')">&lt;&gt;</button>
+              <button class="tb-btn" title="Code Block" onclick="insertCodeBlock()">```{ }</button>
+              <button class="tb-btn" title="Horizontal Divider" onclick="insertDivider()">---</button>
+              <button class="tb-btn" title="Insert Table" onclick="insertTable()">Table</button>
+              <button class="tb-btn" title="Insert Link" onclick="openLinkModal()">Link</button>
+            </div>
+            <!-- Media Embed System -->
+            <div class="tb-group">
+              <div class="tb-dropdown" id="dropdown-embeds">
+                <button class="tb-btn" style="background:#eaf2fb; color:#0055aa; font-weight:700;" onclick="toggleEmbedsDropdown(event)">
+                  <span>+ Insert Media Embed &#9662;</span>
+                </button>
+                <div class="tb-dropdown-content">
+                  <div class="tb-dropdown-item" onclick="openImageEmbedModal()">
+                    <span>Image / Screenshot</span>
+                  </div>
+                  <div class="tb-dropdown-item" onclick="openYouTubeEmbedModal()">
+                    <span>YouTube Video</span>
+                  </div>
+                  <div class="tb-dropdown-item" onclick="openCalloutEmbedModal()">
+                    <span>Callout Alert Box</span>
+                  </div>
+                  <div class="tb-dropdown-item" onclick="openAudioEmbedModal()">
+                    <span>Audio Player</span>
+                  </div>
+                  <div class="tb-dropdown-item" onclick="insertServerIpBadge()">
+                    <span>Server IP Badge</span>
+                  </div>
+                  <div class="tb-dropdown-item" onclick="openPlayerBadgeModal()">
+                    <span>Player Skin Badge</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View Mode Toggles -->
+          <div style="display:flex; gap:2px; flex-shrink:0;">
+            <button class="tb-btn active" id="btn-view-split" onclick="setEditorPaneMode('split')" title="Side-by-side Editor &amp; Preview">Split</button>
+            <button class="tb-btn" id="btn-view-editor" onclick="setEditorPaneMode('editor-only')" title="Editor Only">Write</button>
+            <button class="tb-btn" id="btn-view-preview" onclick="setEditorPaneMode('preview-only')" title="Preview Only">Preview</button>
+          </div>
+        </div>
+
+        <!-- Split Panes -->
+        <div class="editor-panes-wrapper" id="editor-panes-wrapper">
+          <!-- Left: Markdown Input -->
+          <div class="editor-pane">
+            <textarea id="markdown-editor" class="markdown-textarea" placeholder="Write your news post here in Markdown..." oninput="onEditorInput()"></textarea>
+            <div class="editor-statusbar">
+              <div>
+                <span id="stat-words">0 words</span> &bull;
+                <span id="stat-chars">0 characters</span> &bull;
+                <span id="stat-readtime">1 min read</span>
+              </div>
+              <div id="stat-sync">Hugo Auto-Sync Ready</div>
+            </div>
+          </div>
+
+          <!-- Right: Authentic 2009 Post Preview -->
+          <div class="preview-pane" id="preview-pane">
+            <div class="preview-header-label">
+              <span>Live Website Preview (Microsoft 2009 Aero Theme)</span>
+              <span id="preview-slug-label">/news/slug/</span>
+            </div>
+            <article class="post-article" id="rendered-preview-article">
+              <h1 class="post-header-title" id="prev-title">Article Title Preview</h1>
+              <div class="post-header-meta">
+                <span>Posted on <span id="prev-date">November 8, 2026</span> by <strong id="prev-author">cbladeOfficial</strong></span>
+              </div>
+              <div class="post-content ms-kb-content" id="rendered-preview-body">
+                <p style="color:#888;">Type in the markdown editor to see live formatted output...</p>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Save & Action Controls -->
+        <div class="editor-actions-row">
+          <div>
+            <button class="ms-btn-aero-secondary" onclick="discardEditorChanges()">Discard / Close</button>
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button class="ms-btn-aero-secondary" onclick="saveArticle(false)">Save Draft</button>
+            <button class="ms-btn-aero-primary" onclick="saveArticle(true)">Save &amp; Compile (Hugo)</button>
+            <button class="ms-btn-aero-primary" style="background:linear-gradient(180deg, #259e54 0%, #177a3d 50%, #0d5227 100%); border-color:#0d5227;" onclick="saveAndDeployArticle()">Save &amp; Publish to GitHub</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ════ VIEW 3: MEDIA LIBRARY ════ -->
+    <div class="studio-view" id="view-media">
+      <!-- Upload Drop Zone -->
+      <div class="upload-dropzone" onclick="document.getElementById('media-file-input').click()">
+        <input type="file" id="media-file-input" style="display:none;" accept="image/*" onchange="handleMediaUpload(this.files)">
+        <div style="font-size:16px; font-weight:700; margin-bottom:4px;">Click to Upload Image or Drag &amp; Drop here</div>
+        <div style="font-size:12px; color:#666;">Supports PNG, JPG, WEBP, GIF, SVG. Uploaded files are saved to website assets/img/news/</div>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h3 style="font-size:15px; color:#1a4f82; margin:0;">Website Media Library (<span id="media-total-label">0</span> files)</h3>
+        <button class="ms-btn-aero-secondary" onclick="loadMediaLibrary()">Refresh Media</button>
+      </div>
+
+      <div class="media-grid" id="media-grid">
+        <!-- Dynamically populated via JS loadMediaLibrary() -->
+      </div>
+    </div>
+
+    <!-- ════ VIEW 4: BUILD, RSS & DEPLOYMENT ════ -->
+    <div class="studio-view" id="view-deploy">
+      <div class="deploy-grid">
+        <!-- RSS Feed Status Card -->
+        <div class="deploy-card">
+          <h3>
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#f26522;"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
+            <span>Official RSS 2.0 Feed Details</span>
+          </h3>
+          <p style="font-size:12px; color:#555; margin-bottom:12px;">The RSS feed is automatically compiled whenever articles are created, edited, or deleted.</p>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px;">
+            <div>
+              <strong>Primary Feed:</strong>
+              <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" style="color:#0066cc;">https://open-fiestasmp.github.io/news/index.xml</a>
+            </div>
+            <div>
+              <strong>Standard Aliases:</strong>
+              <div style="font-family:Consolas,monospace; font-size:11.5px; color:#444; margin-top:2px;">
+                &bull; /news/rss.xml<br>
+                &bull; /rss.xml<br>
+                &bull; /feed.xml
+              </div>
+            </div>
+            <div>
+              <strong>Feed Standards:</strong> RSS 2.0 + Atom self-link + DC Creator + CDATA content:encoded
+            </div>
+            <div style="margin-top:6px;">
+              <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" class="ms-btn-aero-rss">Open Live Feed</a>
+              <button class="ms-btn-aero-secondary" onclick="navigator.clipboard.writeText('https://open-fiestasmp.github.io/news/index.xml'); showToast('RSS Feed URL copied to clipboard!');">Copy RSS URL</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Git Status & Deploy Card -->
+        <div class="deploy-card">
+          <h3>
+            <span>GitHub Pages Deployment</span>
+          </h3>
+          <p style="font-size:12px; color:#555; margin-bottom:12px;">Push your latest articles and media directly to origin/main on GitHub.</p>
+          <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px;">
+            <div><strong>Target Repo:</strong> open-fiestasmp/open-fiestasmp.github.io</div>
+            <div><strong>Active Branch:</strong> <code id="git-branch-val">main</code></div>
+            <div><strong>Working Tree:</strong> <span id="git-status-val">Checking...</span></div>
+            <div style="margin-top:8px;">
+              <button class="ms-btn-aero-primary" onclick="triggerDeployGitHub()">Deploy / Push to GitHub Now</button>
+              <button class="ms-btn-aero-secondary" onclick="triggerBuildSite()">Re-run Hugo Build</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Terminal Output -->
+      <div style="margin-top:20px;">
+        <h4 style="font-size:13px; color:#1a4f82; margin:0 0 6px 0;">Build &amp; Deployment Console Log</h4>
+        <div class="terminal-console" id="build-console-log">Ready. Click 'Build Site' or 'Deploy to GitHub' to inspect output.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Windows 7 Aero Status Bar -->
+  <footer class="ms-footer" style="margin-top:0; border-top:1px solid #bad2ea;">
+    <div class="ms-footer-bottom" style="padding:6px 16px;">
+      <div class="ms-footer-brand">
+        <span>FiestaSMP Newsroom &bull; Authenticated Admin Session</span>
+      </div>
+      <div class="ms-footer-copy">
+        <span id="status-last-action">Ready</span>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<!-- ════ MODALS FOR MEDIA EMBEDS ════ -->
+
+<!-- Link Modal -->
+<div class="ms-modal-backdrop" id="modal-link">
+  <div class="ms-modal-box">
+    <div class="ms-modal-header">
+      <span>Insert Hyperlink</span>
+      <span style="cursor:pointer;" onclick="closeModal('modal-link')">&times;</span>
+    </div>
+    <div class="ms-modal-body">
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Link Text</label>
+        <input type="text" id="modal-link-text" class="meta-input" placeholder="e.g. Read the Season 2 Guide">
+      </div>
+      <div class="meta-field">
+        <label>Destination URL</label>
+        <input type="text" id="modal-link-url" class="meta-input" placeholder="https://... or /gallery.html">
+      </div>
+    </div>
+    <div class="ms-modal-footer">
+      <button class="ms-btn-aero-secondary" onclick="closeModal('modal-link')">Cancel</button>
+      <button class="ms-btn-aero-primary" onclick="applyInsertLink()">Insert Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- YouTube Embed Modal -->
+<div class="ms-modal-backdrop" id="modal-youtube">
+  <div class="ms-modal-box">
+    <div class="ms-modal-header">
+      <span>Insert YouTube Video Embed</span>
+      <span style="cursor:pointer;" onclick="closeModal('modal-youtube')">&times;</span>
+    </div>
+    <div class="ms-modal-body">
+      <p style="font-size:12px; color:#555; margin-bottom:10px;">Paste any standard YouTube video URL or ID. It will be rendered as a responsive 16:9 player.</p>
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>YouTube Video URL or Video ID *</label>
+        <input type="text" id="yt-url" class="meta-input" placeholder="https://www.youtube.com/watch?v=... or dQw4w9WgXcQ">
+      </div>
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Player Title (Optional)</label>
+        <input type="text" id="yt-title" class="meta-input" placeholder="e.g. Season 2 Gameplay Trailer">
+      </div>
+      <div class="meta-field">
+        <label>Caption (Optional)</label>
+        <input type="text" id="yt-caption" class="meta-input" placeholder="e.g. Server cinematic overview by cbladeOfficial">
+      </div>
+    </div>
+    <div class="ms-modal-footer">
+      <button class="ms-btn-aero-secondary" onclick="closeModal('modal-youtube')">Cancel</button>
+      <button class="ms-btn-aero-primary" onclick="applyYouTubeEmbed()">Insert YouTube Embed</button>
+    </div>
+  </div>
+</div>
+
+<!-- Image Embed Modal -->
+<div class="ms-modal-backdrop" id="modal-image">
+  <div class="ms-modal-box" style="width:540px;">
+    <div class="ms-modal-header">
+      <span>Insert Image / Screenshot</span>
+      <span style="cursor:pointer;" onclick="closeModal('modal-image')">&times;</span>
+    </div>
+    <div class="ms-modal-body">
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Image Source URL *</label>
+        <input type="text" id="img-src" class="meta-input" placeholder="/assets/img/... or https://...">
+      </div>
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Caption</label>
+        <input type="text" id="img-caption" class="meta-input" placeholder="e.g. Spawn harbor boat slipways at sunrise">
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+        <div class="meta-field">
+          <label>Alignment</label>
+          <select id="img-align" class="meta-select">
+            <option value="center">Center (Full Width)</option>
+            <option value="left">Left (Float)</option>
+            <option value="right">Right (Float)</option>
+          </select>
+        </div>
+        <div class="meta-field">
+          <label>Alt Text</label>
+          <input type="text" id="img-alt" class="meta-input" placeholder="Accessibility description">
+        </div>
+      </div>
+    </div>
+    <div class="ms-modal-footer">
+      <button class="ms-btn-aero-secondary" onclick="closeModal('modal-image')">Cancel</button>
+      <button class="ms-btn-aero-primary" onclick="applyImageEmbed()">Insert Image</button>
+    </div>
+  </div>
+</div>
+
+<!-- Callout Alert Modal -->
+<div class="ms-modal-backdrop" id="modal-callout">
+  <div class="ms-modal-box">
+    <div class="ms-modal-header">
+      <span>Insert Callout Alert Box</span>
+      <span style="cursor:pointer;" onclick="closeModal('modal-callout')">&times;</span>
+    </div>
+    <div class="ms-modal-body">
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Callout Type</label>
+        <select id="callout-type" class="meta-select">
+          <option value="note">Note (Blue Info Box)</option>
+          <option value="tip">Tip (Green Advice Box)</option>
+          <option value="important">Important (Orange Caution)</option>
+          <option value="warning">Warning (Red Critical Notice)</option>
+        </select>
+      </div>
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Custom Title (Optional)</label>
+        <input type="text" id="callout-title" class="meta-input" placeholder="e.g. Combat Warmup Rules">
+      </div>
+      <div class="meta-field">
+        <label>Message Content</label>
+        <textarea id="callout-content" class="meta-input" style="height:80px;" placeholder="Write the callout content here..."></textarea>
+      </div>
+    </div>
+    <div class="ms-modal-footer">
+      <button class="ms-btn-aero-secondary" onclick="closeModal('modal-callout')">Cancel</button>
+      <button class="ms-btn-aero-primary" onclick="applyCalloutEmbed()">Insert Callout</button>
+    </div>
+  </div>
+</div>
+
+<!-- Audio Player Modal -->
+<div class="ms-modal-backdrop" id="modal-audio">
+  <div class="ms-modal-box">
+    <div class="ms-modal-header">
+      <span>Insert Audio Player</span>
+      <span style="cursor:pointer;" onclick="closeModal('modal-audio')">&times;</span>
+    </div>
+    <div class="ms-modal-body">
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Audio File URL *</label>
+        <input type="text" id="audio-src" class="meta-input" placeholder="https://.../podcast.mp3">
+      </div>
+      <div class="meta-field" style="margin-bottom:10px;">
+        <label>Recording Title</label>
+        <input type="text" id="audio-title" class="meta-input" placeholder="e.g. Fiesta Community Townhall #4">
+      </div>
+      <div class="meta-field">
+        <label>Caption (Optional)</label>
+        <input type="text" id="audio-caption" class="meta-input" placeholder="Hosted by debarkak and cbladeOfficial">
+      </div>
+    </div>
+    <div class="ms-modal-footer">
+      <button class="ms-btn-aero-secondary" onclick="closeModal('modal-audio')">Cancel</button>
+      <button class="ms-btn-aero-primary" onclick="applyAudioEmbed()">Insert Audio Player</button>
+    </div>
+  </div>
+</div>
+
+<!-- Player Badge Modal -->
+<div class="ms-modal-backdrop" id="modal-player-badge">
+  <div class="ms-modal-box">
+    <div class="ms-modal-header">
+      <span>Insert Player Skin Badge</span>
+      <span style="cursor:pointer;" onclick="closeModal('modal-player-badge')">&times;</span>
+    </div>
+    <div class="ms-modal-body">
+      <div class="meta-field">
+        <label>Minecraft Username *</label>
+        <input type="text" id="player-badge-user" class="meta-input" placeholder="e.g. debarkak, cbladeOfficial, gautam652">
+      </div>
+    </div>
+    <div class="ms-modal-footer">
+      <button class="ms-btn-aero-secondary" onclick="closeModal('modal-player-badge')">Cancel</button>
+      <button class="ms-btn-aero-primary" onclick="applyPlayerBadgeEmbed()">Insert Badge</button>
+    </div>
+  </div>
+</div>
+
+<!-- Notification Toast -->
+<div class="studio-toast" id="studio-toast">Notification</div>
+
+<!-- ════ STUDIO CLIENT JAVASCRIPT ════ -->
+<script>
+{% raw %}
+  let allArticles = [];
+  let mediaItems = [];
+  let currentSlug = '';
+  let autoSlugEnabled = true;
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    loadArticles();
+    loadMediaLibrary();
+    loadStatus();
+
+    // Close dropdown on click outside
+    document.addEventListener('click', (e) => {
+      const dd = document.getElementById('dropdown-embeds');
+      if (dd && !dd.contains(e.target)) {
+        dd.classList.remove('open');
+      }
+    });
+
+    // Setup initial date if empty
+    const dateInput = document.getElementById('ed-date');
+    if (!dateInput.value) {
+      const now = new Date();
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      dateInput.value = now.toISOString().slice(0, 16);
+    }
+  });
+
+  function showToast(msg) {
+    const toast = document.getElementById('studio-toast');
+    toast.innerText = msg;
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 3500);
+  }
+
+  function switchStudioTab(tabId) {
+    document.querySelectorAll('.studio-tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.studio-view').forEach(v => v.classList.remove('active'));
+
+    document.getElementById(`tab-btn-${tabId}`).classList.add('active');
+    document.getElementById(`view-${tabId}`).classList.add('active');
+  }
+
+  // ── Articles API ──────────────────────────────────────────────────────────
+  async function loadArticles() {
+    try {
+      const res = await fetch('/api/news/articles');
+      const data = await res.json();
+      if (data.articles) {
+        allArticles = data.articles;
+        document.getElementById('badge-article-count').innerText = allArticles.length;
+        renderArticlesTable(allArticles);
+      }
+    } catch (e) {
+      console.error('Failed to load articles:', e);
+    }
+  }
+
+  function renderArticlesTable(articles) {
+    const tbody = document.getElementById('articles-table-body');
+    tbody.innerHTML = '';
+    document.getElementById('visible-articles-count').innerText = articles.length;
+
+    if (articles.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:24px; color:#777;">No articles found. Click "+ Create New Article" to publish one!</td></tr>';
+      return;
+    }
+
+    articles.forEach(art => {
+      const tr = document.createElement('tr');
+      if (art.draft) tr.classList.add('draft-row');
+
+      const tagsHtml = (art.tags || []).map(t => `<span class="badge-tag">${escapeHtml(t)}</span>`).join('');
+      const statusHtml = art.draft 
+        ? '<span class="badge-status-draft">Draft</span>' 
+        : '<span class="badge-status-pub">Published</span>';
+
+      const authorDisplay = art.coauthor ? `${art.author} &amp; ${art.coauthor}` : art.author;
+
+      tr.innerHTML = `
+        <td>
+          <div class="article-title-cell">${escapeHtml(art.title)}</div>
+          <div style="font-size:11px; color:#666; margin-top:2px;">${escapeHtml(art.summary || '')}</div>
+        </td>
+        <td><code>${escapeHtml(art.slug)}</code></td>
+        <td>${authorDisplay}</td>
+        <td style="font-size:11.5px; color:#555;">${formatDate(art.date)}</td>
+        <td>${tagsHtml || '<span style="color:#aaa;">-</span>'}</td>
+        <td>${statusHtml}</td>
+        <td style="text-align:center; white-space:nowrap;">
+          <button class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb;" onclick="openArticleEditor('${art.slug}')">Edit</button>
+          <a href="https://open-fiestasmp.github.io/news/${art.slug}/" target="_blank" class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb; text-decoration:none;">View</a>
+          <button class="tb-btn" style="background:#fff0f0; border:1px solid #facdcd; color:#c0392b;" onclick="confirmDeleteArticle('${art.slug}', '${escapeHtml(art.title)}')">Delete</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filterArticlesTable() {
+    const query = document.getElementById('archive-search').value.toLowerCase().trim();
+    const status = document.getElementById('archive-status-filter').value;
+
+    const filtered = allArticles.filter(art => {
+      const matchQuery = !query || 
+        art.title.toLowerCase().includes(query) || 
+        art.slug.toLowerCase().includes(query) || 
+        (art.author && art.author.toLowerCase().includes(query)) ||
+        (art.summary && art.summary.toLowerCase().includes(query)) ||
+        (art.tags && art.tags.some(t => t.toLowerCase().includes(query)));
+
+      const matchStatus = status === 'all' || 
+        (status === 'published' && !art.draft) || 
+        (status === 'draft' && art.draft);
+
+      return matchQuery && matchStatus;
+    });
+
+    renderArticlesTable(filtered);
+  }
+
+  // ── Open Editor for New or Existing Article ────────────────────────────────
+  function openNewArticleModal() {
+    currentSlug = '';
+    autoSlugEnabled = true;
+    document.getElementById('tab-editor-title').innerText = 'New Article';
+    document.getElementById('ed-title').value = '';
+    document.getElementById('ed-slug').value = '';
+    document.getElementById('ed-orig-slug').value = '';
+    document.getElementById('ed-summary').value = '';
+    document.getElementById('ed-tags').value = '';
+    document.getElementById('ed-draft').checked = false;
+    document.getElementById('markdown-editor').value = `Write your announcement or update details here...
+
+## Update Highlights
+
+- **First feature:** Details about the new addition.
+- **Second feature:** Another important fix or balance change.
+`;
+
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    document.getElementById('ed-date').value = now.toISOString().slice(0, 16);
+
+    switchStudioTab('editor');
+    onEditorInput();
+  }
+
+  async function openArticleEditor(slug) {
+    try {
+      showToast('Loading article...');
+      const res = await fetch(`/api/news/articles/${encodeURIComponent(slug)}`);
+      const data = await res.json();
+      if (!data.article) {
+        alert('Could not load article: ' + (data.error || 'Unknown error'));
+        return;
+      }
+
+      const art = data.article;
+      currentSlug = art.slug;
+      autoSlugEnabled = false;
+
+      document.getElementById('tab-editor-title').innerText = `Edit: ${art.title.slice(0, 20)}...`;
+      document.getElementById('ed-title').value = art.title || '';
+      document.getElementById('ed-slug').value = art.slug || '';
+      document.getElementById('ed-orig-slug').value = art.slug || '';
+      document.getElementById('ed-author').value = art.author || 'cbladeOfficial';
+      document.getElementById('ed-coauthor').value = art.coauthor || '';
+      document.getElementById('ed-summary').value = art.summary || '';
+      document.getElementById('ed-tags').value = (art.tags || []).join(', ');
+      document.getElementById('ed-draft').checked = !!art.draft;
+      document.getElementById('markdown-editor').value = art.content || '';
+
+      if (art.date) {
+        try {
+          const d = new Date(art.date);
+          d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+          document.getElementById('ed-date').value = d.toISOString().slice(0, 16);
+        } catch(e) {}
+      }
+
+      switchStudioTab('editor');
+      onEditorInput();
+    } catch (e) {
+      console.error(e);
+      alert('Error fetching article: ' + e);
+    }
+  }
+
+  function onTitleChanged() {
+    if (autoSlugEnabled) {
+      autoGenerateSlug();
+    }
+    updateLivePreview();
+  }
+
+  function autoGenerateSlug() {
+    const title = document.getElementById('ed-title').value;
+    const slug = title.toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/[\s_-]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+    document.getElementById('ed-slug').value = slug;
+    updateLivePreview();
+  }
+
+  // ── Save Article ──────────────────────────────────────────────────────────
+  async function saveArticle(triggerCompile = true) {
+    const title = document.getElementById('ed-title').value.trim();
+    const slug = document.getElementById('ed-slug').value.trim();
+    if (!title) {
+      alert('Please enter an article title.');
+      return;
+    }
+    if (!slug) {
+      alert('Please enter a valid URL slug.');
+      return;
+    }
+
+    const payload = {
+      title: title,
+      slug: slug,
+      orig_slug: document.getElementById('ed-orig-slug').value.trim(),
+      date: document.getElementById('ed-date').value ? new Date(document.getElementById('ed-date').value).toISOString() : new Date().toISOString(),
+      author: document.getElementById('ed-author').value,
+      coauthor: document.getElementById('ed-coauthor').value,
+      summary: document.getElementById('ed-summary').value.trim(),
+      tags: document.getElementById('ed-tags').value.split(',').map(t => t.trim()).filter(Boolean),
+      draft: document.getElementById('ed-draft').checked,
+      content: document.getElementById('markdown-editor').value
+    };
+
+    showToast('Saving article & compiling Hugo...');
+    document.getElementById('stat-sync').innerText = 'Compiling Hugo...';
+
+    try {
+      const res = await fetch('/api/news/articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert('Failed to save article: ' + (data.error || 'Unknown error'));
+        document.getElementById('stat-sync').innerText = 'Save Error';
+        return;
+      }
+
+      showToast(`Article '${slug}' saved successfully!`);
+      document.getElementById('stat-sync').innerText = 'Hugo Synced & RSS Updated';
+      document.getElementById('ed-orig-slug').value = slug;
+      currentSlug = slug;
+
+      if (data.build && data.build.stdout) {
+        logConsole(data.build.stdout);
+      }
+
+      loadArticles();
+      loadStatus();
+    } catch (e) {
+      console.error(e);
+      alert('Error during article save: ' + e);
+    }
+  }
+
+  async function saveAndDeployArticle() {
+    await saveArticle(true);
+    await triggerDeployGitHub();
+  }
+
+  async function confirmDeleteArticle(slug, title) {
+    if (!confirm(`Are you sure you want to delete the article:\n"${title}" (${slug})?\n\nThis will remove the Markdown file and update the site.`)) {
+      return;
+    }
+
+    showToast('Deleting article...');
+    try {
+      const res = await fetch(`/api/news/articles/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!data.success) {
+        alert('Delete failed: ' + (data.error || 'Unknown error'));
+        return;
+      }
+      showToast(`Article '${slug}' deleted!`);
+      loadArticles();
+      loadStatus();
+    } catch(e) {
+      alert('Error deleting article: ' + e);
+    }
+  }
+
+  function discardEditorChanges() {
+    if (confirm('Discard changes and return to article list?')) {
+      switchStudioTab('articles');
+    }
+  }
+
+  // ── Live Markdown & Shortcode Preview ─────────────────────────────────────
+  function onEditorInput() {
+    updateEditorMetrics();
+    updateLivePreview();
+  }
+
+  function updateEditorMetrics() {
+    const text = document.getElementById('markdown-editor').value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    const readMin = Math.max(1, Math.ceil(words / 200));
+
+    document.getElementById('stat-words').innerText = `${words} words`;
+    document.getElementById('stat-chars').innerText = `${chars} characters`;
+    document.getElementById('stat-readtime').innerText = `${readMin} min read`;
+  }
+
+  function updateLivePreview() {
+    const raw = document.getElementById('markdown-editor').value;
+    const title = document.getElementById('ed-title').value || 'Article Title Preview';
+    const author = document.getElementById('ed-author').value || 'cbladeOfficial';
+    const coauthor = document.getElementById('ed-coauthor').value;
+    const slug = document.getElementById('ed-slug').value || 'slug';
+
+    document.getElementById('prev-title').innerText = title;
+    document.getElementById('prev-author').innerText = coauthor ? `${author} & ${coauthor}` : author;
+    document.getElementById('preview-slug-label').innerText = `/news/${slug}/`;
+
+    const dateVal = document.getElementById('ed-date').value;
+    if (dateVal) {
+      try {
+        const d = new Date(dateVal);
+        document.getElementById('prev-date').innerText = d.toLocaleDateString('en-US', { month:'long', day:'numeric', year:'numeric' });
+      } catch(e) {}
+    }
+
+    // Pre-process Hugo shortcodes into HTML before marked.js parses
+    let processed = raw;
+
+    // {{< youtube id="..." >}}
+    processed = processed.replace(/\{\{<\s*youtube\s+id="([^"]+)"(?:\s+caption="([^"]*)")?\s*>\}\}/g, (match, id, cap) => {
+      return `<div class="ms-media-embed ms-embed-youtube"><div class="ms-video-responsive"><iframe src="https://www.youtube-nocookie.com/embed/${id}" frameborder="0" allowfullscreen></iframe></div>${cap ? `<figcaption class="ms-embed-caption">${cap}</figcaption>` : ''}</div>`;
+    });
+
+    // {{< media-image src="..." >}}
+    processed = processed.replace(/\{\{<\s*media-image\s+src="([^"]+)"(?:\s+caption="([^"]*)")?(?:\s+align="([^"]*)")?\s*>\}\}/g, (match, src, cap, align) => {
+      return `<figure class="ms-media-figure ${align ? 'ms-align-' + align : 'ms-align-center'}"><img src="${src}" class="ms-media-img">${cap ? `<figcaption class="ms-embed-caption">${cap}</figcaption>` : ''}</figure>`;
+    });
+
+    // {{< callout type="..." title="..." >}}...{{< /callout >}}
+    processed = processed.replace(/\{\{<\s*callout\s+type="([^"]+)"(?:\s+title="([^"]*)")?\s*>\}\}([\s\S]*?)\{\{<\s*\/callout\s*>\}\}/g, (match, type, title, inner) => {
+      return `<div class="ms-callout ms-callout-${type}"><div class="ms-callout-header"><strong class="ms-callout-title">${title || type.toUpperCase()}</strong></div><div class="ms-callout-content">${marked.parse(inner)}</div></div>`;
+    });
+
+    // {{< server-ip >}}
+    processed = processed.replace(/\{\{<\s*server-ip\s*>\}\}/g, () => {
+      return `<div class="ms-server-ip-box"><span class="ms-ip-label">Server IP:</span> <code class="ms-ip-code">fiesta.debarkak.xyz</code></div>`;
+    });
+
+    // Render markdown via marked.js
+    if (window.marked) {
+      document.getElementById('rendered-preview-body').innerHTML = marked.parse(processed);
+    } else {
+      document.getElementById('rendered-preview-body').innerText = processed;
+    }
+  }
+
+  function setEditorPaneMode(mode) {
+    const wrap = document.getElementById('editor-panes-wrapper');
+    wrap.className = 'editor-panes-wrapper';
+    if (mode === 'editor-only') wrap.classList.add('editor-only');
+    if (mode === 'preview-only') wrap.classList.add('preview-only');
+
+    document.getElementById('btn-view-split').classList.toggle('active', mode === 'split');
+    document.getElementById('btn-view-editor').classList.toggle('active', mode === 'editor-only');
+    document.getElementById('btn-view-preview').classList.toggle('active', mode === 'preview-only');
+  }
+
+  // ── Markdown Toolbar Helpers ──────────────────────────────────────────────
+  function wrapSelection(before, after) {
+    const ta = document.getElementById('markdown-editor');
+    const start = ta.selectionStart;
+    const end = ta.selectionEnd;
+    const val = ta.value;
+    const sel = val.substring(start, end) || 'text';
+    ta.value = val.substring(0, start) + before + sel + after + val.substring(end);
+    ta.focus();
+    ta.selectionStart = start + before.length;
+    ta.selectionEnd = start + before.length + sel.length;
+    onEditorInput();
+  }
+
+  function insertHeading(lvl) {
+    const ta = document.getElementById('markdown-editor');
+    const prefix = '#'.repeat(lvl) + ' ';
+    const start = ta.selectionStart;
+    const val = ta.value;
+    ta.value = val.substring(0, start) + '\n' + prefix + val.substring(start);
+    ta.focus();
+    ta.selectionStart = start + prefix.length + 1;
+    ta.selectionEnd = ta.selectionStart;
+    onEditorInput();
+  }
+
+  function insertList(prefix) {
+    const ta = document.getElementById('markdown-editor');
+    const start = ta.selectionStart;
+    const val = ta.value;
+    ta.value = val.substring(0, start) + '\n' + prefix + val.substring(start);
+    ta.focus();
+    ta.selectionStart = start + prefix.length + 1;
+    ta.selectionEnd = ta.selectionStart;
+    onEditorInput();
+  }
+
+  function insertDivider() {
+    const ta = document.getElementById('markdown-editor');
+    const start = ta.selectionStart;
+    const val = ta.value;
+    ta.value = val.substring(0, start) + '\n---\n\n' + val.substring(start);
+    ta.focus();
+    onEditorInput();
+  }
+
+  function insertCodeBlock() {
+    wrapSelection('\n```markdown\n', '\n```\n');
+  }
+
+  function insertTable() {
+    const tableTemplate = `
+| Feature | Details | Status |
+| :--- | :--- | :--- |
+| Physical Barter | Diamond & Gold Currency | Active |
+| Crossplay | Java & Bedrock Support | Active |
+| Land Claims | GriefProtection Charter | Active |
+`;
+    const ta = document.getElementById('markdown-editor');
+    const start = ta.selectionStart;
+    const val = ta.value;
+    ta.value = val.substring(0, start) + '\n' + tableTemplate + '\n' + val.substring(start);
+    ta.focus();
+    onEditorInput();
+  }
+
+  function toggleEmbedsDropdown(e) {
+    e.stopPropagation();
+    document.getElementById('dropdown-embeds').classList.toggle('open');
+  }
+
+  // ── Media Embed Modals ────────────────────────────────────────────────────
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+  }
+
+  function openLinkModal() {
+    const ta = document.getElementById('markdown-editor');
+    const sel = ta.value.substring(ta.selectionStart, ta.selectionEnd);
+    document.getElementById('modal-link-text').value = sel || '';
+    document.getElementById('modal-link-url').value = '';
+    openModal('modal-link');
+  }
+  function applyInsertLink() {
+    const text = document.getElementById('modal-link-text').value.trim() || 'link';
+    const url = document.getElementById('modal-link-url').value.trim() || '#';
+    closeModal('modal-link');
+    wrapSelection('', `[${text}](${url})`);
+  }
+
+  function openYouTubeEmbedModal() {
+    document.getElementById('dropdown-embeds').classList.remove('open');
+    document.getElementById('yt-url').value = '';
+    document.getElementById('yt-title').value = '';
+    document.getElementById('yt-caption').value = '';
+    openModal('modal-youtube');
+  }
+  function applyYouTubeEmbed() {
+    let raw = document.getElementById('yt-url').value.trim();
+    if (!raw) return;
+
+    // Extract ID from full URL or ID
+    let ytId = raw;
+    const match = raw.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w-]{11})/);
+    if (match) ytId = match[1];
+
+    const title = document.getElementById('yt-title').value.trim();
+    const caption = document.getElementById('yt-caption').value.trim();
+
+    closeModal('modal-youtube');
+    let shortcode = `{{< youtube id="${ytId}"`;
+    if (title) shortcode += ` title="${title}"`;
+    if (caption) shortcode += ` caption="${caption}"`;
+    shortcode += ` >}}\n`;
+
+    const ta = document.getElementById('markdown-editor');
+    ta.value += '\n' + shortcode;
+    onEditorInput();
+  }
+
+  function openImageEmbedModal(defaultSrc = '') {
+    document.getElementById('dropdown-embeds').classList.remove('open');
+    document.getElementById('img-src').value = defaultSrc;
+    document.getElementById('img-caption').value = '';
+    document.getElementById('img-alt').value = '';
+    openModal('modal-image');
+  }
+  function applyImageEmbed() {
+    const src = document.getElementById('img-src').value.trim();
+    if (!src) return;
+    const caption = document.getElementById('img-caption').value.trim();
+    const align = document.getElementById('img-align').value;
+    const alt = document.getElementById('img-alt').value.trim() || caption;
+
+    closeModal('modal-image');
+    let shortcode = `{{< media-image src="${src}"`;
+    if (caption) shortcode += ` caption="${caption}"`;
+    if (alt) shortcode += ` alt="${alt}"`;
+    if (align && align !== 'center') shortcode += ` align="${align}"`;
+    shortcode += ` >}}\n`;
+
+    const ta = document.getElementById('markdown-editor');
+    ta.value += '\n' + shortcode;
+    onEditorInput();
+  }
+
+  function openCalloutEmbedModal() {
+    document.getElementById('dropdown-embeds').classList.remove('open');
+    openModal('modal-callout');
+  }
+  function applyCalloutEmbed() {
+    const type = document.getElementById('callout-type').value;
+    const title = document.getElementById('callout-title').value.trim();
+    const content = document.getElementById('callout-content').value.trim() || 'Callout message goes here.';
+
+    closeModal('modal-callout');
+    const snippet = `{{< callout type="${type}"${title ? ` title="${title}"` : ''} >}}\n${content}\n{{< /callout >}}\n`;
+    const ta = document.getElementById('markdown-editor');
+    ta.value += '\n' + snippet;
+    onEditorInput();
+  }
+
+  function openAudioEmbedModal() {
+    document.getElementById('dropdown-embeds').classList.remove('open');
+    openModal('modal-audio');
+  }
+  function applyAudioEmbed() {
+    const src = document.getElementById('audio-src').value.trim();
+    if (!src) return;
+    const title = document.getElementById('audio-title').value.trim();
+    const cap = document.getElementById('audio-caption').value.trim();
+
+    closeModal('modal-audio');
+    const snippet = `{{< audio src="${src}"${title ? ` title="${title}"` : ''}${cap ? ` caption="${cap}"` : ''} >}}\n`;
+    const ta = document.getElementById('markdown-editor');
+    ta.value += '\n' + snippet;
+    onEditorInput();
+  }
+
+  function openPlayerBadgeModal() {
+    document.getElementById('dropdown-embeds').classList.remove('open');
+    openModal('modal-player-badge');
+  }
+  function applyPlayerBadgeEmbed() {
+    const user = document.getElementById('player-badge-user').value.trim();
+    if (!user) return;
+    closeModal('modal-player-badge');
+    const snippet = `![${user} Skin Avatar](https://mc-heads.net/avatar/${encodeURIComponent(user)}/64)\n`;
+    const ta = document.getElementById('markdown-editor');
+    ta.value += '\n' + snippet;
+    onEditorInput();
+  }
+
+  function insertServerIpBadge() {
+    document.getElementById('dropdown-embeds').classList.remove('open');
+    const ta = document.getElementById('markdown-editor');
+    ta.value += '\n{{< server-ip >}}\n';
+    onEditorInput();
+  }
+
+  // ── Media Library & Uploader ──────────────────────────────────────────────
+  async function loadMediaLibrary() {
+    try {
+      const res = await fetch('/api/news/media');
+      const data = await res.json();
+      if (data.media) {
+        mediaItems = data.media;
+        document.getElementById('badge-media-count').innerText = mediaItems.length;
+        document.getElementById('media-total-label').innerText = mediaItems.length;
+        renderMediaGrid(mediaItems);
+      }
+    } catch(e) {
+      console.error('Failed to load media:', e);
+    }
+  }
+
+  function renderMediaGrid(items) {
+    const grid = document.getElementById('media-grid');
+    grid.innerHTML = '';
+    if (items.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:#888;">No media uploaded yet. Use the dropzone above!</div>';
+      return;
+    }
+
+    items.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'media-card';
+      card.innerHTML = `
+        <div class="media-thumb-wrap">
+          <img src="${m.url}" class="media-thumb" alt="${escapeHtml(m.filename)}" loading="lazy">
+        </div>
+        <div class="media-name" title="${escapeHtml(m.filename)}">${escapeHtml(m.filename)}</div>
+        <div class="media-info">${m.size_str} &bull; ${m.folder}</div>
+        <div class="media-card-btns">
+          <button class="tb-btn media-btn-small" onclick="insertMediaIntoEditor('${m.url}', '${escapeHtml(m.filename)}')">Insert</button>
+          <button class="tb-btn media-btn-small" onclick="navigator.clipboard.writeText('${m.url}'); showToast('URL copied!');">Copy URL</button>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  function insertMediaIntoEditor(url, filename) {
+    openImageEmbedModal(url);
+    switchStudioTab('editor');
+  }
+
+  async function handleMediaUpload(files) {
+    if (!files || files.length === 0) return;
+    const file = files[0];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    showToast('Uploading image to website assets...');
+    try {
+      const res = await fetch('/api/news/upload-media', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert('Upload failed: ' + (data.error || 'Unknown error'));
+        return;
+      }
+
+      showToast(`Uploaded '${data.filename}' successfully!`);
+      loadMediaLibrary();
+      // Prompt user to insert
+      if (confirm(`Uploaded '${data.filename}'. Do you want to insert it into the current article?`)) {
+        insertMediaIntoEditor(data.url, data.filename);
+      }
+    } catch(e) {
+      alert('Upload error: ' + e);
+    }
+  }
+
+  // ── Build & Deployment Console ────────────────────────────────────────────
+  async function triggerBuildSite() {
+    showToast('Running Hugo build & syncing RSS...');
+    logConsole('Executing: hugo --cleanDestinationDir (Compiling static site)...');
+    try {
+      const res = await fetch('/api/news/build', { method: 'POST' });
+      const data = await res.json();
+      if (data.output) logConsole(data.output);
+      showToast('Site build complete & RSS synced!');
+      loadStatus();
+    } catch(e) {
+      logConsole('Build error: ' + e);
+    }
+  }
+
+  async function triggerDeployGitHub() {
+    if (!confirm('Deploy latest news articles and updates to GitHub Pages now?')) return;
+    showToast('Publishing updates to GitHub...');
+    logConsole('Starting deployment pipeline: Hugo build -> git commit -> git push origin main...');
+    try {
+      const res = await fetch('/api/news/publish', { method: 'POST' });
+      const data = await res.json();
+      if (data.message) logConsole(data.message);
+      if (data.commit_output) logConsole(data.commit_output);
+      if (data.push_output) logConsole(data.push_output);
+      if (!data.success && data.error) logConsole('ERROR: ' + data.error);
+      showToast(data.success ? 'Successfully published to GitHub Pages!' : 'Deployment error');
+      loadStatus();
+    } catch(e) {
+      logConsole('Deploy error: ' + e);
+    }
+  }
+
+  async function loadStatus() {
+    try {
+      const res = await fetch('/api/news/status');
+      const data = await res.json();
+      if (data) {
+        document.getElementById('git-branch-val').innerText = data.git_branch || 'main';
+        const st = document.getElementById('git-status-val');
+        if (data.git_clean) {
+          st.innerHTML = '<span style="color:#1e7039; font-weight:700;">Clean (Synced with remote)</span>';
+        } else {
+          st.innerHTML = `<span style="color:#b55d10; font-weight:700;">${data.uncommitted_files} uncommitted files (Deploy recommended)</span>`;
+        }
+      }
+    } catch(e) {}
+  }
+
+  function logConsole(msg) {
+    const con = document.getElementById('build-console-log');
+    const time = new Date().toLocaleTimeString();
+    con.innerText += `\n[${time}] ${msg}`;
+    con.scrollTop = con.scrollHeight;
+  }
+
+  // ── Utilities ─────────────────────────────────────────────────────────────
+  function escapeHtml(str) {
+    return String(str || '').replace(/[&<>"']/g, m => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[m]);
+  }
+
+  function formatDate(isoStr) {
+    if (!isoStr) return '';
+    try {
+      return new Date(isoStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    } catch(e) {
+      return isoStr;
+    }
+  }
+{% endraw %}
+</script>
+
+</body>
+</html>

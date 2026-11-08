@@ -1,0 +1,2104 @@
+/* ==========================================================================
+   Fiesta SMP - 2009 Microsoft / Windows 7 Aero Theme Stylesheet
+   Faithfully inspired by Microsoft.com (2009) & Windows 7 Frutiger Aero
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Global Reset & Foundations
+   -------------------------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  animation: none !important;
+  transition: none !important;
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+}
+
+*:hover, *:focus, *:focus-within, *:active {
+  animation: none !important;
+  transition: none !important;
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+}
+
+html {
+  box-sizing: border-box;
+  font-size: 13px;
+  background-color: #ffffff;
+  color: #2b2b2b;
+  font-family: 'Segoe UI', Tahoma, Arial, Helvetica, sans-serif;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+  overflow-x: hidden;
+}
+
+a {
+  color: #0066cc;
+  text-decoration: none;
+}
+a:hover {
+  color: #004b97;
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Master Page Wrapper (Full Display Space on Desktop and Mobile)
+   -------------------------------------------------------------------------- */
+.ms-page-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  background-color: #ffffff;
+  box-shadow: none;
+  border: none;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* --------------------------------------------------------------------------
+   Top Utility Strip (Hidden)
+   -------------------------------------------------------------------------- */
+.ms-top-strip {
+  display: none !important;
+}
+
+/* --------------------------------------------------------------------------
+   Logo & Brand Header
+   -------------------------------------------------------------------------- */
+.ms-header-brand {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 14px 20px 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+}
+.ms-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none !important;
+}
+.ms-logo-img {
+  width: 38px;
+  height: 38px;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+.ms-brand-title {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2b2b2b;
+  letter-spacing: -0.6px;
+  line-height: 1;
+}
+.ms-brand-title em {
+  font-style: italic;
+  color: #0072c6;
+}
+.ms-brand-subtitle {
+  font-size: 11.5px;
+  color: #777777;
+  font-weight: normal;
+  display: block;
+  margin-top: 3px;
+  letter-spacing: 0.2px;
+}
+.ms-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ms-pill-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: linear-gradient(to bottom, #ffffff 0%, #eff4f8 100%);
+  border: 1px solid #bfd3e1;
+  color: #1e567c;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* Mobile Hamburger Toggle */
+.ms-mobile-toggle {
+  display: none;
+  background: linear-gradient(to bottom, #ffffff 0%, #eaf1f7 100%);
+  border: 1px solid #b2c9d9;
+  border-radius: 3px;
+  padding: 6px 10px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+.ms-mobile-toggle svg {
+  width: 20px;
+  height: 20px;
+  fill: #005a9e;
+}
+
+/* --------------------------------------------------------------------------
+   Iconic 2009 Aero Navigation Bar
+   -------------------------------------------------------------------------- */
+.ms-navbar {
+  background: linear-gradient(to bottom, #397ea5 0%, #29688e 50%, #1e5677 51%, #2c6c92 100%);
+  border-top: 1px solid #689cbd;
+  border-bottom: 1px solid #144463;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+  position: relative;
+  z-index: 50;
+}
+.ms-nav-list {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  list-style: none;
+  padding: 0 20px;
+}
+.ms-nav-item {
+  position: relative;
+}
+.ms-nav-link {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 18px;
+  color: #ffffff !important;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  text-decoration: none !important;
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+}
+.ms-nav-item:first-child .ms-nav-link {
+  border-left: none;
+}
+.ms-nav-link:hover {
+  background: linear-gradient(to bottom, #498fb7 0%, #35769d 50%, #266387 51%, #35759b 100%);
+}
+.ms-nav-item.active .ms-nav-link,
+.ms-nav-link.active {
+  background: linear-gradient(to bottom, #174866 0%, #1f587d 50%, #174867 51%, #1d5376 100%);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.4);
+  border-bottom: 2px solid #e5a700;
+}
+
+/* --------------------------------------------------------------------------
+   Windows 7 Aero Hero Showcase (The 2009 Signature Banner)
+   -------------------------------------------------------------------------- */
+.ms-hero-showcase {
+  background: linear-gradient(125deg, #0e4c75 0%, #175d8d 32%, #2a7a72 58%, #4a8d38 82%, #599b3b 100%);
+  position: relative;
+  color: #ffffff;
+  overflow: hidden;
+  border-bottom: 1px solid #103854;
+}
+.ms-hero-glass-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.02) 100%);
+  pointer-events: none;
+}
+.ms-hero-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 290px;
+  position: relative;
+  z-index: 2;
+}
+
+/* Left Hero Sidebar Tabs (Classic 2009 Style - optional) */
+.ms-hero-tabs {
+  width: 210px;
+  background: rgba(18, 64, 98, 0.45);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+.ms-hero-tab-item {
+  padding: 13px 18px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d6eefa;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-decoration: none !important;
+}
+.ms-hero-tab-item:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+.ms-hero-tab-item.active {
+  background: linear-gradient(to right, rgba(255,255,255,0.20) 0%, rgba(255,255,255,0.05) 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border-left: 3px solid #e5a700;
+}
+.ms-hero-tab-item svg {
+  width: 10px;
+  height: 10px;
+  fill: currentColor;
+  opacity: 0.8;
+}
+
+/* Center Hero Content */
+.ms-hero-content {
+  flex: 1 1 auto;
+  max-width: 660px;
+  padding: 34px 28px 34px 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.ms-hero-tagline {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #f0ca65;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  margin-bottom: 6px;
+}
+.ms-hero-title {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.35);
+  color: #ffffff;
+}
+.ms-hero-desc {
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: #ebf6fd;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+  max-width: 520px;
+  margin-bottom: 22px;
+}
+
+/* Windows 7 Aero Glossy Buttons */
+.ms-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.ms-btn-aero-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  height: 38px;
+  box-sizing: border-box;
+  background: linear-gradient(to bottom, #ffffff 0%, #eef5fa 45%, #d5e6f3 50%, #e2eff8 100%);
+  border: 1px solid #7eaecf;
+  border-radius: 3px;
+  color: #0e446d !important;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+  cursor: pointer;
+}
+.ms-btn-aero-primary:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #fcf4e8 45%, #fae2b6 50%, #fae9cb 100%);
+  border-color: #cda34b;
+  color: #5d3f00 !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.9);
+}
+.ms-btn-aero-primary:active {
+  background: linear-gradient(to bottom, #c2ddf0 0%, #b3d2ea 50%, #cee4f4 100%);
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.ms-btn-aero-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 9px 18px;
+  height: 38px;
+  box-sizing: border-box;
+  background: rgba(14, 55, 87, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 3px;
+  color: #ffffff !important;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-decoration: none !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.25);
+  cursor: pointer;
+}
+.ms-btn-aero-secondary:hover {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: #ffffff;
+}
+
+.ms-hero-footer-note {
+  font-size: 11.5px;
+  color: #d1ecfc;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.4);
+}
+
+/* Right Hero Image Showcase */
+.ms-hero-visual {
+  flex: 0 0 340px;
+  width: 340px;
+  max-width: 42%;
+  padding: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ms-hero-img {
+  display: block;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* --------------------------------------------------------------------------
+   Three-Column Portal Section (Streamlined Microsoft 2009 Layout)
+   -------------------------------------------------------------------------- */
+.ms-portal-section {
+  padding: 24px 0 18px 0;
+  background-color: #ffffff;
+  width: 100%;
+}
+.ms-portal-grid {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.ms-portal-card {
+  border: 1px solid #d5e5f0;
+  border-radius: 4px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+.ms-portal-card:hover {
+  border-color: #7abfe5;
+}
+
+.ms-portal-card-header {
+  background: linear-gradient(to bottom, #f8fafc 0%, #ebf2f7 100%);
+  border-bottom: 1px solid #dce9f2;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e5a84;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ms-portal-card-header svg {
+  width: 16px;
+  height: 16px;
+  fill: #1e5a84;
+}
+
+.ms-portal-card-body {
+  padding: 14px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+.ms-portal-thumb {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 1px solid #dbe6ee;
+  margin-bottom: 12px;
+}
+.ms-portal-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #005a9e;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.ms-portal-card-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #444444;
+  margin-bottom: 14px;
+  flex-grow: 1;
+}
+
+/* Microsoft 2009 Chevron Link Lists */
+.ms-chevron-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid #eef4f8;
+  padding-top: 10px;
+}
+.ms-chevron-list li {
+  margin-bottom: 7px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.ms-chevron-list a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  color: #0066cc;
+  font-weight: 600;
+}
+.ms-chevron-list a:hover {
+  color: #004b97;
+}
+.ms-chevron-arrow {
+  color: #2a8dd4;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+/* Sidebar Frequent Destinations Box */
+.ms-destinations-box {
+  background: linear-gradient(to bottom, #ffffff 0%, #f4f9fd 100%);
+  border: 1px solid #bddae8;
+  border-radius: 4px;
+}
+.ms-dest-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ms-dest-list li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #e8f1f7;
+  font-size: 12px;
+}
+.ms-dest-list li:last-child {
+  border-bottom: none;
+}
+.ms-dest-list a {
+  color: #005a9e;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.ms-dest-list a:hover {
+  color: #003e6d;
+}
+.ms-dest-icon {
+  width: 14px;
+  height: 14px;
+  fill: #0072c6;
+  flex-shrink: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Google Calendar Stream Section (Aero Desktop Window Aesthetic)
+   -------------------------------------------------------------------------- */
+.ms-calendar-section {
+  padding: 6px 0 24px 0;
+  background-color: #ffffff;
+  width: 100%;
+}
+.ms-aero-window-full {
+  max-width: 1080px;
+  margin: 0 auto;
+  width: calc(100% - 40px);
+  box-sizing: border-box;
+  background: linear-gradient(to bottom, #f6f9fc 0%, #ffffff 100%);
+  border: 1px solid #b5d1e4;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 70, 120, 0.10);
+  overflow: hidden;
+}
+.ms-window-titlebar {
+  background: linear-gradient(to bottom, #397ea5 0%, #29688e 50%, #1e5677 51%, #2c6c92 100%);
+  border-bottom: 1px solid #144463;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+}
+.ms-titlebar-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ms-titlebar-title svg {
+  width: 15px;
+  height: 15px;
+  fill: #ffffff;
+}
+.ms-window-controls {
+  display: flex;
+  gap: 4px;
+}
+.ms-win-ctrl {
+  width: 22px;
+  height: 18px;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  font-weight: bold;
+}
+.ms-win-ctrl.close:hover {
+  background: linear-gradient(to bottom, #e75443 0%, #ca2e1e 50%, #b21b0e 51%, #c7291a 100%);
+  border-color: #8c1005;
+}
+
+.ms-calendar-content {
+  padding: 14px;
+}
+.ms-calendar-embed-wrap {
+  position: relative;
+  height: 380px;
+  border: 1px solid #c9dfee;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.ms-calendar-embed-wrap iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+/* --------------------------------------------------------------------------
+   Inner Page Styles (Terms, Gallery, Socials, Support, News)
+   -------------------------------------------------------------------------- */
+.ms-page-header {
+  background: linear-gradient(135deg, #1d5c86 0%, #154569 100%);
+  color: #ffffff;
+  padding: 24px 0;
+  border-bottom: 2px solid #e5a700;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+  width: 100%;
+}
+.ms-page-header h1,
+.ms-page-header p {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+.ms-page-header h1 {
+  font-size: 26px;
+  font-weight: 700;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+  margin-bottom: 4px;
+}
+.ms-page-header p {
+  font-size: 13px;
+  color: #d8edf8;
+}
+
+.ms-page-body {
+  padding: 24px 0 48px 0;
+  background-color: #ffffff;
+  flex: 1 0 auto;
+  width: 100%;
+}
+.ms-page-body > * {
+  max-width: 1120px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+  box-sizing: border-box;
+}
+
+/* --------------------------------------------------------------------------
+   Terms Page (Microsoft TechNet / KB Article Style)
+   -------------------------------------------------------------------------- */
+.ms-kb-container {
+  display: flex;
+  gap: 28px;
+}
+.ms-kb-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+}
+.ms-kb-nav-box {
+  background: #f7fbfe;
+  border: 1px solid #cbe1ef;
+  border-radius: 4px;
+  padding: 14px;
+  position: sticky;
+  top: 20px;
+}
+.ms-kb-nav-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1e5a84;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #dce9f2;
+}
+.ms-kb-nav-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.ms-kb-nav-links li {
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.ms-kb-nav-links a {
+  color: #0066cc;
+  display: block;
+}
+.ms-kb-nav-links a:hover {
+  color: #003e6d;
+}
+
+.ms-kb-content {
+  flex: 1;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: #2b2b2b;
+}
+.ms-kb-content h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #005a9e;
+  margin: 28px 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d9e7f1;
+}
+.ms-kb-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a6494;
+  margin: 20px 0 8px 0;
+}
+.ms-kb-content p {
+  margin-bottom: 14px;
+}
+.ms-kb-content ul,
+.ms-kb-content ol {
+  margin: 0 0 16px 24px;
+}
+.ms-kb-content li {
+  margin-bottom: 6px;
+}
+.ms-callout-info {
+  background: #f0f7fd;
+  border-left: 4px solid #0072c6;
+  border-top: 1px solid #d0e6f4;
+  border-right: 1px solid #d0e6f4;
+  border-bottom: 1px solid #d0e6f4;
+  padding: 12px 16px;
+  margin: 18px 0;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.ms-callout-warning {
+  background: #fffdf5;
+  border-left: 4px solid #d89f25;
+  border-top: 1px solid #faeccc;
+  border-right: 1px solid #faeccc;
+  border-bottom: 1px solid #faeccc;
+  padding: 12px 16px;
+  margin: 18px 0;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.ms-page-body > .ms-callout-info,
+.ms-page-body > .ms-callout-warning {
+  max-width: 1080px;
+  width: calc(100% - 40px);
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* --------------------------------------------------------------------------
+   Gallery Page (Windows Photo Gallery 2009 Style)
+   -------------------------------------------------------------------------- */
+.ms-gallery-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #dce8f2;
+}
+.ms-gallery-toolbar-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e5a84;
+}
+.ms-gallery-toolbar-sub {
+  font-size: 12px;
+  color: #777777;
+  margin-left: 8px;
+}
+.ms-gallery-toolbar-btn {
+  font-size: 12px;
+  padding: 6px 14px;
+  height: auto;
+}
+.ms-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.ms-photo-card {
+  background: #ffffff;
+  border: 1px solid #cbdde9;
+  border-radius: 4px;
+  padding: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+}
+.ms-photo-card:hover {
+  border-color: #5fa6d5;
+}
+.ms-photo-img-wrap {
+  overflow: hidden;
+  border-radius: 3px;
+  position: relative;
+  background: #000000;
+}
+.ms-photo-img-wrap img {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+.ms-photo-meta {
+  padding: 10px 4px 4px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ms-photo-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #005a9e;
+}
+.ms-photo-author-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+.ms-photo-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  image-rendering: pixelated;
+  border: 1px solid #c0d8e8;
+}
+.ms-photo-author-name {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #333333;
+}
+.ms-photo-date {
+  font-size: 11px;
+  color: #777777;
+}
+
+/* --------------------------------------------------------------------------
+   Socials & Directory Page (Microsoft Directory Style)
+   -------------------------------------------------------------------------- */
+.ms-directory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.ms-directory-card {
+  border: 1px solid #cde0ed;
+  border-radius: 4px;
+  background: #fdfefe;
+  overflow: hidden;
+}
+.ms-dir-header {
+  background: linear-gradient(to bottom, #f5f8fa 0%, #e5eef4 100%);
+  border-bottom: 1px solid #cce0ee;
+  padding: 10px 14px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #1e5a84;
+}
+.ms-dir-body {
+  padding: 16px;
+}
+.ms-dir-link-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eef4f8;
+  font-size: 12.5px;
+}
+.ms-dir-link-item:last-child {
+  border-bottom: none;
+}
+.ms-dir-link-label {
+  font-weight: 600;
+  color: #333333;
+}
+.ms-dir-link-val {
+  color: #0066cc;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Contact & Support Page (Microsoft Support Center Style)
+   -------------------------------------------------------------------------- */
+.ms-support-banner {
+  background: #fff8e8;
+  border: 1px solid #fedc96;
+  border-radius: 4px;
+  padding: 14px 18px;
+  margin: 0 auto 24px auto;
+  max-width: 1080px;
+  width: calc(100% - 40px);
+  box-sizing: border-box;
+  font-size: 13px;
+  color: #6d4c00;
+}
+.ms-support-banner strong {
+  color: #b26a00;
+}
+.ms-support-forms-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 28px;
+}
+.ms-support-form-card {
+  border: 1px solid #cde0ed;
+  border-radius: 4px;
+  padding: 18px;
+  text-align: center;
+  background: #fbfdfd;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.ms-support-form-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #005a9e;
+  margin-bottom: 8px;
+}
+.ms-support-form-desc {
+  font-size: 12px;
+  color: #555555;
+  margin-bottom: 16px;
+}
+
+/* --------------------------------------------------------------------------
+   News & Blog Styles (Microsoft PressPass & TechNet Blog)
+   -------------------------------------------------------------------------- */
+.ms-news-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+.ms-news-card {
+  border: 1px solid #d1e2ee;
+  border-radius: 4px;
+  background: #ffffff;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.ms-news-card:hover {
+  border-color: #5fa6d5;
+}
+.ms-news-card-date {
+  font-size: 11px;
+  color: #777777;
+  margin-bottom: 6px;
+}
+.ms-news-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #005a9e;
+  line-height: 1.35;
+  margin: 0 0 8px 0;
+}
+.ms-news-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.ms-news-card-title a:hover {
+  color: #004b97;
+  text-decoration: underline;
+}
+.ms-news-card-summary {
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #444444;
+  margin-bottom: 12px;
+  flex-grow: 1;
+}
+.ms-news-card-footer {
+  border-top: 1px solid #edf4f9;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+}
+.ms-news-card-author {
+  color: #666666;
+  font-weight: 600;
+}
+.ms-news-card-link {
+  color: #0066cc;
+  font-weight: 700;
+  text-decoration: none;
+}
+.ms-news-card-link:hover {
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Home Page News Section (2009 Microsoft PressPass / Windows 7 Era Styling)
+   -------------------------------------------------------------------------- */
+.ms-home-news-section {
+  padding: 10px 0 32px 0;
+  background-color: #ffffff;
+  width: 100%;
+}
+.ms-home-news-header {
+  max-width: 1120px;
+  margin: 0 auto 18px auto;
+  width: 100%;
+  padding: 0 20px 8px 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  border-bottom: 2px solid #0072c6;
+  position: relative;
+}
+.ms-home-news-header::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 20px;
+  width: 90px;
+  height: 2px;
+  background-color: #e5a700;
+}
+.ms-home-news-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ms-home-news-icon {
+  width: 20px;
+  height: 20px;
+  fill: #005a9e;
+  flex-shrink: 0;
+}
+.ms-home-news-title {
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 19px;
+  font-weight: 700;
+  color: #005a9e;
+  margin: 0;
+  line-height: 1.2;
+}
+.ms-home-news-subtitle {
+  font-size: 11.5px;
+  color: #666666;
+  font-weight: normal;
+  display: inline-block;
+  margin-left: 4px;
+}
+.ms-home-news-all-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0066cc;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.ms-home-news-all-link:hover {
+  color: #004b97;
+  text-decoration: underline;
+}
+
+/* Home News 3-Column Grid */
+.ms-home-news-grid {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.ms-home-news-card {
+  background: #ffffff;
+  border: 1px solid #d1e2ee;
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.ms-home-news-card:hover {
+  border-color: #5fa6d5;
+}
+.ms-home-news-card-thumb-wrap {
+  width: 100%;
+  height: 135px;
+  overflow: hidden;
+  background: #1b567d;
+  border-bottom: 1px solid #d5e5f0;
+}
+.ms-home-news-card-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ms-home-news-card-body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.ms-home-news-date {
+  font-size: 11px;
+  color: #777777;
+  margin-bottom: 6px;
+}
+.ms-home-news-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #005a9e;
+  line-height: 1.35;
+  margin: 0 0 8px 0;
+}
+.ms-home-news-card-title a {
+  color: inherit;
+  text-decoration: none;
+}
+.ms-home-news-card-title a:hover {
+  color: #004b97;
+  text-decoration: underline;
+}
+.ms-home-news-card-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #444444;
+  margin-bottom: 12px;
+  flex-grow: 1;
+}
+.ms-home-news-footer {
+  border-top: 1px solid #edf4f9;
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+}
+.ms-home-news-byline {
+  color: #666666;
+  font-weight: 600;
+}
+.ms-home-news-read-link {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0066cc;
+  text-decoration: none;
+}
+.ms-home-news-read-link:hover {
+  text-decoration: underline;
+}
+
+/* Server Quick Wire / Live Bulletins Bar */
+.ms-home-news-wire {
+  max-width: 1080px;
+  margin: 18px auto 0 auto;
+  width: calc(100% - 40px);
+  box-sizing: border-box;
+  background: #f4f8fb;
+  border: 1px solid #d0e4f2;
+  border-radius: 4px;
+  padding: 9px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 12px;
+}
+.ms-wire-label {
+  font-weight: 700;
+  color: #1e5a84;
+  text-transform: uppercase;
+  font-size: 10.5px;
+  background: #e0eff8;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid #bddae8;
+  letter-spacing: 0.4px;
+}
+.ms-wire-items {
+  color: #444444;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.ms-wire-item a {
+  color: #0066cc;
+  font-weight: 600;
+}
+.ms-wire-item a:hover {
+  color: #004b97;
+  text-decoration: underline;
+}
+
+/* --------------------------------------------------------------------------
+   Master Microsoft 2009 Corporate Footer
+   -------------------------------------------------------------------------- */
+.ms-footer {
+  background: linear-gradient(to bottom, #7dbfe7 0%, #4192c7 45%, #2778ae 50%, #155584 100%);
+  border-top: 1px solid #9ad0ef;
+  padding: 14px 0;
+  margin-top: auto;
+  width: 100%;
+}
+.ms-footer-bottom {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 11px;
+  color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0, 30, 60, 0.6);
+}
+.ms-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 11.5px;
+}
+.ms-footer-icon {
+  width: 14px;
+  height: 14px;
+  fill: #ffffff;
+}
+.ms-footer-copy {
+  color: #e4f2fb;
+  font-size: 11px;
+}
+
+/* --------------------------------------------------------------------------
+   Windows 7 Aero Notification Toast & Back to Top
+   -------------------------------------------------------------------------- */
+.fiesta-toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(to bottom, #ffffff 0%, #f3f8fd 100%);
+  border: 1px solid #68a9d6;
+  border-radius: 4px;
+  color: #1a4d73;
+  padding: 12px 18px;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 60, 110, 0.25);
+  z-index: 9999;
+  pointer-events: none;
+  display: none;
+  align-items: center;
+}
+.fiesta-toast.show {
+  display: flex;
+}
+.copyable-ip {
+  cursor: pointer;
+}
+
+/* Back to Top Quick Launch Button */
+.back-to-top {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(to bottom, #ffffff 0%, #eef5fa 45%, #d5e6f3 50%, #e2eff8 100%);
+  border: 1px solid #7eaecf;
+  border-radius: 3px;
+  box-shadow: 0 2px 8px rgba(0, 60, 100, 0.25);
+  color: #005a9e;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 90;
+}
+.back-to-top.visible {
+  display: flex;
+}
+.back-to-top:hover {
+  background: linear-gradient(to bottom, #ffffff 0%, #fcf4e8 45%, #fae2b6 50%, #fae9cb 100%);
+  border-color: #cda34b;
+  color: #5d3f00;
+}
+.back-to-top svg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Breakpoints
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 900px) {
+  .ms-portal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ms-news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ms-home-news-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ms-directory-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ms-kb-container {
+    flex-direction: column;
+  }
+  .ms-kb-sidebar {
+    width: 100%;
+  }
+  .ms-kb-nav-box {
+    position: static;
+  }
+  .ms-hero-visual {
+    display: none;
+  }
+  .ms-hero-content {
+    flex: 1 1 100%;
+    max-width: 100%;
+    padding: 28px 0;
+  }
+}
+
+@media screen and (max-width: 680px) {
+  .ms-header-brand {
+    padding: 10px 14px 8px 14px;
+  }
+  .ms-nav-list {
+    display: none;
+    flex-direction: column;
+    padding: 0;
+  }
+  .ms-hero-inner {
+    flex-direction: column;
+    padding: 0 14px;
+    min-height: auto;
+  }
+  .ms-portal-section {
+    padding: 18px 0 14px 0;
+  }
+  .ms-portal-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 14px;
+  }
+  .ms-calendar-section {
+    padding: 4px 0 18px 0;
+  }
+  .ms-aero-window-full {
+    width: calc(100% - 28px);
+    max-width: 100%;
+  }
+  .ms-home-news-section {
+    padding: 10px 0 24px 0;
+  }
+  .ms-home-news-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+    padding: 0 14px 8px 14px;
+  }
+  .ms-home-news-header::after {
+    left: 14px;
+  }
+  .ms-home-news-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 0 14px;
+  }
+  .ms-home-news-wire {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 14px;
+    width: calc(100% - 28px);
+    max-width: 100%;
+  }
+  .ms-page-header {
+    padding: 18px 0;
+  }
+  .ms-page-header h1,
+  .ms-page-header p {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .ms-page-body {
+    padding: 18px 0 36px 0;
+  }
+  .ms-page-body > * {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+  .ms-mobile-toggle {
+    display: flex;
+  }
+  .ms-navbar.open .ms-nav-list {
+    display: flex;
+  }
+  .ms-nav-link {
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    padding: 0 16px;
+  }
+  .ms-hero-tabs {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    display: none; /* Collapsed on small screens */
+  }
+  .ms-hero-content {
+    padding: 22px 0 18px 0;
+    width: 100%;
+    max-width: 100%;
+  }
+  .ms-hero-tagline {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .ms-hero-title {
+    font-size: 26px;
+    line-height: 1.18;
+    margin-bottom: 10px;
+  }
+  .ms-hero-desc {
+    font-size: 13px;
+    line-height: 1.45;
+    margin-bottom: 16px;
+    max-width: 100%;
+  }
+  .ms-hero-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+  }
+  .ms-hero-actions .ms-btn-aero-primary,
+  .ms-hero-actions .ms-btn-aero-secondary {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    box-sizing: border-box;
+  }
+  .ms-hero-footer-note {
+    font-size: 11px;
+    line-height: 1.4;
+    text-align: center;
+  }
+  .ms-gallery-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .ms-directory-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .ms-support-forms-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .ms-support-banner,
+  .ms-page-body > .ms-callout-info,
+  .ms-page-body > .ms-callout-warning {
+    width: calc(100% - 28px);
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .ms-news-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .ms-calendar-embed-wrap {
+    height: 280px;
+  }
+  .ms-footer {
+    padding: 12px 0;
+  }
+  .ms-footer-bottom {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 0 14px;
+  }
+  /* Eliminate mobile link flooding on small screens */
+  .ms-chevron-list {
+    display: none !important;
+  }
+  .ms-header-badges .ms-status-indicator,
+  .ms-header-badges .ms-pill-badge {
+    display: none;
+  }
+  .ms-header-badges {
+    display: flex;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Windows 7 Aero Photo Viewer Lightbox
+   -------------------------------------------------------------------------- */
+.gallery-lightbox {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99999;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  box-sizing: border-box;
+  touch-action: pan-y;
+}
+.gallery-lightbox.active,
+.gallery-lightbox.open {
+  display: flex;
+}
+.lightbox-window {
+  max-width: 920px;
+  width: 100%;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #5fa6d5;
+  border-radius: 6px;
+  box-shadow: 0 16px 48px rgba(0, 40, 80, 0.5);
+  overflow: hidden;
+}
+.lightbox-titlebar {
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #397ea5 0%, #29688e 50%, #1e5677 51%, #2c6c92 100%);
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 13px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  border-bottom: 1px solid #144463;
+  user-select: none;
+}
+.lightbox-close-btn {
+  background: linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.08) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  color: #ffffff;
+  font-size: 16px;
+  line-height: 1;
+  width: 26px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 0;
+}
+.lightbox-close-btn:hover,
+.lightbox-close-btn:active {
+  background: linear-gradient(to bottom, #e75443 0%, #ca2e1e 50%, #b21b0e 51%, #c7291a 100%);
+  border-color: #8c1005;
+}
+.lightbox-img-wrap {
+  flex: 1 1 auto;
+  position: relative;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  max-height: calc(88vh - 120px);
+  overflow: hidden;
+}
+.lightbox-img-wrap img {
+  max-height: calc(88vh - 120px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+}
+.lightbox-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+.lightbox-nav-btn:hover,
+.lightbox-nav-btn:active {
+  background: rgba(0, 114, 198, 0.85);
+  border-color: #ffffff;
+}
+.lightbox-nav-btn.prev { left: 14px; }
+.lightbox-nav-btn.next { right: 14px; }
+.lightbox-meta-bar {
+  flex-shrink: 0;
+  background: linear-gradient(to bottom, #ffffff 0%, #edf5fa 100%);
+  border-top: 1px solid #d2e4f0;
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+@media screen and (max-width: 640px) {
+  .gallery-lightbox {
+    padding: 6px;
+  }
+  .lightbox-window {
+    max-height: 96vh;
+    border-radius: 4px;
+  }
+  .lightbox-titlebar {
+    padding: 6px 10px;
+    font-size: 11.5px;
+  }
+  .lightbox-titlebar span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 32px);
+  }
+  .lightbox-img-wrap {
+    min-height: 140px;
+    max-height: calc(90vh - 100px);
+  }
+  .lightbox-img-wrap img {
+    max-height: calc(90vh - 100px);
+  }
+  .lightbox-nav-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(0, 0, 0, 0.7);
+  }
+  .lightbox-nav-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  .lightbox-nav-btn.prev { left: 6px; }
+  .lightbox-nav-btn.next { right: 6px; }
+  .lightbox-meta-bar {
+    padding: 8px 10px;
+    gap: 8px;
+  }
+  .lightbox-meta-bar #lightbox-caption {
+    font-size: 12.5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+  .lightbox-meta-bar .lightbox-meta-sub {
+    font-size: 10.5px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Hugo Markdown Post Detail & Article View (2009 PressPass Aesthetic)
+   -------------------------------------------------------------------------- */
+.post-detail-wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  width: 100%;
+}
+.post-article {
+  max-width: 840px;
+}
+.post-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #0066cc;
+  text-decoration: none;
+}
+.post-back-link:hover {
+  color: #004b97;
+  text-decoration: underline;
+}
+.post-header-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: #005a9e;
+  line-height: 1.25;
+  margin: 10px 0 16px 0;
+}
+.post-header-meta {
+  font-size: 12.5px;
+  color: #666666;
+  margin: 8px 0 22px 0;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #dce8f2;
+}
+.post-header-meta strong {
+  color: #1e5a84;
+}
+.post-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #2b2b2b;
+}
+.post-content h1,
+.post-content h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #005a9e;
+  margin: 28px 0 12px 0;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d9e7f1;
+}
+.post-content h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a6494;
+  margin: 20px 0 8px 0;
+}
+.post-content p {
+  margin-bottom: 14px;
+}
+.post-content ul,
+.post-content ol {
+  margin: 0 0 16px 24px;
+}
+.post-content li {
+  margin-bottom: 6px;
+}
+.post-content pre {
+  background: #f4f8fb;
+  border: 1px solid #cddfe9;
+  border-radius: 4px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  font-family: Consolas, 'Courier New', monospace;
+  font-size: 12.5px;
+  margin: 16px 0;
+}
+.post-content code {
+  font-family: Consolas, 'Courier New', monospace;
+  background: #f0f6fa;
+  border: 1px solid #d5e5f0;
+  padding: 2px 5px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: #005a9e;
+}
+.post-content pre code {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+.post-content blockquote {
+  background: #f0f7fd;
+  border-left: 4px solid #0072c6;
+  border-top: 1px solid #d0e6f4;
+  border-right: 1px solid #d0e6f4;
+  border-bottom: 1px solid #d0e6f4;
+  padding: 12px 16px;
+  margin: 18px 0;
+  border-radius: 0 4px 4px 0;
+  font-style: normal;
+}
+.post-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid #cbdde9;
+  margin: 14px 0;
+}
+.post-footer-box {
+  margin-top: 32px;
+  border-top: 1px solid #dce8f2;
+  padding-top: 18px;
+}
+.post-nav-links {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.post-nav-item {
+  text-decoration: none !important;
+  color: #0066cc;
+  font-size: 13px;
+  font-weight: 600;
+  max-width: 45%;
+}
+.post-nav-item:hover {
+  text-decoration: underline !important;
+}
+.post-nav-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #888888;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+/* --------------------------------------------------------------------------
+   RSS Subscription Banner (2009 Microsoft Aero Style)
+   -------------------------------------------------------------------------- */
+.ms-rss-subscribe-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f8fc 60%, #e7f0fa 100%);
+  border: 1px solid #b9d2ea;
+  border-radius: 6px;
+  padding: 12px 18px;
+  margin-bottom: 24px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 2px 4px rgba(0, 70, 140, 0.06);
+}
+.ms-rss-badge-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+.ms-rss-icon-box {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  background: linear-gradient(180deg, #ff944d 0%, #f26522 60%, #cc490a 100%);
+  border: 1px solid #b33e08;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45), 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.ms-rss-icon-box svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+.ms-rss-text-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1a4f82;
+  margin-bottom: 2px;
+}
+.ms-rss-text-desc {
+  font-size: 11px;
+  color: #555555;
+  line-height: 1.35;
+}
+.ms-rss-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.ms-btn-aero-rss {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(180deg, #ff9245 0%, #f26522 50%, #d85213 100%);
+  border: 1px solid #aa3b07;
+  color: #ffffff !important;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 4px;
+  text-decoration: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 1px 2px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.ms-btn-aero-rss:hover {
+  background: linear-gradient(180deg, #ffa35f 0%, #f77233 50%, #e35a1a 100%);
+  color: #ffffff !important;
+}
+.ms-btn-aero-rss svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+@media (max-width: 768px) {
+  .ms-rss-subscribe-bar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .ms-rss-actions {
+    width: 100%;
+    margin-top: 6px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Media Embeds & Shortcodes (Responsive & Aero Formatted)
+   -------------------------------------------------------------------------- */
+.ms-media-embed {
+  margin: 20px 0;
+}
+.ms-video-responsive {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid #b8cee2;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  background: #000000;
+}
+.ms-video-responsive iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+.ms-embed-caption {
+  font-size: 11px;
+  color: #666666;
+  text-align: center;
+  margin-top: 6px;
+  font-style: italic;
+}
+.ms-media-figure {
+  margin: 18px 0;
+  text-align: center;
+}
+.ms-media-figure.ms-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+.ms-media-figure.ms-align-left {
+  float: left;
+  margin-right: 18px;
+  margin-bottom: 12px;
+}
+.ms-media-figure.ms-align-right {
+  float: right;
+  margin-left: 18px;
+  margin-bottom: 12px;
+}
+.ms-media-img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+  border: 1px solid #cbdde9;
+  box-shadow: 0 2px 6px rgba(0, 60, 120, 0.08);
+}
+.ms-callout {
+  border-left: 4px solid #0066cc;
+  background: linear-gradient(180deg, #f7faff 0%, #edf4fc 100%);
+  border-top: 1px solid #dce8f4;
+  border-right: 1px solid #dce8f4;
+  border-bottom: 1px solid #dce8f4;
+  border-radius: 0 4px 4px 0;
+  padding: 12px 16px;
+  margin: 18px 0;
+}
+.ms-callout-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.ms-callout-title {
+  font-size: 13px;
+  color: #0052a3;
+  font-weight: 700;
+}
+.ms-callout-content {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #333333;
+}
+.ms-callout-tip {
+  border-left-color: #2e8b57;
+  background: linear-gradient(180deg, #f8fdf9 0%, #effaf2 100%);
+}
+.ms-callout-tip .ms-callout-title {
+  color: #1e663d;
+}
+.ms-callout-important {
+  border-left-color: #e67e22;
+  background: linear-gradient(180deg, #fffcf8 0%, #fdf5ea 100%);
+}
+.ms-callout-important .ms-callout-title {
+  color: #b55d10;
+}
+.ms-callout-warning {
+  border-left-color: #c0392b;
+  background: linear-gradient(180deg, #fff9f9 0%, #fcedeb 100%);
+}
+.ms-callout-warning .ms-callout-title {
+  color: #96281b;
+}
+
+.ms-server-ip-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f8fc 100%);
+  border: 1px solid #b9d2ea;
+  border-radius: 4px;
+  padding: 8px 14px;
+  margin: 14px 0;
+}
+.ms-ip-code {
+  background: #ffffff;
+  border: 1px solid #cbdde9;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-weight: 700;
+  color: #0055aa;
+  font-size: 13px;
+}
+.ms-btn-copy-ip {
+  padding: 4px 12px;
+  font-size: 11px;
+}

@@ -31,6 +31,7 @@ from functools import wraps
 from flask import Flask, request, jsonify, render_template, session, redirect, url_for, send_file, send_from_directory, Response, has_request_context
 from addon_manager import AddonManager
 from cloud_backups import CloudBackupManager
+from website_news_manager import WebsiteNewsManager
 import autostart
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -1423,6 +1424,7 @@ except Exception as e:
     app.logger.warning(f"Error during addon_manager initialization: {e}")
 
 cloud_backup_mgr = CloudBackupManager(DATA_DIR)
+website_news = WebsiteNewsManager()
 
 _last_known_server_running = None
 _last_known_online_players = None
@@ -8594,6 +8596,103 @@ def api_action():
         return jsonify({"success": True, "message": "Garbage collector (/gc) triggered in Minecraft engine!"})
 
     return jsonify({"success": False, "message": "Unknown action"}), 400
+
+# ── FiestaSMP Official Website News Studio & RSS CMS ─────────────────────────
+
+@app.route("/admin/news-studio", methods=["GET"])
+@app.route("/studio/news", methods=["GET"])
+@login_required
+def route_admin_news_studio():
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return render_template("login.html", error="Access Denied: Administrator privileges required for News Studio.", branding=load_branding()), 403
+    return render_template("admin_news_studio.html", branding=load_branding())
+
+@app.route("/assets/<path:filename>")
+def route_website_assets(filename):
+    website_assets_dir = os.path.join(website_news.repo_dir, "assets")
+    return send_from_directory(website_assets_dir, filename)
+
+@app.route("/server-icon.webp")
+def route_server_icon_webp():
+    icon_path = os.path.join(website_news.repo_dir, "server-icon.webp")
+    if os.path.isfile(icon_path):
+        return send_file(icon_path, mimetype="image/webp")
+    return send_from_directory(os.path.join(BASE_DIR, "static"), "favicon.ico")
+
+@app.route("/api/news/articles", methods=["GET"])
+@login_required
+def api_news_list_articles():
+    return jsonify({"success": True, "articles": website_news.list_articles()})
+
+@app.route("/api/news/articles", methods=["POST"])
+@login_required
+def api_news_save_article():
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return jsonify({"success": False, "error": "Permission denied"}), 403
+    data = request.get_json(silent=True) or {}
+    res = website_news.save_article(data)
+    return jsonify(res)
+
+@app.route("/api/news/articles/<slug>", methods=["GET"])
+@login_required
+def api_news_get_article(slug):
+    art = website_news.get_article(slug)
+    if not art:
+        return jsonify({"success": False, "error": f"Article '{slug}' not found"}), 404
+    return jsonify({"success": True, "article": art})
+
+@app.route("/api/news/articles/<slug>", methods=["DELETE"])
+@login_required
+def api_news_delete_article(slug):
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return jsonify({"success": False, "error": "Permission denied"}), 403
+    res = website_news.delete_article(slug)
+    return jsonify(res)
+
+@app.route("/api/news/media", methods=["GET"])
+@login_required
+def api_news_list_media():
+    return jsonify({"success": True, "media": website_news.list_media()})
+
+@app.route("/api/news/upload-media", methods=["POST"])
+@login_required
+def api_news_upload_media():
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return jsonify({"success": False, "error": "Permission denied"}), 403
+    if "file" not in request.files:
+        return jsonify({"success": False, "error": "No file uploaded"}), 400
+    file = request.files["file"]
+    res = website_news.save_media_file(file)
+    return jsonify(res)
+
+@app.route("/api/news/build", methods=["POST"])
+@login_required
+def api_news_build():
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return jsonify({"success": False, "error": "Permission denied"}), 403
+    res = website_news.rebuild()
+    return jsonify({"success": res["success"], "output": res.get("stdout") or res.get("stderr") or "Hugo build completed.", "build": res})
+
+@app.route("/api/news/publish", methods=["POST"])
+@login_required
+def api_news_publish():
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return jsonify({"success": False, "error": "Permission denied"}), 403
+    data = request.get_json(silent=True) or {}
+    msg = data.get("message")
+    res = website_news.deploy_to_github(msg)
+    return jsonify(res)
+
+@app.route("/api/news/status", methods=["GET"])
+@login_required
+def api_news_status():
+    return jsonify(website_news.get_status())
 
 @app.route("/install.sh")
 def route_install_script():
