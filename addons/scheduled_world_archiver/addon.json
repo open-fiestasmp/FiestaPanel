@@ -13,7 +13,13 @@
       "key": "default_cloud_target",
       "label": "Default Cloud Upload Destination",
       "type": "select",
-      "options": ["archive_org", "github", "s3", "custom_post", "local"],
+      "options": [
+        "archive_org",
+        "github",
+        "s3",
+        "custom_post",
+        "local"
+      ],
       "default": "archive_org"
     },
     {
@@ -149,7 +155,13 @@
       "key": "recurring_snapshot_interval",
       "label": "Automated Recurring Snapshot Interval",
       "type": "select",
-      "options": ["disabled", "6h", "12h", "24h", "7d"],
+      "options": [
+        "disabled",
+        "6h",
+        "12h",
+        "24h",
+        "7d"
+      ],
       "default": "disabled"
     },
     {
@@ -205,5 +217,31 @@
       "icon": "fa-solid fa-cloud-arrow-up",
       "description": "Capture world snapshots for any scheduled purpose, publish to GitHub Releases, Internet Archive, or Cloudflare R2 / S3, and synchronize releases."
     }
+  },
+  "settings": {
+    "default_cloud_target": "archive_org",
+    "github_token": "",
+    "github_repo": "",
+    "github_tag_prefix": "v",
+    "archive_org_access_key": "",
+    "archive_org_secret_key": "",
+    "archive_org_collection": "opensource",
+    "item_prefix": "fiestasmp_world_",
+    "s3_endpoint_url": "",
+    "s3_bucket_name": "",
+    "s3_access_key": "",
+    "s3_secret_key": "",
+    "s3_region": "auto",
+    "s3_public_base_url": "",
+    "custom_post_url": "",
+    "custom_post_auth_header": "",
+    "include_overworld": true,
+    "include_nether": true,
+    "include_the_end": true,
+    "auto_upload_cloud": false,
+    "recurring_snapshot_interval": "disabled",
+    "google_calendar_feed_url": "",
+    "broadcast_on_release": true,
+    "discord_webhook_url": ""
   }
 }
