@@ -405,7 +405,7 @@ class WebsiteNewsManager:
 
         try:
             # 1. git add .
-            subprocess.run(["git", "add", "."], cwd=self.repo_dir, check=True)
+            subprocess.run(["git", "add", "."], cwd=self.repo_dir, capture_output=True, text=True, check=True)
 
             # 2. Check if there are changes to commit
             status_proc = subprocess.run(["git", "status", "--porcelain"], cwd=self.repo_dir, capture_output=True, text=True, check=True)
@@ -430,11 +430,13 @@ class WebsiteNewsManager:
                 "build": build_res
             }
         except subprocess.CalledProcessError as e:
+            err_msg = (e.stderr or e.stdout or str(e) or f"Process {e.cmd} returned {e.returncode}").strip()
             return {
                 "success": False,
-                "error": f"Git command failed: {e.cmd}",
-                "stdout": e.stdout if hasattr(e, "stdout") else "",
-                "stderr": e.stderr if hasattr(e, "stderr") else str(e)
+                "error": f"Git command failed: {err_msg}",
+                "cmd": str(e.cmd),
+                "stdout": e.stdout or "",
+                "stderr": e.stderr or ""
             }
         except Exception as e:
             return {"success": False, "error": str(e)}
