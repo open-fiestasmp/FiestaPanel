@@ -255,12 +255,16 @@ class WebsiteNewsManager:
 
         # Handle rename / slug change
         if orig_slug and orig_slug != slug:
-            old_path = os.path.join(self.posts_dir, f"{orig_slug}.md")
-            if os.path.isfile(old_path):
-                try:
-                    os.remove(old_path)
-                except Exception as e:
-                    logger.warning(f"Could not remove old file {old_path}: {e}")
+            old_art = self.get_article(orig_slug)
+            old_candidates = [os.path.join(self.posts_dir, f"{orig_slug}.md")]
+            if old_art and old_art.get("filename"):
+                old_candidates.append(os.path.join(self.posts_dir, old_art["filename"]))
+            for old_p in set(old_candidates):
+                if os.path.isfile(old_p) and os.path.abspath(old_p) != os.path.abspath(new_path):
+                    try:
+                        os.remove(old_p)
+                    except Exception as e:
+                        logger.warning(f"Could not remove old file {old_p}: {e}")
             old_compiled = os.path.join(self.news_dir, orig_slug)
             if os.path.isdir(old_compiled):
                 try:
@@ -321,7 +325,18 @@ class WebsiteNewsManager:
                     continue
 
         if not target_file or not os.path.isfile(target_file):
-            return {"success": False, "error": f"Article with slug '{slug}' not found."}
+            # Clean up compiled directory if it still exists
+            for s in set([slug, clean_slug, actual_slug]):
+                compiled_dir = os.path.join(self.news_dir, s)
+                if os.path.isdir(compiled_dir):
+                    shutil.rmtree(compiled_dir, ignore_errors=True)
+            build_res = self.rebuild()
+            return {
+                "success": True,
+                "message": f"Article '{slug}' was already removed from posts.",
+                "already_deleted": True,
+                "build": build_res
+            }
 
         # Attempt deletion with explicit error handling
         try:

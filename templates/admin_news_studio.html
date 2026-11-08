@@ -1286,9 +1286,9 @@
         <td>${tagsHtml || '<span style="color:#aaa;">-</span>'}</td>
         <td>${statusHtml}</td>
         <td style="text-align:center; white-space:nowrap;">
-          <button class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb;" onclick="openArticleEditor('${art.slug}')">Edit</button>
+          <button class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb;" data-slug="${escapeHtml(art.slug)}" onclick="openArticleEditor(this.dataset.slug)">Edit</button>
           <a href="https://open-fiestasmp.github.io/news/${art.slug}/" target="_blank" class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb; text-decoration:none;">View</a>
-          <button class="tb-btn" style="background:#fff0f0; border:1px solid #facdcd; color:#c0392b;" onclick="confirmDeleteArticle('${art.slug}', '${escapeHtml(art.title)}')">Delete</button>
+          <button class="tb-btn" style="background:#fff0f0; border:1px solid #facdcd; color:#c0392b;" data-slug="${escapeHtml(art.slug)}" data-title="${escapeHtml(art.title)}" onclick="confirmDeleteArticle(this.dataset.slug, this.dataset.title)">Delete</button>
         </td>
       `;
       tbody.appendChild(tr);
@@ -1485,13 +1485,15 @@
       const data = await res.json();
       if (!data.success) {
         alert('Delete failed: ' + (data.error || 'Unknown error'));
-        return;
+      } else {
+        showToast(`Article '${slug}' deleted!`);
       }
-      showToast(`Article '${slug}' deleted!`);
-      loadArticles();
-      loadStatus();
+      await loadArticles();
+      await loadStatus();
     } catch(e) {
       alert('Error deleting article: ' + e);
+      await loadArticles();
+      await loadStatus();
     }
   }
 

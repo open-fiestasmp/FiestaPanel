@@ -8650,7 +8650,8 @@ def api_news_delete_article(slug):
     if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
         return jsonify({"success": False, "error": "Permission denied"}), 403
     res = website_news.delete_article(slug)
-    return jsonify(res)
+    status_code = 200 if res.get("success") else 400
+    return jsonify(res), status_code
 
 @app.route("/api/news/media", methods=["GET"])
 @login_required

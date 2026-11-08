@@ -106,6 +106,10 @@ class TestWebsiteNewsStudio(unittest.TestCase):
         self.assertTrue(del_res["success"])
         self.assertIsNone(self.manager.get_article(test_slug))
 
+        # 5. Idempotent deletion (deleting already-deleted article should succeed gracefully)
+        del_res_again = self.manager.delete_article(test_slug)
+        self.assertTrue(del_res_again["success"])
+
     def test_news_studio_page_and_api_auth(self):
         """Verify API endpoints require authentication and allow authorized admin access."""
         # Unauthenticated access must fail
