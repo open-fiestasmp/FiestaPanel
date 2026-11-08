@@ -6,7 +6,30 @@
   <title>FiestaSMP News Studio</title>
   <link rel="icon" href="/server-icon.webp" type="image/webp">
   <link rel="stylesheet" href="/static/microsoft-2009.css?v=20261108b">
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <script src="/static/marked.min.js"></script>
+  <script>
+    const CSRF_TOKEN = {{ csrf_token|tojson }};
+    (() => {
+      const originalFetch = window.fetch;
+      window.fetch = async (input, options = {}) => {
+        const url = new URL(typeof input === 'string' ? input : input.url, location.href);
+        const method = (options.method || (input instanceof Request ? input.method : 'GET')).toUpperCase();
+        if (url.origin === location.origin && !['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+          const headers = new Headers(options.headers || (input instanceof Request ? input.headers : undefined));
+          if (!headers.has('X-CSRF-Token') && CSRF_TOKEN) {
+            headers.set('X-CSRF-Token', CSRF_TOKEN);
+          }
+          options = {...options, headers};
+        }
+        const res = await originalFetch(input, options);
+        if (res.status === 401 && url.origin === location.origin && url.pathname.startsWith('/api/')) {
+          location.href = '/login';
+        }
+        return res;
+      };
+    })();
+  </script>
   <style>
     /* ── News Studio 2009 Aero Workbench Styles ────────────────────────── */
     :root {
@@ -1411,7 +1434,10 @@
     try {
       const res = await fetch('/api/news/articles', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': CSRF_TOKEN
+        },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -1450,7 +1476,12 @@
 
     showToast('Deleting article...');
     try {
-      const res = await fetch(`/api/news/articles/${encodeURIComponent(slug)}`, { method: 'DELETE' });
+      const res = await fetch(`/api/news/articles/${encodeURIComponent(slug)}`, {
+        method: 'DELETE',
+        headers: {
+          'X-CSRF-Token': CSRF_TOKEN
+        }
+      });
       const data = await res.json();
       if (!data.success) {
         alert('Delete failed: ' + (data.error || 'Unknown error'));
@@ -1803,11 +1834,15 @@
     const file = files[0];
     const formData = new FormData();
     formData.append('file', file);
+    formData.append('csrf_token', CSRF_TOKEN);
 
     showToast('Uploading image to website assets...');
     try {
       const res = await fetch('/api/news/upload-media', {
         method: 'POST',
+        headers: {
+          'X-CSRF-Token': CSRF_TOKEN
+        },
         body: formData
       });
       const data = await res.json();
@@ -1832,7 +1867,12 @@
     showToast('Running Hugo build & syncing RSS...');
     logConsole('Executing: hugo --cleanDestinationDir (Compiling static site)...');
     try {
-      const res = await fetch('/api/news/build', { method: 'POST' });
+      const res = await fetch('/api/news/build', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': CSRF_TOKEN
+        }
+      });
       const data = await res.json();
       if (data.output) logConsole(data.output);
       showToast('Site build complete & RSS synced!');
@@ -1847,7 +1887,14 @@
     showToast('Publishing updates to GitHub...');
     logConsole('Starting deployment pipeline: Hugo build -> git commit -> git push origin main...');
     try {
-      const res = await fetch('/api/news/publish', { method: 'POST' });
+      const res = await fetch('/api/news/publish', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': CSRF_TOKEN
+        },
+        body: JSON.stringify({ message: 'Update website news articles and assets' })
+      });
       const data = await res.json();
       if (data.message) logConsole(data.message);
       if (data.commit_output) logConsole(data.commit_output);

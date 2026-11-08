@@ -125,6 +125,8 @@ class TestWebsiteNewsStudio(unittest.TestCase):
         self.assertIn("FiestaSMP News Studio", html)
         self.assertIn("FiestaSMP Official Website", html)
         self.assertIn("Articles Archive", html)
+        self.assertIn("CSRF_TOKEN", html)
+        self.assertIn('meta name="csrf-token"', html)
 
         # Authenticated access to articles API
         res = self.client.get("/api/news/articles")
@@ -132,6 +134,43 @@ class TestWebsiteNewsStudio(unittest.TestCase):
         data = res.get_json()
         self.assertTrue(data["success"])
         self.assertGreaterEqual(len(data["articles"]), 4)
+
+        # CSRF enforcement test on article creation and deletion
+        dummy_slug = "csrf-test-article"
+        dummy_payload = {
+            "title": "CSRF Test Article",
+            "author": "debarkak",
+            "slug": dummy_slug,
+            "summary": "Testing CSRF token enforcement on articles API",
+            "content": "This is a test article body."
+        }
+
+        # 1. POST without CSRF token must be rejected with 403
+        res_no_csrf = self.client.post("/api/news/articles", json=dummy_payload)
+        self.assertEqual(res_no_csrf.status_code, 403)
+        self.assertEqual(res_no_csrf.get_json().get("error"), "Invalid CSRF token")
+
+        # 2. POST with CSRF token must succeed
+        res_with_csrf = self.client.post(
+            "/api/news/articles",
+            json=dummy_payload,
+            headers={"X-CSRF-Token": self.csrf_token}
+        )
+        self.assertEqual(res_with_csrf.status_code, 200)
+        self.assertTrue(res_with_csrf.get_json().get("success"))
+
+        # 3. DELETE without CSRF token must be rejected with 403
+        res_del_no_csrf = self.client.delete(f"/api/news/articles/{dummy_slug}")
+        self.assertEqual(res_del_no_csrf.status_code, 403)
+        self.assertEqual(res_del_no_csrf.get_json().get("error"), "Invalid CSRF token")
+
+        # 4. DELETE with CSRF token must succeed
+        res_del_with_csrf = self.client.delete(
+            f"/api/news/articles/{dummy_slug}",
+            headers={"X-CSRF-Token": self.csrf_token}
+        )
+        self.assertEqual(res_del_with_csrf.status_code, 200)
+        self.assertTrue(res_del_with_csrf.get_json().get("success"))
 
         # Authenticated access to media API
         res = self.client.get("/api/news/media")
