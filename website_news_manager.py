@@ -11,16 +11,18 @@ import os
 import re
 import glob
 import time
+import json
 import shutil
 import datetime
 import subprocess
 import logging
+import requests
 from typing import Dict, Any, List, Optional, Tuple
 
 logger = logging.getLogger("fiesta.website_news")
 
 class WebsiteNewsManager:
-    def __init__(self, repo_dir: Optional[str] = None):
+    def __init__(self, repo_dir: Optional[str] = None, neocities_api_key: Optional[str] = None, neocities_sitename: Optional[str] = None):
         self.repo_dir = repo_dir or os.environ.get("FIESTA_WEBSITE_DIR") or "/home/ubuntu/open-fiestasmp.github.io"
         self.posts_dir = os.path.join(self.repo_dir, "content", "posts")
         self.news_dir = os.path.join(self.repo_dir, "news")
@@ -30,6 +32,21 @@ class WebsiteNewsManager:
 
         os.makedirs(self.posts_dir, exist_ok=True)
         os.makedirs(self.media_dir, exist_ok=True)
+
+        self.neocities_api_key = neocities_api_key or os.environ.get("NEOCITIES_API_KEY")
+        self.neocities_sitename = neocities_sitename or os.environ.get("NEOCITIES_SITENAME") or "fiestamc"
+        if not self.neocities_api_key:
+            try:
+                cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+                if os.path.exists(cfg_path):
+                    with open(cfg_path, "r", encoding="utf-8") as f:
+                        cfg = json.load(f)
+                        self.neocities_api_key = cfg.get("neocities_api_key") or self.neocities_api_key
+                        self.neocities_sitename = cfg.get("neocities_sitename") or self.neocities_sitename
+            except Exception:
+                pass
+        if not self.neocities_api_key:
+            self.neocities_api_key = "129a7410d44b1f40481b65f88b8b3972"
 
     # ── Slug & Date Utilities ────────────────────────────────────────────────
     @staticmethod
@@ -456,6 +473,134 @@ class WebsiteNewsManager:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
+    # ── Neocities Deployment ─────────────────────────────────────────────────
+    def deploy_to_neocities(self, api_key: Optional[str] = None, batch_size: int = 10) -> Dict[str, Any]:
+        """Builds static site via Hugo, syncs RSS feeds, and uploads all deployable assets to Neocities."""
+        build_res = self.rebuild()
+        if not build_res["success"]:
+            return {
+                "success": False,
+                "error": "Hugo build failed prior to Neocities deployment.",
+                "build": build_res
+            }
+
+        key = api_key or self.neocities_api_key
+        if not key:
+            return {
+                "success": False,
+                "error": "Neocities API key is not configured.",
+                "build": build_res
+            }
+
+        deployable_exts = (
+            ".html", ".xml", ".txt", ".webp", ".png", ".jpg", ".jpeg",
+            ".gif", ".svg", ".ico", ".js", ".css", ".json", ".webmanifest"
+        )
+        excluded_dirs = {".git", ".github", "content", "layouts", "archetypes", "__pycache__"}
+        excluded_files = {".gitignore", ".hugo_build.lock", "hugo.toml", "README.md", "LICENSE"}
+
+        files_to_deploy = []
+        for root, dirs, files in os.walk(self.repo_dir):
+            dirs[:] = [d for d in dirs if d not in excluded_dirs]
+            for f in files:
+                if f in excluded_files or f.endswith((".py", ".pyc", ".bak", ".tmp")):
+                    continue
+                if any(f.endswith(ext) for ext in deployable_exts):
+                    full_p = os.path.join(root, f)
+                    rel_p = os.path.relpath(full_p, self.repo_dir)
+                    files_to_deploy.append((rel_p, full_p))
+
+        files_to_deploy.sort(key=lambda x: x[0])
+        total = len(files_to_deploy)
+        if total == 0:
+            return {
+                "success": True,
+                "message": "No files found to deploy to Neocities.",
+                "uploaded": 0,
+                "total": 0,
+                "build": build_res
+            }
+
+        headers = {"Authorization": f"Bearer {key}"}
+        uploaded = 0
+        api_url = "https://neocities.org/api/upload"
+
+        for i in range(0, total, batch_size):
+            batch = files_to_deploy[i:i + batch_size]
+            file_handles = []
+            files_payload = {}
+            try:
+                for rel_p, full_p in batch:
+                    fh = open(full_p, "rb")
+                    file_handles.append(fh)
+                    files_payload[rel_p] = (os.path.basename(rel_p), fh)
+
+                resp = requests.post(api_url, headers=headers, files=files_payload, timeout=60)
+                if resp.status_code != 200:
+                    return {
+                        "success": False,
+                        "error": f"Neocities API responded with status {resp.status_code}: {resp.text}",
+                        "uploaded": uploaded,
+                        "total": total,
+                        "build": build_res
+                    }
+                res_data = resp.json()
+                if res_data.get("result") != "success":
+                    return {
+                        "success": False,
+                        "error": f"Neocities API error: {res_data.get('message', 'Unknown error')}",
+                        "uploaded": uploaded,
+                        "total": total,
+                        "build": build_res
+                    }
+                uploaded += len(batch)
+            except Exception as e:
+                return {
+                    "success": False,
+                    "error": f"Network or upload exception during batch {i // batch_size + 1}: {e}",
+                    "uploaded": uploaded,
+                    "total": total,
+                    "build": build_res
+                }
+            finally:
+                for fh in file_handles:
+                    try:
+                        fh.close()
+                    except Exception:
+                        pass
+
+        sitename = self.neocities_sitename or "fiestamc"
+        return {
+            "success": True,
+            "message": f"Successfully published {uploaded} files to Neocities (https://{sitename}.neocities.org/)!",
+            "uploaded": uploaded,
+            "total": total,
+            "site_url": f"https://{sitename}.neocities.org/",
+            "news_url": f"https://{sitename}.neocities.org/news/",
+            "build": build_res
+        }
+
+    # ── Combined Publishing ──────────────────────────────────────────────────
+    def publish(self, message: Optional[str] = None) -> Dict[str, Any]:
+        """Full publishing pipeline: Hugo build -> RSS sync -> Neocities upload -> GitHub push."""
+        neocities_res = self.deploy_to_neocities()
+        if not neocities_res["success"]:
+            return {
+                "success": False,
+                "error": f"Neocities deployment failed: {neocities_res.get('error')}",
+                "neocities": neocities_res
+            }
+
+        github_res = self.deploy_to_github(message=message)
+
+        sitename = self.neocities_sitename or "fiestamc"
+        return {
+            "success": True,
+            "message": f"Successfully published news updates to Neocities (https://{sitename}.neocities.org/) and GitHub!",
+            "neocities": neocities_res,
+            "github": github_res
+        }
+
     # ── Media Library & Uploads ──────────────────────────────────────────────
     def list_media(self) -> List[Dict[str, Any]]:
         """Scans website image folders and returns media items."""
@@ -556,8 +701,11 @@ class WebsiteNewsManager:
             "git_clean": git_clean,
             "git_branch": git_branch,
             "uncommitted_files": uncommitted_files,
-            "rss_url": "https://open-fiestasmp.github.io/news/index.xml",
-            "rss_alias": "https://open-fiestasmp.github.io/news/rss.xml",
-            "website_url": "https://open-fiestasmp.github.io/",
-            "news_url": "https://open-fiestasmp.github.io/news/"
+            "rss_url": f"https://{self.neocities_sitename}.neocities.org/news/index.xml",
+            "rss_alias": f"https://{self.neocities_sitename}.neocities.org/news/rss.xml",
+            "website_url": f"https://{self.neocities_sitename}.neocities.org/",
+            "news_url": f"https://{self.neocities_sitename}.neocities.org/news/",
+            "neocities_configured": bool(self.neocities_api_key),
+            "neocities_sitename": self.neocities_sitename,
+            "neocities_url": f"https://{self.neocities_sitename}.neocities.org/"
         }

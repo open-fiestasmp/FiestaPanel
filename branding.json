@@ -7,7 +7,7 @@
   "server_desc": "Server Gateway Console",
   "header_icon": "tplink",
   "header_icon_custom": "",
-  "server_domain": "",
-  "public_site_url": "",
-  "bedrock_server_name": "Minecraft Server"
+  "server_domain": "fiesta.debarkak.xyz",
+  "public_site_url": "https://fiestamc.neocities.org",
+  "bedrock_server_name": "FiestaSMP"
 }

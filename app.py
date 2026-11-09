@@ -8687,7 +8687,16 @@ def api_news_publish():
         return jsonify({"success": False, "error": "Permission denied"}), 403
     data = request.get_json(silent=True) or {}
     msg = data.get("message")
-    res = website_news.deploy_to_github(msg)
+    res = website_news.publish(msg)
+    return jsonify(res)
+
+@app.route("/api/news/deploy-neocities", methods=["POST"])
+@login_required
+def api_news_deploy_neocities():
+    curr_perms = session.get("permissions", [])
+    if session.get("role") not in ("owner", "admin", "administrator") and "all" not in curr_perms and "announcements" not in curr_perms:
+        return jsonify({"success": False, "error": "Permission denied"}), 403
+    res = website_news.deploy_to_neocities()
     return jsonify(res)
 
 @app.route("/api/news/status", methods=["GET"])

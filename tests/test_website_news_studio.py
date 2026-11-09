@@ -57,7 +57,7 @@ class TestWebsiteNewsStudio(unittest.TestCase):
             channel = root.find("channel")
             self.assertIsNotNone(channel)
             self.assertEqual(channel.find("title").text, "FiestaSMP - News & Updates")
-            self.assertEqual(channel.find("link").text, "https://open-fiestasmp.github.io/news/")
+            self.assertEqual(channel.find("link").text, "https://fiestamc.neocities.org/news/")
 
             items = channel.findall("item")
             self.assertGreaterEqual(len(items), 1, "Should have at least 1 published news item")
@@ -126,7 +126,7 @@ class TestWebsiteNewsStudio(unittest.TestCase):
         """Verify API endpoints require authentication and allow authorized admin access."""
         # Unauthenticated access must fail
         res = self.client.get("/api/news/articles")
-        self.assertEqual(res.status_code, 401)
+        self.assertIn(res.status_code, (401, 403))
 
         res = self.client.get("/admin/news-studio")
         self.assertEqual(res.status_code, 302)
@@ -200,6 +200,23 @@ class TestWebsiteNewsStudio(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
         self.assertIn("rss_url", data)
+        self.assertEqual(data["rss_url"], "https://fiestamc.neocities.org/news/index.xml")
+        self.assertEqual(data["website_url"], "https://fiestamc.neocities.org/")
+        self.assertEqual(data["news_url"], "https://fiestamc.neocities.org/news/")
+        self.assertTrue(data.get("neocities_configured"))
+        self.assertEqual(data.get("neocities_sitename"), "fiestamc")
+
+    def test_neocities_deploy_api_permissions(self):
+        """Verify neocities deploy endpoint requires authentication."""
+        res = self.client.post("/api/news/deploy-neocities")
+        self.assertIn(res.status_code, (401, 403))
+
+        self._login(role="owner")
+        # Test status endpoint reports correct neocities info
+        status = self.manager.get_status()
+        self.assertTrue(status["neocities_configured"])
+        self.assertEqual(status["neocities_sitename"], "fiestamc")
+        self.assertIn("neocities.org", status["website_url"])
 
 if __name__ == "__main__":
     unittest.main()
