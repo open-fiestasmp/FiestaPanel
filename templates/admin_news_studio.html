@@ -682,9 +682,10 @@
     <div class="studio-header-btns">
       <button class="ms-btn-aero-primary" onclick="openNewArticleModal()">+ Create New Article</button>
       <button class="ms-btn-aero-secondary" onclick="triggerBuildSite()">Build Site (Hugo)</button>
-      <button class="ms-btn-aero-secondary" onclick="triggerDeployGitHub()">Deploy to GitHub</button>
-      <a href="https://open-fiestasmp.github.io/news/" target="_blank" class="ms-btn-aero-secondary" style="text-decoration:none;">Live News &rsaquo;</a>
-      <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" class="ms-btn-aero-rss">
+      <button class="ms-btn-aero-primary" onclick="triggerDeployNeocities()">Deploy to Neocities</button>
+      <button class="ms-btn-aero-secondary" onclick="triggerDeployPublish()">Publish (Neocities &amp; Git)</button>
+      <a href="https://fiestamc.neocities.org/news/" target="_blank" class="ms-btn-aero-secondary" style="text-decoration:none;">Live News &rsaquo;</a>
+      <a href="https://fiestamc.neocities.org/news/index.xml" target="_blank" class="ms-btn-aero-rss">
         <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
         <span>RSS Feed</span>
       </a>
@@ -910,7 +911,7 @@
           <div style="display:flex; gap:8px;">
             <button class="ms-btn-aero-secondary" onclick="saveArticle(false)">Save Draft</button>
             <button class="ms-btn-aero-primary" onclick="saveArticle(true)">Save &amp; Compile (Hugo)</button>
-            <button class="ms-btn-aero-primary" style="background:linear-gradient(180deg, #259e54 0%, #177a3d 50%, #0d5227 100%); border-color:#0d5227;" onclick="saveAndDeployArticle()">Save &amp; Publish to GitHub</button>
+            <button class="ms-btn-aero-primary" style="background:linear-gradient(180deg, #259e54 0%, #177a3d 50%, #0d5227 100%); border-color:#0d5227;" onclick="saveAndDeployArticle()">Save &amp; Publish to Neocities</button>
           </div>
         </div>
 
@@ -949,7 +950,7 @@
           <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px;">
             <div>
               <strong>Primary Feed:</strong>
-              <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" style="color:#0066cc;">https://open-fiestasmp.github.io/news/index.xml</a>
+              <a href="https://fiestamc.neocities.org/news/index.xml" target="_blank" style="color:#0066cc;">https://fiestamc.neocities.org/news/index.xml</a>
             </div>
             <div>
               <strong>Standard Aliases:</strong>
@@ -963,11 +964,11 @@
               <strong>Feed Standards:</strong> RSS 2.0 + Atom self-link + DC Creator + CDATA content:encoded
             </div>
             <div style="margin-top:6px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-              <a href="https://open-fiestasmp.github.io/news/index.xml" target="_blank" class="ms-btn-aero-rss">
+              <a href="https://fiestamc.neocities.org/news/index.xml" target="_blank" class="ms-btn-aero-rss">
                 <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;"><circle cx="6.18" cy="17.82" r="2.18"/><path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z"/></svg>
                 <span>Open Live Feed</span>
               </a>
-              <button class="ms-btn-aero-copy" onclick="navigator.clipboard.writeText('https://open-fiestasmp.github.io/news/index.xml'); showToast('RSS Feed URL copied to clipboard!');" title="Copy RSS Feed URL to clipboard">
+              <button class="ms-btn-aero-copy" onclick="navigator.clipboard.writeText('https://fiestamc.neocities.org/news/index.xml'); showToast('RSS Feed URL copied to clipboard!');" title="Copy RSS Feed URL to clipboard">
                 <svg viewBox="0 0 24 24" style="width:13px;height:13px;fill:currentColor;"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
                 <span>Copy RSS URL</span>
               </button>
@@ -975,18 +976,22 @@
           </div>
         </div>
 
-        <!-- Git Status & Deploy Card -->
+        <!-- Neocities & Git Status & Deploy Card -->
         <div class="deploy-card">
           <h3>
-            <span>GitHub Pages Deployment</span>
+            <span>Neocities &amp; Web Deployment</span>
           </h3>
-          <p style="font-size:12px; color:#555; margin-bottom:12px;">Push your latest articles and media directly to origin/main on GitHub.</p>
+          <p style="font-size:12px; color:#555; margin-bottom:12px;">Push your latest articles and media directly to Neocities (fiestamc.neocities.org) and synchronize with GitHub.</p>
           <div style="display:flex; flex-direction:column; gap:8px; font-size:12.5px;">
+            <div><strong>Target Site:</strong> <a href="https://fiestamc.neocities.org/" target="_blank" style="color:#0066cc;">fiestamc.neocities.org</a></div>
+            <div><strong>Neocities Site:</strong> <code id="neocities-site-val">fiestamc</code></div>
+            <div><strong>Neocities Status:</strong> <span id="neocities-status-val" style="color:#1e7039; font-weight:700;">Connected (API Key Active)</span></div>
             <div><strong>Target Repo:</strong> open-fiestasmp/open-fiestasmp.github.io</div>
             <div><strong>Active Branch:</strong> <code id="git-branch-val">main</code></div>
             <div><strong>Working Tree:</strong> <span id="git-status-val">Checking...</span></div>
-            <div style="margin-top:8px;">
-              <button class="ms-btn-aero-primary" onclick="triggerDeployGitHub()">Deploy / Push to GitHub Now</button>
+            <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+              <button class="ms-btn-aero-primary" onclick="triggerDeployNeocities()">Deploy to Neocities</button>
+              <button class="ms-btn-aero-secondary" onclick="triggerDeployPublish()">Full Publish (Neocities + Git)</button>
               <button class="ms-btn-aero-secondary" onclick="triggerBuildSite()">Re-run Hugo Build</button>
             </div>
           </div>
@@ -1287,7 +1292,7 @@
         <td>${statusHtml}</td>
         <td style="text-align:center; white-space:nowrap;">
           <button class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb;" data-slug="${escapeHtml(art.slug)}" onclick="openArticleEditor(this.dataset.slug)">Edit</button>
-          <a href="https://open-fiestasmp.github.io/news/${art.slug}/" target="_blank" class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb; text-decoration:none;">View</a>
+          <a href="https://fiestamc.neocities.org/news/${art.slug}/" target="_blank" class="tb-btn" style="background:#eef4fa; border:1px solid #c2d8eb; text-decoration:none;">View</a>
           <button class="tb-btn" style="background:#fff0f0; border:1px solid #facdcd; color:#c0392b;" data-slug="${escapeHtml(art.slug)}" data-title="${escapeHtml(art.title)}" onclick="confirmDeleteArticle(this.dataset.slug, this.dataset.title)">Delete</button>
         </td>
       `;
@@ -1884,10 +1889,33 @@
     }
   }
 
-  async function triggerDeployGitHub() {
-    if (!confirm('Deploy latest news articles and updates to GitHub Pages now?')) return;
-    showToast('Publishing updates to GitHub...');
-    logConsole('Starting deployment pipeline: Hugo build -> git commit -> git push origin main...');
+  async function triggerDeployNeocities() {
+    if (!confirm('Deploy latest news articles and website assets to Neocities (fiestamc.neocities.org) now?')) return;
+    showToast('Deploying updates to Neocities...');
+    logConsole('Starting Neocities deployment pipeline: Hugo build -> RSS sync -> Neocities upload...');
+    try {
+      const res = await fetch('/api/news/deploy-neocities', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': CSRF_TOKEN
+        }
+      });
+      const data = await res.json();
+      if (data.message) logConsole(data.message);
+      if (data.uploaded !== undefined) logConsole(`Uploaded ${data.uploaded} of ${data.total} files.`);
+      if (!data.success && data.error) logConsole('ERROR: ' + data.error);
+      showToast(data.success ? 'Successfully published to Neocities!' : 'Neocities deployment error');
+      loadStatus();
+    } catch(e) {
+      logConsole('Neocities deploy error: ' + e);
+    }
+  }
+
+  async function triggerDeployPublish() {
+    if (!confirm('Publish all website updates to Neocities and synchronize with GitHub repository?')) return;
+    showToast('Publishing updates to Neocities & GitHub...');
+    logConsole('Starting full publishing pipeline: Hugo build -> Neocities upload -> git commit -> git push origin main...');
     try {
       const res = await fetch('/api/news/publish', {
         method: 'POST',
@@ -1899,15 +1927,19 @@
       });
       const data = await res.json();
       if (data.message) logConsole(data.message);
-      if (data.commit_output) logConsole(data.commit_output);
-      if (data.push_output) logConsole(data.push_output);
+      if (data.neocities && data.neocities.message) logConsole('Neocities: ' + data.neocities.message);
+      if (data.github && data.github.commit_output) logConsole('Git commit: ' + data.github.commit_output);
+      if (data.github && data.github.push_output) logConsole('Git push: ' + data.github.push_output);
       if (!data.success && data.error) logConsole('ERROR: ' + data.error);
-      showToast(data.success ? 'Successfully published to GitHub Pages!' : 'Deployment error');
+      showToast(data.success ? 'Successfully published to Neocities & GitHub!' : 'Publishing error');
       loadStatus();
     } catch(e) {
-      logConsole('Deploy error: ' + e);
+      logConsole('Publish error: ' + e);
     }
   }
+
+  // Alias for backward compatibility
+  window.triggerDeployGitHub = triggerDeployPublish;
 
   async function loadStatus() {
     try {
@@ -1920,6 +1952,18 @@
           st.innerHTML = '<span style="color:#1e7039; font-weight:700;">Clean (Synced with remote)</span>';
         } else {
           st.innerHTML = `<span style="color:#b55d10; font-weight:700;">${data.uncommitted_files} uncommitted files (Deploy recommended)</span>`;
+        }
+        const neoSt = document.getElementById('neocities-status-val');
+        if (neoSt) {
+          if (data.neocities_configured) {
+            neoSt.innerHTML = '<span style="color:#1e7039; font-weight:700;">Connected (API Key Active)</span>';
+          } else {
+            neoSt.innerHTML = '<span style="color:#c00; font-weight:700;">Not Configured</span>';
+          }
+        }
+        const neoSite = document.getElementById('neocities-site-val');
+        if (neoSite && data.neocities_sitename) {
+          neoSite.innerText = data.neocities_sitename;
         }
       }
     } catch(e) {}

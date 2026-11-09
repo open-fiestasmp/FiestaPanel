@@ -259,7 +259,7 @@ Fetches current branding configuration.
       "footer_text": "Made by Fiesta and it's developers, Mockup UI of Legacy TP-Link Portal",
       "browser_title": "FIESTA-LINK | FS-GATEWAY-PRO Console",
       "server_domain": "fiesta.debarkak.xyz",
-      "public_site_url": "https://open-fiestasmp.github.io",
+      "public_site_url": "https://fiestamc.neocities.org",
       "bedrock_server_name": "FiestaSMP"
     }
   }
