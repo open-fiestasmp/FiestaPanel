@@ -73,7 +73,7 @@ class AdminAddonsPublisherTests(unittest.TestCase):
         self.patch_repo_file.start()
 
         # Set a known test dev key
-        self.test_dev_key = "test_fiesta_secret_key_12345"
+        self.test_dev_key = "fixture-dev-key"
         portal_app.SERVER_CONFIG["fiesta_dev_key"] = self.test_dev_key
         with open(self.temp_config, "r+", encoding="utf-8") as f:
             cfg = json.load(f)
@@ -138,7 +138,7 @@ class AdminAddonsPublisherTests(unittest.TestCase):
         self.assertNotIn("Enter Fiesta Developer Secret Key", html)
 
         # 2. Old hardcoded key is rejected and unlock is 403
-        res_old = self._post('/api/admin/addons-publisher/unlock', {"key": "fiesta-core-dev-2026"})
+        res_old = self._post('/api/admin/addons-publisher/unlock', {"key": "legacy-fixture-key"})
         self.assertEqual(res_old.status_code, 403)
         self.assertFalse(res_old.get_json().get("success"))
         self.assertIn("disabled on this server instance", res_old.get_json().get("error", ""))
