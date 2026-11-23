@@ -166,7 +166,7 @@ Complete world lifecycle management:
 ## 11. Game Options & Gameplay Switchboard (Aternos Options)
 
 A responsive switchboard for all Minecraft server gameplay flags:
-- **Online Mode Toggle**: Switch between official Mojang account authentication and offline/cracked mode supported via AuthMe.
+- **Online Mode Toggle**: Switch between official Mojang account authentication and offline accounts managed through AuthMe.
 - **Player vs Player (PvP)**: Enable or disable combat between players.
 - **White List**: Enforce whitelist access with One-Click.
 - **Flight & Command Blocks**: Allow creative flight without kick warnings, and toggle command block automation.

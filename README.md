@@ -90,7 +90,7 @@ Open **`http://localhost:8080`** in your browser. Complete guide & options in [*
 | Feature | Highlights |
 |---|---|
 | **Dedicated Worlds Hub** | Download world ZIPs, upload world archives, One-Click Nether & The End dimension resets, world generator wizard, and datapacks manager. |
-| **Game Options Switchboard** | Instant toggles for Online Mode (Cracked vs Mojang), PvP, Whitelist, Flight, Command Blocks, Mob Spawning, Hardcore, and Idle Timeout. |
+| **Game Options Switchboard** | Instant toggles for Online Mode (offline accounts vs Mojang authentication), PvP, Whitelist, Flight, Command Blocks, Mob Spawning, Hardcore, and Idle Timeout. |
 | **Expanded Parameter Editor** | Direct editing for Paper (`paper-global.yml`, `paper-world-defaults.yml`), Purpur, Spigot, Bukkit, Geyser/Floodgate, and all plugin configs with `.bak` safety snapshots. |
 | **Log Intelligence & One-Click mclo.gs** | Auto-detects crashes, OOM, port conflicts, and corrupted chunks; One-Click token-sanitized log upload to `mclo.gs`. |
 | **Dedicated Banned IPs View** | Blacklisted IP records management, manual IP banning, and instant `/pardon-ip` unban action. |

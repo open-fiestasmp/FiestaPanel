@@ -6009,8 +6009,8 @@
           <div class="aternos-card-grid">
             <div class="aternos-card">
               <div class="aternos-card-info">
-                <span class="aternos-card-title">Online Mode (Cracked / Mojang)</span>
-                <span class="aternos-card-desc">Enabled requires official Mojang accounts. Disabled allows cracked/offline players via AuthMe.</span>
+                <span class="aternos-card-title">Online Mode (Mojang authentication / offline accounts)</span>
+                <span class="aternos-card-desc">Enabled requires authenticated Mojang accounts. Disabled allows offline accounts through AuthMe.</span>
               </div>
               <label class="switch-toggle">
                 <input type="checkbox" id="opt-online-mode">
@@ -7845,7 +7845,7 @@
                 <td class="label-col">Online Mode (Mojang Auth):</td>
                 <td class="val-col">
                   <select id="gui-prop-online-mode" style="width: 200px;">
-                    <option value="false">Disabled (Cracked / AuthMe Managed)</option>
+                    <option value="false">Disabled (offline accounts through AuthMe)</option>
                     <option value="true">Enabled (Official Mojang Accounts Only)</option>
                   </select>
                 </td>
@@ -9716,7 +9716,7 @@ def on_action(ctx, action_name, payload):
         title: 'Game Options Help',
         body: `
           <div class="help-sub">Aternos Gameplay Switches</div>
-          <p class="help-text">Instant switchboard for server-wide gameplay rules: Online Mode (Cracked vs Mojang), PvP, Flight, Command Blocks, and Mob Spawning.</p>
+          <p class="help-text">Instant switchboard for server-wide gameplay rules: Online Mode (Mojang authentication vs offline accounts), PvP, Flight, Command Blocks, and Mob Spawning.</p>
           <div class="help-sub">Difficulties &amp; Gamemodes</div>
           <p class="help-text">Sets default game mode (Survival, Creative, Adventure, Spectator) and global world difficulty (Peaceful to Hard).</p>
         `
