@@ -45,8 +45,6 @@ class WebsiteNewsManager:
                         self.neocities_sitename = cfg.get("neocities_sitename") or self.neocities_sitename
             except Exception:
                 pass
-        if not self.neocities_api_key:
-            self.neocities_api_key = "129a7410d44b1f40481b65f88b8b3972"
 
     # ── Slug & Date Utilities ────────────────────────────────────────────────
     @staticmethod
