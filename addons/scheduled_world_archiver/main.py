@@ -106,6 +106,15 @@ def _format_bytes(bytes_count: int) -> str:
         return f"{bytes_count / (1024 * 1024 * 1024):.2f} GB"
 
 
+def _remove_incomplete_archive(path: Optional[str]):
+    if not path or not os.path.exists(path):
+        return
+    try:
+        os.remove(path)
+    except OSError as exc:
+        logger.warning("Could not remove incomplete archive: %s", exc)
+
+
 def _send_discord_announcement(webhook_url: str, title: str, description: str, fields: List[Dict[str, Any]] = None, color: int = 0x38bdf8):
     """Sends rich release announcement embed to Discord."""
     if not webhook_url or not webhook_url.startswith("http"):
@@ -350,6 +359,8 @@ def _execute_archive_task(
     """Worker thread that flushes Minecraft data, compresses world folders, and saves manifest entry."""
     global _CURRENT_TASK
     task_id = _CURRENT_TASK["task_id"]
+    target_zip = None
+    registered = False
 
     try:
         # Step 1: Flush server world
@@ -357,30 +368,40 @@ def _execute_archive_task(
             _CURRENT_TASK["stage"] = "Flushing Minecraft chunk cache to disk (save-all flush)..."
             _CURRENT_TASK["progress"] = 5
 
-        try:
-            ctx.send_command("save-all flush")
-            time.sleep(2)
-        except Exception as cmd_err:
-            logger.warning(f"save-all flush command issue: {cmd_err}")
-
         server_dir = "/home/ubuntu/fiesta"
         if hasattr(ctx, "manager") and ctx.manager and hasattr(ctx.manager, "server_dir"):
             server_dir = ctx.manager.server_dir
 
+        if ctx.get_server_status().get("online"):
+            log_path = os.path.join(server_dir, "logs", "latest.log")
+            try:
+                with open(log_path, "r", encoding="utf-8", errors="replace") as log:
+                    log.seek(0, os.SEEK_END)
+                    ok, detail = ctx.send_command("save-all flush")
+                    if not ok:
+                        raise RuntimeError(f"Could not flush Minecraft world: {detail}")
+                    deadline = time.monotonic() + 90
+                    while time.monotonic() < deadline:
+                        if _CURRENT_TASK.get("cancelled"):
+                            raise InterruptedError("Archive creation cancelled by user.")
+                        if "Saved the game" in log.readline():
+                            break
+                        time.sleep(0.1)
+                    else:
+                        raise RuntimeError("Minecraft did not confirm that the world save completed within 90 seconds.")
+            except OSError as exc:
+                raise RuntimeError(f"Cannot verify Minecraft world save: {exc}") from exc
+
         include_folders = []
-        if dimensions.get("overworld", True) and os.path.isdir(os.path.join(server_dir, "world")):
-            include_folders.append(("world", os.path.join(server_dir, "world")))
-        if dimensions.get("nether", True) and os.path.isdir(os.path.join(server_dir, "world_nether")):
-            include_folders.append(("world_nether", os.path.join(server_dir, "world_nether")))
-        if dimensions.get("the_end", True) and os.path.isdir(os.path.join(server_dir, "world_the_end")):
-            include_folders.append(("world_the_end", os.path.join(server_dir, "world_the_end")))
+        for setting, folder in (("overworld", "world"), ("nether", "world_nether"), ("the_end", "world_the_end")):
+            if dimensions.get(setting, True):
+                path = os.path.join(server_dir, folder)
+                if not os.path.isdir(path):
+                    raise ValueError(f"Selected world folder not found: {path}")
+                include_folders.append((folder, path))
 
         if not include_folders:
-            world_base = os.path.join(server_dir, "world")
-            if os.path.isdir(world_base):
-                include_folders.append(("world", world_base))
-            else:
-                raise ValueError(f"No Minecraft world folders detected in {server_dir}.")
+            raise ValueError(f"No selected Minecraft world folders detected in {server_dir}.")
 
         # Step 2: Scan files and count total uncompressed bytes
         with _TASK_LOCK:
@@ -405,8 +426,8 @@ def _execute_archive_task(
                         sz = os.path.getsize(full_p)
                         files_to_pack.append((full_p, rel_p, sz))
                         total_bytes += sz
-                    except OSError:
-                        pass
+                    except OSError as exc:
+                        raise OSError(f"Cannot inspect world file {rel_p}: {exc}") from exc
 
         with _TASK_LOCK:
             _CURRENT_TASK["total_bytes"] = total_bytes
@@ -435,17 +456,12 @@ def _execute_archive_task(
         with zipfile.ZipFile(target_zip, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=1) as zf:
             for full_p, arc_name, sz in files_to_pack:
                 if _CURRENT_TASK["cancelled"]:
-                    zf.close()
-                    try:
-                        os.remove(target_zip)
-                    except OSError:
-                        pass
                     raise InterruptedError("Archive creation cancelled by user.")
 
                 try:
                     zf.write(full_p, arcname=arc_name)
                 except Exception as write_err:
-                    logger.warning(f"Could not pack {full_p}: {write_err}")
+                    raise OSError(f"Could not archive {arc_name}: {write_err}") from write_err
 
                 processed += sz
                 now_t = time.time()
@@ -512,29 +528,36 @@ def _execute_archive_task(
 
         manifest = _load_manifest(ctx)
         manifest.insert(0, ep_entry)
-        _save_manifest(ctx, manifest)
-
-        with _TASK_LOCK:
-            _CURRENT_TASK["status"] = "completed"
-            _CURRENT_TASK["progress"] = 100
-            _CURRENT_TASK["stage"] = f"Archive successfully created! ({_format_bytes(final_size)})"
-            _CURRENT_TASK["archive_id"] = archive_id
+        if not _save_manifest(ctx, manifest):
+            raise OSError("Could not save archive manifest; check backup directory permissions and free space.")
+        registered = True
 
         # Trigger auto-upload if requested
         settings = ctx.get_settings()
         should_upload = auto_upload or settings.get("auto_upload_cloud", False)
         target_dest = upload_target or settings.get("default_cloud_targets") or settings.get("default_cloud_target", "archive_org")
+        cloud_targets = _normalize_cloud_targets(target_dest) if should_upload else []
 
-        if should_upload and target_dest != "local":
+        with _TASK_LOCK:
+            _CURRENT_TASK["status"] = "running" if cloud_targets else "completed"
+            _CURRENT_TASK["progress"] = 100
+            _CURRENT_TASK["stage"] = f"Archive successfully created! ({_format_bytes(final_size)})"
+            _CURRENT_TASK["archive_id"] = archive_id
+
+        if cloud_targets:
             logger.info(f"Direct cloud upload starting for archive {archive_id} to destination '{target_dest}'...")
-            _dispatch_cloud_upload(ctx, archive_id, target_dest)
+            _dispatch_cloud_upload(ctx, archive_id, cloud_targets)
 
     except InterruptedError:
+        if not registered:
+            _remove_incomplete_archive(target_zip)
         logger.info("Snapshot archive task was cancelled.")
         with _TASK_LOCK:
             _CURRENT_TASK["status"] = "cancelled"
             _CURRENT_TASK["stage"] = "Operation cancelled."
     except Exception as e:
+        if not registered:
+            _remove_incomplete_archive(target_zip)
         logger.error(f"Snapshot creation failed: {e}", exc_info=True)
         with _TASK_LOCK:
             _CURRENT_TASK["status"] = "error"
@@ -544,6 +567,21 @@ def _execute_archive_task(
 
 # ── Cloud Upload Dispatcher & Providers ────────────────────────────────────
 
+def _normalize_cloud_targets(target: Any) -> List[str]:
+    if isinstance(target, str):
+        if "," in target:
+            targets = [item.strip() for item in target.split(",") if item.strip()]
+        elif target.lower() in ("all", "multi", "all_configured"):
+            targets = ["archive_org", "github", "s3", "custom_post"]
+        else:
+            targets = [target.strip()]
+    elif isinstance(target, (list, tuple)):
+        targets = [str(item).strip() for item in target if item and str(item).strip()]
+    else:
+        targets = ["archive_org"]
+    return [item for item in targets if item and item != "local"]
+
+
 def _dispatch_cloud_upload(ctx, archive_id: str, target: Any):
     """
     Dispatches upload task to one or multiple selected cloud destinations.
@@ -552,19 +590,7 @@ def _dispatch_cloud_upload(ctx, archive_id: str, target: Any):
       - comma-separated string: "archive_org,github"
       - single string: "archive_org" or "all"
     """
-    if isinstance(target, str):
-        if "," in target:
-            targets = [t.strip() for t in target.split(",") if t.strip()]
-        elif target.lower() in ("all", "multi", "all_configured"):
-            targets = ["archive_org", "github", "s3", "custom_post"]
-        else:
-            targets = [target.strip()]
-    elif isinstance(target, (list, tuple)):
-        targets = [str(t).strip() for t in target if t and str(t).strip()]
-    else:
-        targets = ["archive_org"]
-
-    targets = [t for t in targets if t and t != "local"]
+    targets = _normalize_cloud_targets(target)
     if not targets:
         logger.info("No cloud destinations configured or selected.")
         return
@@ -635,6 +661,12 @@ class ProgressFileWrapper:
         self.uploaded = 0
         self.task_label = task_label
         self.last_update = time.time()
+
+    def __len__(self):
+        return self.total_size
+
+    def tell(self):
+        return self.file_obj.tell()
 
     def read(self, size=-1):
         if _CURRENT_TASK["cancelled"]:
@@ -1015,28 +1047,32 @@ def _execute_ia_upload(ctx, archive_id: str, is_multi: bool = False, task_prefix
         _CURRENT_TASK["cancelled"] = False
 
     try:
-        url = f"https://s3.us.archive.org/{item_id}/{filename}"
+        url = f"https://s3.us.archive.org/{item_id}/{urllib.parse.quote(filename, safe='')}"
         title = entry.get("title", "World Snapshot")
         type_str = entry.get("type_label") or ("Pre-Event (Before)" if snap_type == "pre" else "Post-Event (After)")
+
+        def header_text(value):
+            # HTTP header values must be Latin-1 and cannot contain line breaks.
+            return str(value).replace("\r", " ").replace("\n", " ").encode("latin-1", "replace").decode("latin-1")
 
         headers = {
             "authorization": f"LOW {access_key}:{secret_key}",
             "x-archive-auto-make-bucket": "1",
-            "x-archive-meta-title": f"FiestaSMP World Archive - {title} ({type_str})",
+            "x-archive-meta-title": header_text(f"FiestaSMP World Archive - {title} ({type_str})"),
             "x-archive-meta-mediatype": "data",
-            "x-archive-meta-collection": collection,
+            "x-archive-meta-collection": header_text(collection),
             "x-archive-meta-creator": "FiestaSMP",
-            "x-archive-meta-description": f"Official Minecraft server world download for FiestaSMP: {title}. Snapshot type: {type_str}.",
+            "x-archive-meta-description": header_text(f"Official Minecraft server world download for FiestaSMP: {title}. Snapshot type: {type_str}."),
             "Content-Type": "application/zip",
             "Content-Length": str(filesize)
         }
 
         with open(filepath, "rb") as f_obj:
             wrapped = ProgressFileWrapper(f_obj, filesize, task_label=f"{task_prefix}Uploading to archive.org")
-            res = requests.put(url, data=wrapped, headers=headers, timeout=600)
+            res = requests.put(url, data=wrapped, headers=headers, timeout=600, allow_redirects=False)
 
         if res.status_code in (200, 201):
-            ia_dl = f"https://archive.org/download/{item_id}/{filename}"
+            ia_dl = f"https://archive.org/download/{item_id}/{urllib.parse.quote(filename, safe='')}"
             ia_details = f"https://archive.org/details/{item_id}"
 
             manifest = _load_manifest(ctx)
@@ -1058,7 +1094,8 @@ def _execute_ia_upload(ctx, archive_id: str, is_multi: bool = False, task_prefix
                     }
                     m["uploaded_at"] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     break
-            _save_manifest(ctx, manifest)
+            if not _save_manifest(ctx, manifest):
+                raise OSError("Upload succeeded, but the panel could not save its download link to the archive manifest.")
 
             if not is_multi:
                 with _TASK_LOCK:
@@ -1402,12 +1439,9 @@ def on_action(ctx, action_name: str, payload: Dict[str, Any]) -> Dict[str, Any]:
             return {"success": False, "error": "Please provide both Archive.org S3 Access Key and Secret Key."}
         try:
             r = requests.get("https://s3.us.archive.org", headers={"authorization": f"LOW {ak}:{sk}"}, timeout=8)
-            if r.status_code in (200, 403):
-                if r.status_code == 200:
-                    return {"success": True, "message": "Archive.org S3 API keys verified successfully!"}
-                else:
-                    return {"success": False, "error": f"Authentication failed (HTTP 403). Please verify your S3 keys from archive.org/account/s3.php."}
-            return {"success": True, "message": f"Connected to Internet Archive S3 endpoint (HTTP {r.status_code})."}
+            if r.status_code == 200:
+                return {"success": True, "message": "Connected to the Internet Archive S3 endpoint. This check cannot verify the keys; an upload is required."}
+            return {"success": False, "error": f"Internet Archive S3 endpoint returned HTTP {r.status_code}; credentials were not verified."}
         except Exception as e:
             return {"success": False, "error": f"Failed to connect to Internet Archive: {e}"}
 
